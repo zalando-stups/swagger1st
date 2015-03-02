@@ -1,0 +1,18 @@
+(defproject io.sarnowski/swagger1st "0.1.0-SNAPSHOT"
+  :description "A ring middleware that does routing based on a swagger definition."
+  :url "https://github.com/sarnowski/swagger1st"
+  :license {:name "ISC License"
+            :url "http://opensource.org/licenses/ISC"}
+
+  :dependencies [[org.clojure/clojure "1.6.0"]
+
+                 [org.clojure/data.json "0.2.5"]
+                 [circleci/clj-yaml "0.5.3"]
+
+                 [prismatic/schema "0.3.7"]]
+
+  :profiles {:dev {:dependencies [[ring/ring-mock "0.2.0"]
+                                  [ring/ring-core "1.3.2"]
+                                  [ring/ring-devel "1.3.2"]
+                                  [javax.servlet/servlet-api "2.5"]
+                                  [ring/ring-defaults "0.1.4"]]}})
