@@ -9,8 +9,3 @@
                                           "version" "1.0"}
                                    "paths" {"/test" {"get" {"operationId" "some-fn"
                                                             "responses" {"200" {"description" "success"}}}}}}))
-
-(deftest maximal-definition
-  (s/validate s1st/swagger-schema {"swagger" "2.0"
-                                   "info" {"title" "maximal schema"
-                                           "version" "1.0"}}))

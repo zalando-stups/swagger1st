@@ -5,6 +5,7 @@
             :url "http://opensource.org/licenses/ISC"}
 
   :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.clojure/tools.logging "0.3.1"]
 
                  [org.clojure/data.json "0.2.5"]
                  [circleci/clj-yaml "0.5.3"]
@@ -15,4 +16,8 @@
                                   [ring/ring-core "1.3.2"]
                                   [ring/ring-devel "1.3.2"]
                                   [javax.servlet/servlet-api "2.5"]
-                                  [ring/ring-defaults "0.1.4"]]}})
+                                  [ring/ring-defaults "0.1.4"]
+                                  [org.slf4j/slf4j-api "1.7.7"]
+                                  [org.slf4j/jul-to-slf4j "1.7.7"]
+                                  [org.slf4j/jcl-over-slf4j "1.7.7"]
+                                  [org.slf4j/slf4j-simple "1.7.7"]]}})

@@ -1,5 +1,7 @@
 (ns io.sarnowski.swagger1st.core
-  (:require [clojure.data.json :as json]
+  (:require [clojure.walk :as walk]
+            [clojure.tools.logging :as log]
+            [clojure.data.json :as json]
             [clojure.java.io :as io]
             [clj-yaml.core :as yaml]
             [io.sarnowski.swagger1st.schema :as s]
@@ -32,32 +34,90 @@
 
 ;;; Runtime dispatching functions
 
-(defn- create-call-defs [definition]
-  ; for every endpoint, create a call-def (fully calculated definition)
-  [{:fn 'a-fn}])
+(defn- get-definition [r d]
+  (let [path (rest (split-with #"/" r))]
+    (get-in d path)))
 
-(defn- request-matches? [call-def request]
+(defn- denormalize-ref [definition data]
+  (if-let [r (get data "$ref")]
+    (get-definition r definition)
+    data))
+
+(defn- denormalize-refs [definition]
+  (let [f (fn [[k v]] [k (denormalize-ref definition v)])]
+    (walk/prewalk (fn [x] (if (map? x) (into {} (map f x)) x)) definition)))
+
+(defn- extract-requests [definition]
+  (into {}
+        (apply concat
+               (for [[path path-definition] (get definition "paths")]
+                 (for [[operation operation-definition] path-definition]
+                   [(get operation-definition "operationId") operation-definition])))))
+
+(defn- create-swagger-requests [definition]
+  (-> definition
+      denormalize-refs
+      extract-requests))
+
+(defn- request-matches? [[request-key swagger-request] request]
   ; method, path, ...
   true)
 
-(defn- create-call-def-lookup [definition]
-  (let [call-defs (create-call-defs definition)]
+(defn- create-swagger-request-lookup [definition]
+  (let [swagger-requests (create-swagger-requests definition)]
     (fn [request]
-      (first (filter #(request-matches? % request) call-defs)))))
+      (val (first (filter #(request-matches? % request) swagger-requests))))))
 
 ;;; The middleware
 
-(defn swagger-routing
-  "A ring middleware that uses a swagger definition for routing."
+(defn swagger-mapper
+  "A ring middleware that uses a swagger definition for mapping a request to the specification."
   [chain-handler swagger-definition-type swagger-definition]
   (let [definition (schema/validate s/swagger-schema
                                     (load-swagger-definition swagger-definition-type swagger-definition))
-        lookup-call-def (create-call-def-lookup definition)]
+        lookup-swagger-request (create-swagger-request-lookup definition)]
+    (log/debug "swagger-definition" definition)
 
-    ; actual runtime function
     (fn [request]
-      (if-let [call-def (lookup-call-def request)]
-        ; found the definition, call the connected function
-        ((:fn call-def) call-def)
-        ; definition not found, skip for our middleware
-        (chain-handler request)))))
+      (let [swagger-request (lookup-swagger-request request)]
+        (log/trace "request:" request)
+        (log/trace "swagger-request:" swagger-request)
+        (chain-handler (-> request
+                           (assoc :swagger definition)
+                           (assoc :swagger-request swagger-request)))))))
+
+(defn swagger-validator
+  "A ring middleware that uses a swagger definition for validating incoming requests and their responses."
+  [chain-handler]
+  (fn [request]
+    ; TODO noop currently, validate request (and response?!) from swagger def
+    (chain-handler request)))
+
+(defn swagger-executor
+  "A ring middleware that uses a swagger definition for executing the given function."
+  [& {:keys [mappings auto-map-fn?]
+      :or {mappings {}
+           auto-map-fn? true}}]
+  (fn [request]
+    (if-let [swagger-request (:swagger-request request)]
+      (if-let [operationId (get swagger-request "operationId")]
+        (do
+          (log/trace "matched swagger defined route for operation" operationId)
+
+          ; found the definition, find mapping
+          (if-let [call-fn (get mappings operationId)]
+            (do
+              (log/trace "found mapping for operation" operationId "to" call-fn)
+              (call-fn request))
+
+            ; no mapping, auto map to fn?
+            (if auto-map-fn?
+              (let [call-fn (resolve (symbol operationId))]
+                (log/trace "auto mapped operation" operationId "to" call-fn)
+                (call-fn request))
+
+              ; no auto mapping enabled
+              (ex-info "no mapping found and no auto-mapping active" request)))))
+
+      ; definition not found, skip for our middleware
+      (ex-info "route not defined" request))))

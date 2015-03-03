@@ -4,16 +4,22 @@
             [ring.middleware.defaults :as ring]
             [io.sarnowski.swagger1st.core :as s1st]))
 
-(defn app [handler]
-  (-> handler
+(def app
+  (-> (s1st/swagger-executor)
+
       (ring/wrap-defaults ring/api-defaults)
-      (s1st/swagger-routing ::s1st/yaml-cp "io/sarnowski/swagger1st/simple.yaml")))
+      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/simple.yaml")
+      (s1st/swagger-validator)))
+
 
 (defn generate-greeting [request]
-  "Hello!")
+  {:status  200
+   :headers {"content-type" "text/plain"}
+   :body    "Hello!"})
+
 
 (deftest simple-get
-  (is (= (app (mock/request :get "/hello"))
+  (is (= (app (mock/request :post "/greeting"))
          {:status  200
           :headers {"content-type" "text/plain"}
-          :body    "hello"})))
+          :body    "Hello!"})))

@@ -15,7 +15,9 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
 (def app
   (-> handler
     (ring/wrap-defaults ring/api-defaults)
-    (s1st/swagger-routing ::s1st/json-file "example/swagger.json")))
+    (s1st/swagger-mapper ::s1st/json-file "example/swagger.json")
+    (s1st/swagger-validator)
+    (s1st/swagger-executor)))
 ```
 
 The following swagger definition inputs are possible:
@@ -23,8 +25,10 @@ The following swagger definition inputs are possible:
 * **direct** - swagger definition already as clojure data structures
 * **json** - a string containing a JSON formatted swagger definition
 * **json-file** - a reference to a file, containing JSON
+* **json-cp** - a reference to a classpath resource, containing JSON
 * **yaml** - a string containing a YAML formatted swagger definition
 * **yaml-file** - a reference to a file, containing YAML
+* **yaml-cp** - a reference to a classpath resource, containing YAML
 
 ## License
 

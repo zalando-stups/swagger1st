@@ -44,7 +44,7 @@
 (def swagger-item
   {(s/optional-key "type")             s-string
    (s/optional-key "format")           s-string
-   (s/optional-key "items")            swagger-item
+   (s/optional-key "items")            (s/recursive #'swagger-item)
    (s/optional-key "collectionFormat") s-string
    (s/optional-key "default")          s/Any
    (s/optional-key "maximum")          s-long
@@ -89,6 +89,9 @@
 
           (s/optional-key "schema")      swagger-object}))
 
+(def swagger-parameters
+  {s-string swagger-parameter})
+
 (def swagger-responses
   {s/Any (s/either swagger-response swagger-reference)})
 
@@ -104,26 +107,38 @@
    (s/optional-key "externalDocs")      swagger-external-docs
    (s/optional-key "consumes")          [s-string]
    (s/optional-key "produces")          [s-string]
-   (s/optional-key "parameters")        (s/either swagger-parameter swagger-reference)
+   (s/optional-key "parameters")        swagger-parameters ; TODO (s/either swagger-parameters swagger-reference)
    (s/optional-key "schemes")           [s-string]
    (s/optional-key "deprecated")        s-boolean
    (s/optional-key "security")          swagger-security
    (s/optional-key (s/pred extension?)) s/Any})
 
 (def swagger-path
-  {(s/optional-key "$ref")              s-string
-   (s/optional-key "get")               swagger-operation
-   (s/optional-key "put")               swagger-operation
-   (s/optional-key "post")              swagger-operation
-   (s/optional-key "delete")            swagger-operation
-   (s/optional-key "options")           swagger-operation
-   (s/optional-key "head")              swagger-operation
-   (s/optional-key "patch")             swagger-operation
-   (s/optional-key "parameters")        (s/either swagger-parameter swagger-reference)
+  {(s/optional-key "$ref") s-string
+   (s/optional-key "get") swagger-operation
+   (s/optional-key "put") swagger-operation
+   (s/optional-key "post") swagger-operation
+   (s/optional-key "delete") swagger-operation
+   (s/optional-key "options") swagger-operation
+   (s/optional-key "head") swagger-operation
+   (s/optional-key "patch") swagger-operation
+   (s/optional-key "parameters") (s/either swagger-parameters swagger-reference)
    (s/optional-key (s/pred extension?)) s/Any})
 
 (def swagger-paths
   {s-string                             swagger-path
+   (s/optional-key (s/pred extension?)) s/Any})
+
+(def swagger-definitions
+  {})
+
+(def swagger-security-definition
+  {})
+
+(def swagger-tag
+  {(s/required-key "name") s-string
+   (s/optional-key "description") s-string
+   (s/optional-key "externalDocs") swagger-external-docs
    (s/optional-key (s/pred extension?)) s/Any})
 
 (def swagger-schema
@@ -134,4 +149,11 @@
    (s/optional-key "basePath") s-string
    (s/optional-key "schemes")  [s-string]
    (s/optional-key "consumes") [s-string]
-   (s/optional-key "produces") [s-string]})
+   (s/optional-key "produces") [s-string]
+   (s/optional-key "definitions") swagger-definitions
+   (s/optional-key "parameters") swagger-parameters
+   (s/optional-key "responses") swagger-responses
+   (s/optional-key "securityDefinitions") swagger-security-definition
+   (s/optional-key "security") swagger-security
+   (s/optional-key "tags") [swagger-tag]
+   (s/optional-key "externalDocs") swagger-external-docs})
