@@ -10,7 +10,7 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
 ```clojure
 (ns example
   (:require [ring.middleware.defaults :as ring]
-            [io.sarnowski.swagger1st :as s1st]))
+            [io.sarnowski.swagger1st.core :as s1st]))
 
 (def app
   (-> handler
