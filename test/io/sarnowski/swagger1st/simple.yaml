@@ -24,3 +24,15 @@ paths:
           description: Name of the person to greet.
           required: true
           type: string
+  /health:
+      get:
+        summary: Get health status
+        description: Provides health system information
+        operationId: io.sarnowski.swagger1st.core-test/provide-health-status
+        produces:
+          - application/json
+        responses:
+          200:
+            description: everything ok
+            schema:
+              type: boolean

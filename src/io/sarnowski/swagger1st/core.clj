@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [clj-yaml.core :as yaml]
             [io.sarnowski.swagger1st.schema :as s]
-            [schema.core :as schema]))
+            [schema.core :as schema]
+            [clojure.pprint :refer [pprint]]))
 
 ;;; Load definitions
 
@@ -52,7 +53,9 @@
         (apply concat
                (for [[path path-definition] (get definition "paths")]
                  (for [[operation operation-definition] path-definition]
-                   [(get operation-definition "operationId") operation-definition])))))
+                   [{:operation operation
+                     :path path}
+                    operation-definition])))))
 
 (defn- create-swagger-requests [definition]
   (-> definition
@@ -60,13 +63,13 @@
       extract-requests))
 
 (defn- request-matches? [[request-key swagger-request] request]
-  ; method, path, ...
-  true)
+  (and (= (:operation request-key) (name (:request-method request)))
+       (= (:path request-key) (:uri request))))
 
 (defn- create-swagger-request-lookup [definition]
   (let [swagger-requests (create-swagger-requests definition)]
     (fn [request]
-      (val (first (filter #(request-matches? % request) swagger-requests))))))
+      (second (first (filter #(request-matches? % request) swagger-requests))))))
 
 ;;; The middleware
 
@@ -77,6 +80,7 @@
                                     (load-swagger-definition swagger-definition-type swagger-definition))
         lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
+    (pprint definition)
 
     (fn [request]
       (let [swagger-request (lookup-swagger-request request)]
@@ -117,7 +121,13 @@
                 (call-fn request))
 
               ; no auto mapping enabled
-              (ex-info "no mapping found and no auto-mapping active" request)))))
+              (do
+                (log/error "could not resolve handler for request" operationId)
+                {:status 500
+                 :headers {"Content-Type" "plain/text"}
+                 :body "Internal server error."})))))
 
       ; definition not found, skip for our middleware
-      (ex-info "route not defined" request))))
+      {:status 404
+       :headers {"Content-Type" "plain/text"}
+       :body "Not found."})))
