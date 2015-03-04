@@ -21,7 +21,7 @@
 
       (test-request-logging)
 
-      (s1st/swagger-serializer)
+      (s1st/swagger-parser)
       (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")))
 
 

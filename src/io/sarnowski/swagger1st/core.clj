@@ -54,6 +54,16 @@
   (let [f (fn [[k v]] [k (denormalize-ref definition v)])]
     (walk/prewalk (fn [x] (if (map? x) (into {} (map f x)) x)) definition)))
 
+(defn- denormalize-inheritance
+  "Denormalizes inheritance of parameters etc."
+  [definition parent-definition]
+  ; TODO security, consumes, produces, ...
+  ; parameters
+  (let [parameters        (get definition "parameters")
+        parent-parameters (get parent-definition "parameters")
+        merged-parameters (merge parent-parameters parameters)]
+    (assoc definition "parameters" merged-parameters)))
+
 (defn- split-path
   "Splits a / separated path into its segments and replaces all variable entries (e.g. {name}) with nil."
   [path]
@@ -67,12 +77,20 @@
   "Extracts request-key->operation-definition from a swagger definition."
   [definition]
   (into {}
-        (apply concat
-               (for [[path path-definition] (get definition "paths")]
-                 (for [[operation operation-definition] path-definition]
-                   [{:operation operation
-                     :path      (split-path path)}
-                    operation-definition])))))
+        (remove nil?
+                (apply concat
+                       (for [[path path-definition] (get definition "paths")]
+                         (when-not (contains? #{"parameters"} path) ; maybe (if ... [] (let ...))
+                           (let [path-definition (denormalize-inheritance path-definition definition)]
+                             (for [[operation operation-definition] path-definition]
+                               (when-not (contains? #{"parameters"} path)
+                                 [; request-key
+                                  {:operation operation
+                                   :path      (split-path path)}
+                                  ; swagger-request
+                                  (denormalize-inheritance
+                                    operation-definition
+                                    path-definition)])))))))))
 
 (defn- create-swagger-requests
   "Creates a map of 'request-key' -> 'swagger-definition' entries. The request-key can be used to efficiently lookup
@@ -126,8 +144,8 @@
                            (assoc :swagger definition)
                            (assoc :swagger-request swagger-request)))))))
 
-(defn swagger-serializer
-  "A ring middleware that uses a swagger definition for (de)serializing parameters and responses."
+(defn swagger-parser
+  "A ring middleware that uses a swagger definition for parsing parameters and crafting responses."
   ; TODO optional map of (de)serializer functions for mimetypes
   [chain-handler]
   (fn [request]

@@ -9,5 +9,5 @@
 (def app
   (-> (s1st/swagger-executor)
       (s1st/swagger-validator)
-      (s1st/swagger-serializer)
+      (s1st/swagger-parser)
       (s1st/swagger-mapper ::s1st/yaml-cp "example.yaml")))
