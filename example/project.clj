@@ -3,7 +3,6 @@
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [ring "1.3.2"]
-                 [ring/ring-defaults "0.1.4"]
                  [io.sarnowski/swagger1st "0.1.0-SNAPSHOT"]]
 
   :plugins [[lein-ring "0.9.2"]]

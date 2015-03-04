@@ -16,7 +16,6 @@
                                   [ring/ring-core "1.3.2"]
                                   [ring/ring-devel "1.3.2"]
                                   [javax.servlet/servlet-api "2.5"]
-                                  [ring/ring-defaults "0.1.4"]
                                   [org.slf4j/slf4j-api "1.7.7"]
                                   [org.slf4j/jul-to-slf4j "1.7.7"]
                                   [org.slf4j/jcl-over-slf4j "1.7.7"]

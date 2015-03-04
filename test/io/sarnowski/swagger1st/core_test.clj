@@ -1,22 +1,12 @@
 (ns io.sarnowski.swagger1st.core-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
-            [ring.middleware.defaults :as ring]
             [io.sarnowski.swagger1st.core :as s1st]
             [ring.util.response :refer :all]
             [clojure.tools.logging :as log]
             [clojure.pprint :refer [pprint]]))
 
 ;; infrastructure setup incl. exception handler
-
-(defn- test-transform-exception [next-fn]
-  (fn [request]
-    (try
-      (next-fn request)
-      (catch Exception e
-        {:status 500
-         :headers {"Content-Type" "plain/text"}
-         :body (.toString e)}))))
 
 (defn- test-request-logging [next-fn]
   (fn [request]
@@ -31,13 +21,11 @@
 
       (test-request-logging)
 
-      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
-
-      (test-transform-exception)
-      (ring/wrap-defaults ring/api-defaults)))
+      (s1st/swagger-serializer)
+      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")))
 
 
-;; application endpoints
+;; application endpoints, referenced by the swagger spec
 
 (defn read-health
   "Provides information if the system is working."

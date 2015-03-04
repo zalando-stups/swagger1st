@@ -1,6 +1,5 @@
 (ns example.core
-  (:require [ring.middleware.defaults :as ring]
-            [io.sarnowski.swagger1st.core :as s1st]))
+  (:require [io.sarnowski.swagger1st.core :as s1st]))
 
 (defn create-greeting [request]
   {:status  200
@@ -10,5 +9,5 @@
 (def app
   (-> (s1st/swagger-executor)
       (s1st/swagger-validator)
-      (s1st/swagger-mapper ::s1st/yaml-cp "example.yaml")
-      (ring/wrap-defaults ring/api-defaults)))
+      (s1st/swagger-serializer)
+      (s1st/swagger-mapper ::s1st/yaml-cp "example.yaml")))

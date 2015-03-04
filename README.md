@@ -1,7 +1,9 @@
 # swagger1st (swagger first)
 
-A Clojure [Ring](https://github.com/ring-clojure/ring) middleware that does routing based on
-[swagger](http://swagger.io/) definitions.
+A Clojure [Ring](https://github.com/ring-clojure/ring) middleware that does routing, serialization and validation based
+on [swagger](http://swagger.io/) definitions.
+
+Currently only supports Swagger 2.0 specification.
 
 ## Usage
 
@@ -9,14 +11,13 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
 
 ```clojure
 (ns example
-  (:require [ring.middleware.defaults :as ring]
-            [io.sarnowski.swagger1st.core :as s1st]))
+  (:require [io.sarnowski.swagger1st.core :as s1st]))
 
 (def app
   (-> (s1st/swagger-executor)
       (s1st/swagger-validator)
-      (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")
-      (ring/wrap-defaults ring/api-defaults)))
+      (s1st/swagger-serializer)
+      (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")))
 ```
 
 The following swagger definition inputs are possible:
@@ -28,6 +29,12 @@ The following swagger definition inputs are possible:
 * **yaml** - a string containing a YAML formatted swagger definition
 * **yaml-file** - a reference to a file, containing YAML
 * **yaml-cp** - a reference to a classpath resource, containing YAML
+
+## Detailed usage
+
+TODO
+* explain different steps of the middleware and their dependencies, inputs and outputs
+* explain configuration options
 
 ## License
 
