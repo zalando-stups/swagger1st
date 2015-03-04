@@ -24,19 +24,6 @@
 
       (ring/wrap-defaults ring/api-defaults)))
 
-(comment
-
-  (ring/wrap-defaults
-    (transform-exception
-      (s1st/swagger-mapper
-        (s1st/swagger-validator
-          (s1st/swagger-executor))
-
-        ::s1st/yaml-cp "io/sarnowski/swagger1st/simple.yaml"))
-    ring/api-defaults)
-
-  )
-
 
 (defn generate-greeting [request]
   (-> (response "Hello!")

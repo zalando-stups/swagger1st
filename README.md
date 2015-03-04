@@ -13,11 +13,10 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
             [io.sarnowski.swagger1st.core :as s1st]))
 
 (def app
-  (-> handler
-    (ring/wrap-defaults ring/api-defaults)
-    (s1st/swagger-mapper ::s1st/json-file "example/swagger.json")
-    (s1st/swagger-validator)
-    (s1st/swagger-executor)))
+  (-> (s1st/swagger-executor)
+      (s1st/swagger-validator)
+      (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")
+      (ring/wrap-defaults ring/api-defaults)))
 ```
 
 The following swagger definition inputs are possible:

@@ -9,7 +9,6 @@
 
 (def app
   (-> (s1st/swagger-executor)
-
-      (ring/wrap-defaults ring/api-defaults)
+      (s1st/swagger-validator)
       (s1st/swagger-mapper ::s1st/yaml-cp "example.yaml")
-      (s1st/swagger-validator)))
+      (ring/wrap-defaults ring/api-defaults)))
