@@ -5,8 +5,7 @@
             [clojure.java.io :as io]
             [clj-yaml.core :as yaml]
             [io.sarnowski.swagger1st.schema :as s]
-            [schema.core :as schema]
-            [clojure.pprint :refer [pprint]]))
+            [schema.core :as schema]))
 
 ;;; Load definitions
 
@@ -80,11 +79,9 @@
                                     (load-swagger-definition swagger-definition-type swagger-definition))
         lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
-    (pprint definition)
 
     (fn [request]
       (let [swagger-request (lookup-swagger-request request)]
-        (log/trace "request:" request)
         (log/trace "swagger-request:" swagger-request)
         (chain-handler (-> request
                            (assoc :swagger definition)

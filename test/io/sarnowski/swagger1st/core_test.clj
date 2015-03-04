@@ -4,11 +4,12 @@
             [ring.middleware.defaults :as ring]
             [io.sarnowski.swagger1st.core :as s1st]
             [ring.util.response :refer :all]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [clojure.pprint :refer [pprint]]))
 
 ;; infrastructure setup incl. exception handler
 
-(defn- transform-exception [next-fn]
+(defn- test-transform-exception [next-fn]
   (fn [request]
     (try
       (next-fn request)
@@ -17,12 +18,22 @@
          :headers {"Content-Type" "plain/text"}
          :body (.toString e)}))))
 
+(defn- test-request-logging [next-fn]
+  (fn [request]
+    (pprint request)
+    (let [response (next-fn request)]
+      (print response)
+      response)))
+
 (def app
   (-> (s1st/swagger-executor)
       (s1st/swagger-validator)
+
+      (test-request-logging)
+
       (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
 
-      (transform-exception)
+      (test-transform-exception)
       (ring/wrap-defaults ring/api-defaults)))
 
 
@@ -64,7 +75,9 @@
 
 (deftest users
 
-  (is (= (app (mock/request :post "/user/123"))
+  (is (= (app (-> (mock/request :post "/user/123")
+                  (mock/header "Content-Type" "application/json")
+                  (mock/body "sarnowski")))
          {:status 200}))
 
   (is (= (app (mock/request :get "/user/123"))
