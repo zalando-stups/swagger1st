@@ -6,6 +6,8 @@
             [ring.util.response :refer :all]
             [clojure.tools.logging :as log]))
 
+;; infrastructure setup incl. exception handler
+
 (defn- transform-exception [next-fn]
   (fn [request]
     (try
@@ -18,28 +20,56 @@
 (def app
   (-> (s1st/swagger-executor)
       (s1st/swagger-validator)
-      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/simple.yaml")
+      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
 
       (transform-exception)
-
       (ring/wrap-defaults ring/api-defaults)))
 
 
-(defn generate-greeting [request]
-  (-> (response "Hello!")
-      (content-type "application/json")))
+;; application endpoints
 
-(defn provide-health-status [request]
-  (-> (response true)
-      (content-type "application/json")))
+(defn read-health
+  "Provides information if the system is working."
+  [_]
+  {:status 200})
 
 
-(deftest simple-get
+(def user-db (atom {}))
 
-  (is (= (app (mock/request :post "/greeting"))
-         (-> (response "Hello!")
-             (content-type "application/json"))))
+(defn read-user
+  "Reads the profile information of a user from the user-db."
+  [{{:keys [id]} :parameters}]
+  (-> (response (@user-db id))
+      (status 200)))
+
+(defn create-or-update-user
+  "Creates or updates a profile for a user in the user-db."
+  [{{:keys [id profile]} :parameters}]
+  (swap! user-db assoc id profile)
+  {:status 200})
+
+(defn delete-user
+  "Deletes a user from the user-db."
+  [{{:keys [id]} :parameters}]
+  (swap! user-db dissoc id)
+  {:status 200})
+
+
+;; TESTS
+
+(deftest health
 
   (is (= (app (mock/request :get "/health"))
-         (-> (response true)
-             (content-type "application/json")))))
+         {:status 200})))
+
+(deftest users
+
+  (is (= (app (mock/request :post "/user/123"))
+         {:status 200}))
+
+  (is (= (app (mock/request :get "/user/123"))
+         {:status 200}
+          :body "sarnowski"))
+
+  (is (= (app (mock/request :delete "/user/123"))
+         {:status 200})))
