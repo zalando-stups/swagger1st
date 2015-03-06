@@ -59,7 +59,7 @@
   [definition parent-definition]
   ; TODO security, consumes, produces, ...
   ; parameters
-  (let [parameters        (get definition "parameters")
+  (let [parameters (get definition "parameters")
         parent-parameters (get parent-definition "parameters")
         merged-parameters (merge parent-parameters parameters)]
     (assoc definition "parameters" merged-parameters)))
@@ -70,36 +70,44 @@
   (let [split (fn [^String s] (.split s "/"))]
     (-> path split rest)))
 
-(defn- mark-variables
+(defn- variable-to-keyword
   "Replaces a variable path segment (like /{username}/) with the variable name as keyword (like :username)."
   [seg]
-  (if-let [variable-name (re-matches #"\{(.*)\}" seg)]
+  (if-let [variable-name (second (re-matches #"\{(.*)\}" seg))]
     ; use keywords for variable names
     (keyword variable-name)
     ; no variable found, return original segment
     seg))
 
+(defn- create-request-tuple
+  "Generates easier to digest request tuples from operations and paths."
+  [operation operation-definition path path-definition]
+  [; request-key
+   {:operation operation
+    :path      (->> path
+                    split-path
+                    (map variable-to-keyword))}
+   ; swagger-request
+   (denormalize-inheritance
+     operation-definition
+     path-definition)])
+
 (defn- extract-requests
   "Extracts request-key->operation-definition from a swagger definition."
   [definition]
   (let [non-path-keys #{"parameters"}]
-    (into {}
-          (remove nil?
-                  (apply concat
-                         (for [[path path-definition] (get definition "paths")]
-                           (when-not (contains? non-path-keys path)
-                             (let [path-definition (denormalize-inheritance path-definition definition)]
-                               (for [[operation operation-definition] path-definition]
-                                 (when-not (contains? non-path-keys path)
-                                   [; request-key
-                                    {:operation operation
-                                     :path      (->> path
-                                                     split-path
-                                                     (map mark-variables))}
-                                    ; swagger-request
-                                    (denormalize-inheritance
-                                      operation-definition
-                                      path-definition)]))))))))))
+    (->>
+      ; create request-key / swagger-request tuples
+      (for [[path path-definition] (get definition "paths")]
+        (when-not (contains? non-path-keys path)
+          (let [path-definition (denormalize-inheritance path-definition definition)]
+            (for [[operation operation-definition] path-definition]
+              (when-not (contains? non-path-keys path)
+                (create-request-tuple operation operation-definition path path-definition))))))
+      ; streamline tuples and bring into a map
+      (apply concat)
+      (remove nil?)
+      (into {}))))
 
 (defn- create-swagger-requests
   "Creates a map of 'request-key' -> 'swagger-definition' entries. The request-key can be used to efficiently lookup
@@ -115,7 +123,7 @@
    a nil value, it is a dynamic segment."
   [path-template path-real]
   (when (= (count path-template) (count path-real))
-    (let [pairs         (map #(vector %1 %2) path-template path-real)
+    (let [pairs (map #(vector %1 %2) path-template path-real)
           pair-matches? (fn [[t r]] (or (keyword? t) (= t r)))]
       (every? pair-matches? pairs))))
 
@@ -141,8 +149,8 @@
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification."
   [chain-handler swagger-definition-type swagger-definition]
-  (let [definition             (schema/validate s/swagger-schema
-                                                (load-swagger-definition swagger-definition-type swagger-definition))
+  (let [definition (schema/validate s/swagger-schema
+                                    (load-swagger-definition swagger-definition-type swagger-definition))
         lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
 
