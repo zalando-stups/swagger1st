@@ -176,14 +176,24 @@
     ; TODO noop currently, validate request (and response?!) from swagger def
     (chain-handler request)))
 
+(defn map-function-name
+  "Simple resolver function that resolves the operationId as a function name (including namespace)."
+  [operationId]
+  (resolve (symbol operationId)))
+
+(defn- resolve-function
+  "Resolves the target function with multiple resolver functions. First in list will 'win'."
+  [operationId [first-fn & fallback-fns]]
+  (if-let [function (first-fn operationId)]
+    function
+    (if fallback-fns
+      (recur operationId fallback-fns)
+      nil)))
+
 (defn swagger-executor
   "A ring middleware that uses a swagger definition for executing the given function."
-  [& {:keys [mappings auto-map-fn?]
-      :or   {mappings     {}
-             ; TODO remove auto-map-fn? and call 'mappings' as a function. map still works but can have a default of
-             ; 'resolve-function' mapper - also provide possibility to chain multiple functions as fallback strategies
-             ; like :mapper [{} resolve-function] or as default :mapper [resolve-function].
-             auto-map-fn? true}}]
+  [& {:keys [mappers]
+      :or   {mappers [map-function-name]}}]
   (fn [request]
     (if-let [swagger-request (:swagger-request request)]
       (if-let [operationId (get swagger-request "operationId")]
@@ -191,23 +201,16 @@
           (log/trace "matched swagger defined route for operation" operationId)
 
           ; found the definition, find mapping
-          (if-let [call-fn (get mappings operationId)]
+          (if-let [call-fn (resolve-function operationId mappers)]
             (do
               (log/trace "found mapping for operation" operationId "to" call-fn)
               (call-fn request))
 
-            ; no mapping, auto map to fn? see TODO for auto-map-fn?
-            (if auto-map-fn?
-              (let [call-fn (resolve (symbol operationId))]
-                (log/trace "auto mapped operation" operationId "to" call-fn)
-                (call-fn request))
-
-              ; no auto mapping enabled
-              (do
-                (log/error "could not resolve handler for request" operationId)
-                {:status  501
-                 :headers {"Content-Type" "plain/text"}
-                 :body    "Operation not implemented."})))))
+            (do
+              (log/error "could not resolve handler for request" operationId)
+              {:status  501
+               :headers {"Content-Type" "plain/text"}
+               :body    "Operation not implemented."}))))
 
       ; definition not found, skip for our middleware
       {:status  400

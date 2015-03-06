@@ -36,6 +36,10 @@ TODO
 * explain different steps of the middleware and their dependencies, inputs and outputs
 * explain configuration options
 
+### Using different operationId mappings
+
+TODO :mapper [{"operationId" function-name} my-custom-resolver s1st/map-function-name]
+
 ## License
 
 Copyright (c) 2015, Tobias Sarnowski
