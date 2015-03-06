@@ -68,10 +68,12 @@
   "Splits a / separated path into its segments and replaces all variable entries (e.g. {name}) with nil."
   [path]
   (let [split (fn [^String s] (.split s "/"))]
-    (->> path
-         split
-         rest
-         (map (fn [^String segment] (when (not (.startsWith segment "{")) segment))))))
+    (-> path split rest)))
+
+(defn- nil-variables
+  "Replace variables in a path segment collection with nil."
+  [seg]
+  (if (re-matches #"\{.*\}" seg) nil seg))
 
 (defn- extract-requests
   "Extracts request-key->operation-definition from a swagger definition."
@@ -86,7 +88,9 @@
                                (when-not (contains? #{"parameters"} path)
                                  [; request-key
                                   {:operation operation
-                                   :path      (split-path path)}
+                                   :path      (->> path
+                                                   split-path
+                                                   (map nil-variables))}
                                   ; swagger-request
                                   (denormalize-inheritance
                                     operation-definition
