@@ -39,6 +39,7 @@ TODO
 ### Using different operationId mappings
 
 TODO :mapper [{"operationId" function-name} my-custom-resolver s1st/map-function-name]
+TODO how to integrate with 'component' lifecycle manager
 
 ## License
 
