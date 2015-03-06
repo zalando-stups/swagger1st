@@ -70,31 +70,36 @@
   (let [split (fn [^String s] (.split s "/"))]
     (-> path split rest)))
 
-(defn- nil-variables
-  "Replace variables in a path segment collection with nil."
+(defn- mark-variables
+  "Replaces a variable path segment (like /{username}/) with the variable name as keyword (like :username)."
   [seg]
-  (if (re-matches #"\{.*\}" seg) nil seg))
+  (if-let [variable-name (re-matches #"\{(.*)\}" seg)]
+    ; use keywords for variable names
+    (keyword variable-name)
+    ; no variable found, return original segment
+    seg))
 
 (defn- extract-requests
   "Extracts request-key->operation-definition from a swagger definition."
   [definition]
-  (into {}
-        (remove nil?
-                (apply concat
-                       (for [[path path-definition] (get definition "paths")]
-                         (when-not (contains? #{"parameters"} path) ; maybe (if ... [] (let ...))
-                           (let [path-definition (denormalize-inheritance path-definition definition)]
-                             (for [[operation operation-definition] path-definition]
-                               (when-not (contains? #{"parameters"} path)
-                                 [; request-key
-                                  {:operation operation
-                                   :path      (->> path
-                                                   split-path
-                                                   (map nil-variables))}
-                                  ; swagger-request
-                                  (denormalize-inheritance
-                                    operation-definition
-                                    path-definition)])))))))))
+  (let [non-path-keys #{"parameters"}]
+    (into {}
+          (remove nil?
+                  (apply concat
+                         (for [[path path-definition] (get definition "paths")]
+                           (when-not (contains? non-path-keys path)
+                             (let [path-definition (denormalize-inheritance path-definition definition)]
+                               (for [[operation operation-definition] path-definition]
+                                 (when-not (contains? non-path-keys path)
+                                   [; request-key
+                                    {:operation operation
+                                     :path      (->> path
+                                                     split-path
+                                                     (map mark-variables))}
+                                    ; swagger-request
+                                    (denormalize-inheritance
+                                      operation-definition
+                                      path-definition)]))))))))))
 
 (defn- create-swagger-requests
   "Creates a map of 'request-key' -> 'swagger-definition' entries. The request-key can be used to efficiently lookup
@@ -111,7 +116,7 @@
   [path-template path-real]
   (when (= (count path-template) (count path-real))
     (let [pairs         (map #(vector %1 %2) path-template path-real)
-          pair-matches? (fn [[t r]] (or (nil? t) (= t r)))]
+          pair-matches? (fn [[t r]] (or (keyword? t) (= t r)))]
       (every? pair-matches? pairs))))
 
 (defn- request-matches?
