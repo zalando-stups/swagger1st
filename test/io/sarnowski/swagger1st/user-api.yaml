@@ -45,7 +45,7 @@ paths:
               description: user deleted
 
     parameters:
-      name:
+      idParam:
         name: id
         in: path
         description: ID of the user

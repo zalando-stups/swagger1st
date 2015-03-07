@@ -140,11 +140,8 @@
     (fn [request]
       (->> swagger-requests
            (filter #(request-matches? % request))
-           first                                            ; if we have multiple matches then its not well defined, just choose the first
-           second                                           ; first is request-key, second is swagger-definition in the resulting tuple
-           ))))
-
-;;; The middlewares
+           ; if we have multiple matches then its not well defined, just choose the first
+           first))))
 
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification."
@@ -155,19 +152,65 @@
     (log/debug "swagger-definition" definition)
 
     (fn [request]
-      (let [swagger-request (lookup-swagger-request request)]
+      (let [[request-key swagger-request] (lookup-swagger-request request)]
         (log/debug "swagger-request:" swagger-request)
         (chain-handler (-> request
                            (assoc :swagger definition)
-                           (assoc :swagger-request swagger-request)))))))
+                           (assoc :swagger-request swagger-request)
+                           (assoc :swagger-request-key request-key)))))))
+
+(defn- extract-parameter-path
+  "Extract a parameter from the request path."
+  [request definition]
+  (let [{template :path} (:swagger-request-key request)
+        keys (map (fn [t r] (if (keyword? t) [t r] nil))
+                  template
+                  (split-path (:uri request)))
+        keys (->> keys
+                  (remove nil?)
+                  (into {}))]
+    (get keys (keyword (get definition "name")))))
+
+(defn- extract-parameter-query
+  "Extract a parameter from the request url."
+  [{query-params :query-params} definition]
+  (get query-params (get definition "name")))
+
+(defn- extract-parameter-header
+  "Extract a parameter from the request headers."
+  [{headers :headers} definition]
+  (get headers (get definition "name")))
+
+(defn- extract-parameter-form
+  "Extract a parameter from the request body form."
+  [{form-params :form-params} definition]
+  (get form-params (get definition "name")))
+
+(defn- extract-parameter
+  "Extracts a parameter from the request according to the definition."
+  [request definition]
+  (let [extractors {"path" extract-parameter-path
+                    "query" extract-parameter-query
+                    "header" extract-parameter-header
+                    "form" extract-parameter-form}
+        extractor (get extractors (get definition "in"))
+        parameter [(keyword (get definition "name")) (extractor request definition)]]
+    (log/trace "parameter:" parameter)
+    parameter))
 
 (defn swagger-parser
   "A ring middleware that uses a swagger definition for parsing parameters and crafting responses."
-  ; TODO optional map of (de)serializer functions for mimetypes
+  ; TODO optional map of (de)serializer functions for body mimetypes
   [chain-handler]
   (fn [request]
-    ; TODO noop currently, parse parameters and (de)serialize them according to mimetypes
-    (chain-handler request)))
+    (if-let [swagger-request (:swagger-request request)]
+      (chain-handler
+        (assoc request :parameters
+                       (into {}
+                             (map (fn [[_ definition]]
+                                    (extract-parameter request definition))
+                                  (get swagger-request "parameters")))))
+      (chain-handler request))))
 
 (defn swagger-validator
   "A ring middleware that uses a swagger definition for validating incoming requests and their responses."

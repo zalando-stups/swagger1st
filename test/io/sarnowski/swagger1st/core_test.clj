@@ -1,5 +1,6 @@
 (ns io.sarnowski.swagger1st.core-test
   (:require [clojure.test :refer :all]
+            [ring.middleware.params :refer [wrap-params]]
             [ring.mock.request :as mock]
             [io.sarnowski.swagger1st.core :as s1st]
             [ring.util.response :refer :all]
@@ -22,7 +23,9 @@
       (test-request-logging)
 
       (s1st/swagger-parser)
-      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")))
+      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
+
+      (wrap-params)))
 
 
 ;; application endpoints, referenced by the swagger spec

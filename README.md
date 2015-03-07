@@ -11,13 +11,15 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
 
 ```clojure
 (ns example
-  (:require [io.sarnowski.swagger1st.core :as s1st]))
+  (:require [io.sarnowski.swagger1st.core :as s1st]
+            [ring.middleware.params :refer [wrap-params]]))
 
 (def app
   (-> (s1st/swagger-executor)
       (s1st/swagger-validator)
       (s1st/swagger-serializer)
-      (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")))
+      (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")
+      (wrap-params))
 ```
 
 The following swagger definition inputs are possible:
