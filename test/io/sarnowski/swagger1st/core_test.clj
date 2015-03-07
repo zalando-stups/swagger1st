@@ -40,19 +40,19 @@
 
 (defn read-user
   "Reads the profile information of a user from the user-db."
-  [{{:keys [id]} :parameters}]
+  [{{{:keys [id]} :path} :parameters}]
   (-> (response (@user-db id))
       (status 200)))
 
 (defn create-or-update-user
   "Creates or updates a profile for a user in the user-db."
-  [{{:keys [id profile]} :parameters}]
+  [{{{:keys [id]} :path {:keys [profile]} :body} :parameters}]
   (swap! user-db assoc id profile)
   {:status 200})
 
 (defn delete-user
   "Deletes a user from the user-db."
-  [{{:keys [id]} :parameters}]
+  [{{{:keys [id]} :path} :parameters}]
   (swap! user-db dissoc id)
   {:status 200})
 
@@ -68,7 +68,7 @@
 
   (is (= (app (-> (mock/request :post "/user/123")
                   (mock/header "Content-Type" "application/json")
-                  (mock/body "sarnowski")))
+                  (mock/body "{\"name\": \"sarnowski\"")))
          {:status 200}))
 
   (is (= (app (mock/request :get "/user/123"))

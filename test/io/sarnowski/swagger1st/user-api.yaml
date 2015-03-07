@@ -26,23 +26,23 @@ paths:
       description: Registers or changes a user's profile in the system.
       operationId: io.sarnowski.swagger1st.core-test/create-or-update-user
       parameters:
-            name:
-              name: profile
-              in: body
-              description: The user's profile
-              required: true
-              type: string
+        profileParam:
+          name: profile
+          in: body
+          description: The user's profile
+          required: true
+          type: string
       responses:
-              200:
-                description: user created
+        200:
+          description: user created
 
     delete:
-          summary: Deletes a user
-          description: Deletes a user's profile from the system.
-          operationId: io.sarnowski.swagger1st.core-test/delete-user
-          responses:
-            200:
-              description: user deleted
+      summary: Deletes a user
+      description: Deletes a user's profile from the system.
+      operationId: io.sarnowski.swagger1st.core-test/delete-user
+      responses:
+        200:
+          description: user deleted
 
     parameters:
       idParam:
@@ -53,12 +53,12 @@ paths:
         type: string
 
   /health:
-      get:
-        summary: Get health status
-        description: Provides health system information
-        operationId: io.sarnowski.swagger1st.core-test/read-health
-        responses:
-          200:
-            description: system is working
-            schema:
-              type: boolean
+    get:
+      summary: Get health status
+      description: Provides health system information
+      operationId: io.sarnowski.swagger1st.core-test/read-health
+      responses:
+        200:
+          description: system is working
+          schema:
+            type: boolean

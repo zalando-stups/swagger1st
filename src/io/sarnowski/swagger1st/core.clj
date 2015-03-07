@@ -54,15 +54,31 @@
   (let [f (fn [[k v]] [k (denormalize-ref definition v)])]
     (walk/prewalk (fn [x] (if (map? x) (into {} (map f x)) x)) definition)))
 
+(defn- denormalize-inheritance-map
+  "Merges a map from parent to definition, overwriting keys with definition."
+  [definition parent-definition map-name]
+  (let [m (get definition map-name)
+        pm (get parent-definition map-name)
+        merged (merge pm m)]
+    (assoc definition map-name merged)))
+
+(defn- denormalize-inheritance-col
+  "Denormalizes a collection, using the parent or replacing it with definition."
+  [definition parent-definition col-name]
+  (assoc definition col-name
+                    (if-let [col (get definition col-name)]
+                      col
+                      (get parent-definition col-name))))
+
 (defn- denormalize-inheritance
   "Denormalizes inheritance of parameters etc."
   [definition parent-definition]
-  ; TODO security, consumes, produces, ...
-  ; parameters
-  (let [parameters (get definition "parameters")
-        parent-parameters (get parent-definition "parameters")
-        merged-parameters (merge parent-parameters parameters)]
-    (assoc definition "parameters" merged-parameters)))
+  (-> definition
+      (denormalize-inheritance-map parent-definition "parameters")
+      (denormalize-inheritance-col parent-definition "consumes")
+      (denormalize-inheritance-col parent-definition "produces")
+      (denormalize-inheritance-col parent-definition "schemes")
+      (denormalize-inheritance-col parent-definition "security")))
 
 (defn- split-path
   "Splits a / separated path into its segments and replaces all variable entries (e.g. {name}) with nil."
@@ -95,14 +111,14 @@
 (defn- extract-requests
   "Extracts request-key->operation-definition from a swagger definition."
   [definition]
-  (let [non-path-keys #{"parameters"}]
+  (let [inheriting-key? #{"parameters" "consumes" "produces" "schemes" "security"}]
     (->>
       ; create request-key / swagger-request tuples
       (for [[path path-definition] (get definition "paths")]
-        (when-not (contains? non-path-keys path)
+        (when-not (inheriting-key? path)
           (let [path-definition (denormalize-inheritance path-definition definition)]
             (for [[operation operation-definition] path-definition]
-              (when-not (contains? non-path-keys path)
+              (when-not (inheriting-key? operation)
                 (create-request-tuple operation operation-definition path path-definition))))))
       ; streamline tuples and bring into a map
       (apply concat)
@@ -186,30 +202,47 @@
   [{form-params :form-params} definition]
   (get form-params (get definition "name")))
 
+(defn- extract-parameter-body
+  "Extract a parameter from the request body."
+  [request definition]
+  (let [content-type (get (:headers request) "Content-Type")
+        allowed-content-types (into #{} (get definition "consumes"))
+        ; TODO make this configurable
+        supported-content-types {"application/json" json/read-json}]
+    (if (allowed-content-types content-type)
+      (if-let [deserialize-fn (get supported-content-types content-type)]
+        (deserialize-fn (:body request))
+        (:body request))
+      (throw (ex-info "Content type not allowed." {:http-code 406})))))
+
 (defn- extract-parameter
   "Extracts a parameter from the request according to the definition."
   [request definition]
-  (let [extractors {"path" extract-parameter-path
-                    "query" extract-parameter-query
-                    "header" extract-parameter-header
-                    "form" extract-parameter-form}
-        extractor (get extractors (get definition "in"))
-        parameter [(keyword (get definition "name")) (extractor request definition)]]
+  (let [type (keyword (get definition "in"))
+        extractors {:path   extract-parameter-path
+                    :query  extract-parameter-query
+                    :header extract-parameter-header
+                    :form   extract-parameter-form
+                    :body   extract-parameter-body}
+        extractor (get extractors type)
+        parameter [type (keyword (get definition "name")) (extractor request definition)]]
     (log/trace "parameter:" parameter)
     parameter))
 
 (defn swagger-parser
   "A ring middleware that uses a swagger definition for parsing parameters and crafting responses."
-  ; TODO optional map of (de)serializer functions for body mimetypes
   [chain-handler]
   (fn [request]
     (if-let [swagger-request (:swagger-request request)]
-      (chain-handler
-        (assoc request :parameters
-                       (into {}
-                             (map (fn [[_ definition]]
-                                    (extract-parameter request definition))
-                                  (get swagger-request "parameters")))))
+      (let [parameter-groups (group-by first
+                                       (map (fn [[_ definition]]
+                                              (extract-parameter request definition))
+                                            (get swagger-request "parameters")))
+            parameter-groups (into {}
+                                   (map (fn [[group parameters]]
+                                          [group (into {} (map (fn [[_ k v]] [k v]) parameters))])
+                                        parameter-groups))]
+        (chain-handler (assoc request :parameters parameter-groups)))
       (chain-handler request))))
 
 (defn swagger-validator
@@ -217,6 +250,8 @@
   [chain-handler]
   (fn [request]
     ; TODO noop currently, validate request (and response?!) from swagger def
+    ; TODO type validation
+    ; TODO required validation
     (chain-handler request)))
 
 (defn map-function-name
@@ -251,11 +286,7 @@
 
             (do
               (log/error "could not resolve handler for request" operationId)
-              {:status  501
-               :headers {"Content-Type" "plain/text"}
-               :body    "Operation not implemented."}))))
+              (throw (ex-info "Operation not implemented." {:http-code 501}))))))
 
       ; definition not found, skip for our middleware
-      {:status  400
-       :headers {"Content-Type" "plain/text"}
-       :body    "Operation not defined."})))
+      (throw (ex-info "Operation not defined." {:http-code 400})))))
