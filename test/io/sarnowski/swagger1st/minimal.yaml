@@ -1,0 +1,13 @@
+swagger: "2.0"
+
+info:
+  title: swagger1st simple app
+  version: "1.0"
+
+paths:
+  /hello:
+    get:
+      operationId: some-fn
+      responses:
+        200:
+          description: user deleted

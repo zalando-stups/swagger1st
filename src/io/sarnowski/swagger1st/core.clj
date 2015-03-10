@@ -5,7 +5,7 @@
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [clj-yaml.core :as yaml]
-            [io.sarnowski.swagger1st.schema :as s]
+            [io.sarnowski.swagger1st.schemas.swagger-2-0 :as swagger-2-0]
             [schema.core :as schema]))
 
 ;;; Load definitions
@@ -162,7 +162,7 @@
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification."
   [chain-handler swagger-definition-type swagger-definition]
-  (let [definition (schema/validate s/swagger-schema
+  (let [definition (schema/validate swagger-2-0/root-object
                                     (load-swagger-definition swagger-definition-type swagger-definition))
         lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
