@@ -68,12 +68,13 @@
 
   (is (= (app (-> (mock/request :post "/user/123")
                   (mock/header "Content-Type" "application/json")
-                  (mock/body "{\"name\": \"sarnowski\"")))
+                  (mock/body "{\"name\": \"sarnowski\"}")))
          {:status 200}))
 
   (is (= (app (mock/request :get "/user/123"))
-         {:status 200}
-          :body "sarnowski"))
+         {:status 200
+          :headers {}
+          :body {:name "sarnowski"}}))
 
   (is (= (app (mock/request :delete "/user/123"))
          {:status 200})))

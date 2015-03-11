@@ -87,7 +87,7 @@
                     (let [pd (get parent-definition col-name)
                           d  (get definition col-name)]
                       (remove nil?
-                        (conj-if-not if-not-fn d (first pd) (next pd))))))
+                              (conj-if-not if-not-fn d (first pd) (next pd))))))
 
 (defn- keys-equal?
   "Compares two maps if both have the same given keys."
@@ -235,16 +235,20 @@
 
 (defn- extract-parameter-body
   "Extract a parameter from the request body."
-  [request definition]
-  (let [content-type            (get (:headers request) "Content-Type")
-        allowed-content-types   (into #{} (get definition "consumes"))
+  [request parameter-definition]
+  (let [request-definition      (:swagger-request request)
+        content-type            (get (:headers request) "content-type")
+        allowed-content-types   (into #{} (get request-definition "consumes"))
         ; TODO make this configurable
-        supported-content-types {"application/json" json/read-json}]
+        supported-content-types {"application/json" (fn [body] (json/read-json (slurp body)))}]
     (if (allowed-content-types content-type)
       (if-let [deserialize-fn (get supported-content-types content-type)]
         (deserialize-fn (:body request))
         (:body request))
-      (throw (ex-info "Content type not allowed." {:http-code 406})))))
+      (throw (ex-info "Content type not allowed."
+                      {:http-code             406
+                       :content-type          content-type
+                       :allowed-content-types allowed-content-types})))))
 
 (defn- extract-parameter
   "Extracts a parameter from the request according to the definition."
