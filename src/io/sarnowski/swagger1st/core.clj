@@ -54,15 +54,15 @@
   (let [f (fn [[k v]] [k (denormalize-ref definition v)])]
     (walk/prewalk (fn [x] (if (map? x) (into {} (map f x)) x)) definition)))
 
-(defn- denormalize-inheritance-map
+(defn- inherit-map
   "Merges a map from parent to definition, overwriting keys with definition."
   [definition parent-definition map-name]
-  (let [m (get definition map-name)
-        pm (get parent-definition map-name)
+  (let [m      (get definition map-name)
+        pm     (get parent-definition map-name)
         merged (merge pm m)]
     (assoc definition map-name merged)))
 
-(defn- denormalize-inheritance-col
+(defn- inherit-list
   "Denormalizes a collection, using the parent or replacing it with definition."
   [definition parent-definition col-name]
   (assoc definition col-name
@@ -70,15 +70,46 @@
                       col
                       (get parent-definition col-name))))
 
-(defn- denormalize-inheritance
-  "Denormalizes inheritance of parameters etc."
+(defn- conj-if-not
+  "Conjoins x to col if test-fn doesn't find an existing entry in col."
+  [test-fn col x & xs]
+  (let [col (if (empty? (filter (fn [y] (test-fn x y)) col))
+              (conj col x)
+              col)]
+    (if xs
+      (recur test-fn col (first xs) (next xs))
+      col)))
+
+(defn- inherit-list-elements
+  "Denormalizes a collection, replacing entries that are equal."
+  [definition parent-definition col-name if-not-fn]
+  (assoc definition col-name
+                    (let [pd (get parent-definition col-name)
+                          d  (get definition col-name)]
+                      (remove nil?
+                        (conj-if-not if-not-fn d (first pd) (next pd))))))
+
+(defn- keys-equal?
+  "Compares two maps if both have the same given keys."
+  [x y ks]
+  (every? (fn [k] (= (get x k) (get y k))) ks))
+
+(defn- inherit-mimetypes
+  "Inherit 'consumes' and 'produces' mimetypes if not defined."
   [definition parent-definition]
   (-> definition
-      (denormalize-inheritance-map parent-definition "parameters")
-      (denormalize-inheritance-col parent-definition "consumes")
-      (denormalize-inheritance-col parent-definition "produces")
-      (denormalize-inheritance-col parent-definition "schemes")
-      (denormalize-inheritance-col parent-definition "security")))
+      (inherit-list parent-definition "consumes")
+      (inherit-list parent-definition "produces")
+      (inherit-list parent-definition "security")))
+
+(defn- inherit-path-spec
+  "Denormalizes inheritance of parameters etc. from the path to operation."
+  [definition parent-definition]
+  (-> definition
+      (inherit-mimetypes parent-definition)
+      (inherit-list-elements parent-definition "parameters" (fn [x y] (keys-equal? x y ["name" "in"])))
+      (inherit-map parent-definition "responses")
+      (inherit-list parent-definition "security")))
 
 (defn- split-path
   "Splits a / separated path into its segments and replaces all variable entries (e.g. {name}) with nil."
@@ -104,7 +135,7 @@
                     split-path
                     (map variable-to-keyword))}
    ; swagger-request
-   (denormalize-inheritance
+   (inherit-path-spec
      operation-definition
      path-definition)])
 
@@ -116,7 +147,7 @@
       ; create request-key / swagger-request tuples
       (for [[path path-definition] (get definition "paths")]
         (when-not (inheriting-key? path)
-          (let [path-definition (denormalize-inheritance path-definition definition)]
+          (let [path-definition (inherit-mimetypes path-definition definition)]
             (for [[operation operation-definition] path-definition]
               (when-not (inheriting-key? operation)
                 (create-request-tuple operation operation-definition path path-definition))))))
@@ -139,7 +170,7 @@
    a nil value, it is a dynamic segment."
   [path-template path-real]
   (when (= (count path-template) (count path-real))
-    (let [pairs (map #(vector %1 %2) path-template path-real)
+    (let [pairs         (map #(vector %1 %2) path-template path-real)
           pair-matches? (fn [[t r]] (or (keyword? t) (= t r)))]
       (every? pair-matches? pairs))))
 
@@ -162,8 +193,8 @@
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification."
   [chain-handler swagger-definition-type swagger-definition]
-  (let [definition (schema/validate swagger-2-0/root-object
-                                    (load-swagger-definition swagger-definition-type swagger-definition))
+  (let [definition             (schema/validate swagger-2-0/root-object
+                                                (load-swagger-definition swagger-definition-type swagger-definition))
         lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
 
@@ -205,8 +236,8 @@
 (defn- extract-parameter-body
   "Extract a parameter from the request body."
   [request definition]
-  (let [content-type (get (:headers request) "Content-Type")
-        allowed-content-types (into #{} (get definition "consumes"))
+  (let [content-type            (get (:headers request) "Content-Type")
+        allowed-content-types   (into #{} (get definition "consumes"))
         ; TODO make this configurable
         supported-content-types {"application/json" json/read-json}]
     (if (allowed-content-types content-type)
@@ -218,14 +249,14 @@
 (defn- extract-parameter
   "Extracts a parameter from the request according to the definition."
   [request definition]
-  (let [type (keyword (get definition "in"))
+  (let [type       (keyword (get definition "in"))
         extractors {:path   extract-parameter-path
                     :query  extract-parameter-query
                     :header extract-parameter-header
                     :form   extract-parameter-form
                     :body   extract-parameter-body}
-        extractor (get extractors type)
-        parameter [type (keyword (get definition "name")) (extractor request definition)]]
+        extractor  (get extractors type)
+        parameter  [type (keyword (get definition "name")) (extractor request definition)]]
     (log/trace "parameter:" parameter)
     parameter))
 
@@ -235,7 +266,7 @@
   (fn [request]
     (if-let [swagger-request (:swagger-request request)]
       (let [parameter-groups (group-by first
-                                       (map (fn [[_ definition]]
+                                       (map (fn [definition]
                                               (extract-parameter request definition))
                                             (get swagger-request "parameters")))
             parameter-groups (into {}

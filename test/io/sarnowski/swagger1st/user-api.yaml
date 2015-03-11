@@ -8,6 +8,8 @@ produces:
   - application/json
 consumes:
   - application/json
+schemes:
+  - https
 
 paths:
   /user/{id}:
