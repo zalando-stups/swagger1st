@@ -5,6 +5,8 @@ on [swagger](http://swagger.io/) definitions.
 
 Currently only supports Swagger 2.0 specification.
 
+[![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
+
 ## Usage
 
 Add the swagger1st middleware into your ring handler chain and specify the schema location.
