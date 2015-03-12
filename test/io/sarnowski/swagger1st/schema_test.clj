@@ -22,3 +22,11 @@
 (deftest user-api-definition
   (s/validate schema-2-0/root-object
               (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")))
+
+(deftest default-definition
+  (s/validate schema-2-0/root-object
+              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/default.yaml")))
+
+(deftest simple-ref-definition
+  (s/validate schema-2-0/root-object
+              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/simple-ref.yaml")))

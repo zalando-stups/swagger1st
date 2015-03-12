@@ -71,25 +71,41 @@
    (s/optional-key "wraped")    boolean})
 
 (def schema-object
-  (merge items-object
-         {(s/optional-key "title")         string
-          (s/optional-key "description")   string
-          (s/optional-key "maxProperties") long
-          (s/optional-key "minProperties") long
-          (s/optional-key "required")      boolean
-          (s/optional-key "items")         (s/recursive #'schema-object)
-          (s/optional-key "allOf")         (s/recursive #'schema-object)
-          (s/optional-key "properties")    (s/recursive #'schema-object)
-          (s/optional-key "discriminator") string
-          (s/optional-key "readOnly")      boolean
-          (s/optional-key "xml")           xml-object
-          (s/optional-key "externalDocs")  external-documentation-object
-          (s/optional-key "example")       s/Any
-          (s/optional-key "$ref")          string}))
+  {(s/optional-key "type")             string
+   (s/optional-key "format")           string
+   (s/optional-key "items")            (s/recursive #'schema-object)
+   (s/optional-key "collectionFormat") string
+   (s/optional-key "default")          s/Any
+   (s/optional-key "maximum")          long
+   (s/optional-key "exclusiveMaximum") boolean
+   (s/optional-key "minimum")          long
+   (s/optional-key "exclusiveMinimum") boolean
+   (s/optional-key "maxLength")        long
+   (s/optional-key "minLength")        long
+   (s/optional-key "pattern")          string
+   (s/optional-key "maxItems")         long
+   (s/optional-key "minItems")         long
+   (s/optional-key "uniqueItems")      boolean
+   (s/optional-key "enum")             [s/Any]
+   (s/optional-key "multipleOf")       long
+   (s/optional-key "title")            string
+   (s/optional-key "description")      string
+   (s/optional-key "maxProperties")    long
+   (s/optional-key "minProperties")    long
+   (s/optional-key "required")         boolean
+   (s/optional-key "allOf")            (s/recursive #'schema-object)
+   (s/optional-key "properties")       {string (s/recursive #'schema-object)}
+   (s/optional-key "discriminator")    string
+   (s/optional-key "readOnly")         boolean
+   (s/optional-key "xml")              xml-object
+   (s/optional-key "externalDocs")     external-documentation-object
+   (s/optional-key "example")          s/Any
+   (s/optional-key "$ref")             string})
 
 (def header-object
-  (merge items-object
-         {(s/optional-key "description") string}))
+  (merge
+    items-object
+    {(s/optional-key "description") string}))
 
 (def headers-object
   {string header-object})
@@ -104,13 +120,14 @@
    (s/optional-key "examples")    example-object})
 
 (def parameter-object
-  (merge items-object
-         {(s/required-key "name")              string
-          (s/required-key "in")                string
-          (s/optional-key "description")       string
-          (s/optional-key "required")          boolean
-          (s/optional-key "schema")            schema-object
-          (s/optional-key (s/pred extension?)) s/Any}))
+  (merge
+    items-object
+    {(s/required-key "name")              string
+     (s/required-key "in")                string
+     (s/optional-key "description")       string
+     (s/optional-key "required")          boolean
+     (s/optional-key "schema")            schema-object
+     (s/optional-key (s/pred extension?)) s/Any}))
 
 (def parameters-definitions-object
   {string parameter-object})

@@ -21,7 +21,7 @@ paths:
         200:
           description: user deleted
           schema:
-            type: string
+            $ref: '#/definitions/Profile'
 
     post:
       summary: Create or update a user
@@ -64,3 +64,9 @@ paths:
           description: system is working
           schema:
             type: boolean
+
+definitions:
+  Profile:
+    properties:
+      name:
+        type: string
