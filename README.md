@@ -6,6 +6,7 @@ on [swagger](http://swagger.io/) definitions.
 Currently only supports Swagger 2.0 specification.
 
 [![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
+[![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
 
 ## Usage
 
