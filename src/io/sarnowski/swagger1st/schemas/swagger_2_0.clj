@@ -92,7 +92,7 @@
    (s/optional-key "description")      string
    (s/optional-key "maxProperties")    long
    (s/optional-key "minProperties")    long
-   (s/optional-key "required")         boolean
+   (s/optional-key "required")         [string]
    (s/optional-key "allOf")            (s/recursive #'schema-object)
    (s/optional-key "properties")       {string (s/recursive #'schema-object)}
    (s/optional-key "discriminator")    string
