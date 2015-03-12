@@ -6,4 +6,4 @@ jdk:
   - openjdk7
 
 after_script:
-  - bash -ex test/coveralls.sh
+  - bash -ex coveralls.sh
