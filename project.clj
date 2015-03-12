@@ -1,8 +1,11 @@
 (defproject io.sarnowski/swagger1st "0.1.0-SNAPSHOT"
   :description "A ring middleware that does routing based on a swagger definition."
   :url "https://github.com/sarnowski/swagger1st"
+
   :license {:name "ISC License"
             :url "http://opensource.org/licenses/ISC"}
+
+  :min-lein-version "2.0.0"
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.3.1"]
@@ -21,4 +24,5 @@
                                   [org.slf4j/jcl-over-slf4j "1.7.7"]
                                   [org.slf4j/slf4j-simple "1.7.7"]]}}
 
-  :deploy-repositories [["releases" :clojars]])
+  :deploy-repositories [["releases" :clojars]]
+  :signing {:gpg-key "tobias@sarnowski.io"})
