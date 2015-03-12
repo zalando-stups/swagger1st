@@ -1,5 +1,9 @@
 language: clojure
+
 jdk:
   - oraclejdk8
   - oraclejdk7
   - openjdk7
+
+after_script:
+  - bash -ex test/coveralls.sh

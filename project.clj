@@ -15,6 +15,8 @@
 
                  [prismatic/schema "0.3.7"]]
 
+  :plugins [[lein-cloverage "1.0.2"]]
+
   :profiles {:dev {:dependencies [[ring/ring-mock "0.2.0"]
                                   [ring/ring-core "1.3.2"]
                                   [ring/ring-devel "1.3.2"]
