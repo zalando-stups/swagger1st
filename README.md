@@ -9,6 +9,10 @@ Currently only supports Swagger 2.0 specification.
 
 ## Usage
 
+Use the following dependency:
+
+[![Clojars Project](http://clojars.org/io.sarnowski/swagger1st/latest-version.svg)](http://clojars.org/io.sarnowski/swagger1st)
+
 Add the swagger1st middleware into your ring handler chain and specify the schema location.
 
 ```clojure
