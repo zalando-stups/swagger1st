@@ -45,7 +45,7 @@
   {(s/required-key "$ref") string})
 
 (def items-object
-  {(s/required-key "type")             string
+  {(s/optional-key "type")             string
    (s/optional-key "format")           string
    (s/optional-key "items")            (s/recursive #'items-object)
    (s/optional-key "collectionFormat") string
