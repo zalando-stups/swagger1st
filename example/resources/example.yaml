@@ -17,9 +17,9 @@ paths:
           description: greeting response
           schema:
             type: string
-    parameters:
-      - name: name
-        in: path
-        description: Name of the person to greet.
-        required: true
-        type: string
+      parameters:
+        - name: name
+          in: path
+          description: Name of the person to greet.
+          required: true
+          type: string

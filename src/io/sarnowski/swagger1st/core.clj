@@ -6,7 +6,8 @@
             [clojure.java.io :as io]
             [clj-yaml.core :as yaml]
             [io.sarnowski.swagger1st.schemas.swagger-2-0 :as swagger-2-0]
-            [schema.core :as schema]))
+            [schema.core :as schema]
+            [ring.util.response :as r]))
 
 ;;; Load definitions
 
@@ -57,8 +58,8 @@
 (defn- inherit-map
   "Merges a map from parent to definition, overwriting keys with definition."
   [definition parent-definition map-name]
-  (let [m      (get definition map-name)
-        pm     (get parent-definition map-name)
+  (let [m (get definition map-name)
+        pm (get parent-definition map-name)
         merged (merge pm m)]
     (assoc definition map-name merged)))
 
@@ -85,7 +86,7 @@
   [definition parent-definition col-name if-not-fn]
   (assoc definition col-name
                     (let [pd (get parent-definition col-name)
-                          d  (get definition col-name)]
+                          d (get definition col-name)]
                       (remove nil?
                               (conj-if-not if-not-fn d (first pd) (next pd))))))
 
@@ -170,7 +171,7 @@
    a nil value, it is a dynamic segment."
   [path-template path-real]
   (when (= (count path-template) (count path-real))
-    (let [pairs         (map #(vector %1 %2) path-template path-real)
+    (let [pairs (map #(vector %1 %2) path-template path-real)
           pair-matches? (fn [[t r]] (or (keyword? t) (= t r)))]
       (every? pair-matches? pairs))))
 
@@ -190,21 +191,61 @@
            ; if we have multiple matches then its not well defined, just choose the first
            first))))
 
+(defn- serialize-response
+  "Serializes the response body according to the Content-Type."
+  [request response]
+  (let [supported-content-types {"application/json" json/write-str}]
+    (if-let [serializer (supported-content-types (get-in response [:headers "Content-Type"]))]
+      ; TODO check for allowed "produces" mimetypes and do object validation
+      (assoc response :body (serializer (:body response)))
+      response)))
+
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification."
   [chain-handler swagger-definition-type swagger-definition]
-  (let [definition             (schema/validate swagger-2-0/root-object
-                                                (load-swagger-definition swagger-definition-type swagger-definition))
+  (let [definition (schema/validate swagger-2-0/root-object
+                                    (load-swagger-definition swagger-definition-type swagger-definition))
         lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
 
     (fn [request]
       (let [[request-key swagger-request] (lookup-swagger-request request)]
         (log/debug "swagger-request:" swagger-request)
-        (chain-handler (-> request
-                           (assoc :swagger definition)
-                           (assoc :swagger-request swagger-request)
-                           (assoc :swagger-request-key request-key)))))))
+        (let [response (chain-handler (-> request
+                                          (assoc :swagger definition)
+                                          (assoc :swagger-request swagger-request)
+                                          (assoc :swagger-request-key request-key)))]
+          (serialize-response request response))))))
+
+(defn- swaggerui-template
+  "Loads the swagger ui template (index.html) and replaces certain keywords."
+  [{definition :swagger} definition-url]
+  (let [template (slurp (io/resource "io/sarnowski/swagger1st/swaggerui/index.html"))
+        vars {"$TITLE$" (get-in definition ["info" "title"])
+              "$DEFINITION$" definition-url}]
+    (reduce (fn [template [var val]] (string/replace template var val)) template vars)))
+
+(defn swagger-discovery
+  "A ring middleware that exposes the swagger definition and the swagger UI for public use."
+  [chain-handler & {:keys [discovery definition ui]
+                    :or   {discovery  "/.discovery"
+                           definition "/swagger.json"
+                           ui         "/ui/"}}]
+  (fn [request]
+    (if (:swagger-request request)
+      (chain-handler request)
+      (let [path (:uri request)]
+        (cond
+          (= discovery path) (-> (r/response {:definition definition
+                                              :ui         ui})
+                                 (r/header "Content-Type" "application/json"))
+          (= definition path) (-> (r/response (:swagger request))
+                                  (r/header "Content-Type" "application/json"))
+          (= ui path) (-> (r/response (swaggerui-template request definition))
+                          (r/header "Content-Type" "text/html"))
+          (.startsWith path ui) (let [path (.substring path (count ui))]
+                                  (-> (r/response (io/input-stream (io/resource (str "io/sarnowski/swagger1st/swaggerui/" path))))))
+          :else (chain-handler request))))))
 
 (defn- extract-parameter-path
   "Extract a parameter from the request path."
@@ -236,9 +277,9 @@
 (defn- extract-parameter-body
   "Extract a parameter from the request body."
   [request parameter-definition]
-  (let [request-definition      (:swagger-request request)
-        content-type            (get (:headers request) "content-type")
-        allowed-content-types   (into #{} (get request-definition "consumes"))
+  (let [request-definition (:swagger-request request)
+        content-type (get (:headers request) "content-type")
+        allowed-content-types (into #{} (get request-definition "consumes"))
         ; TODO make this configurable
         supported-content-types {"application/json" (fn [body] (json/read-json (slurp body)))}]
     (if (allowed-content-types content-type)
@@ -253,14 +294,14 @@
 (defn- extract-parameter
   "Extracts a parameter from the request according to the definition."
   [request definition]
-  (let [type       (keyword (get definition "in"))
+  (let [type (keyword (get definition "in"))
         extractors {:path   extract-parameter-path
                     :query  extract-parameter-query
                     :header extract-parameter-header
                     :form   extract-parameter-form
                     :body   extract-parameter-body}
-        extractor  (get extractors type)
-        parameter  [type (keyword (get definition "name")) (extractor request definition)]]
+        extractor (get extractors type)
+        parameter [type (keyword (get definition "name")) (extractor request definition)]]
     (log/trace "parameter:" parameter)
     parameter))
 
@@ -287,6 +328,13 @@
     ; TODO noop currently, validate request (and response?!) from swagger def
     ; TODO type validation
     ; TODO required validation
+    (chain-handler request)))
+
+(defn swagger-security
+  "A ring middleware that uses a swagger definition for enforcing security constraints."
+  [chain-handler]
+  (fn [request]
+    ; TODO noop currently, validate request (and response?!) from swagger def
     (chain-handler request)))
 
 (defn map-function-name

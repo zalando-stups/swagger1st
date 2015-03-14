@@ -23,8 +23,10 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
 
 (def app
   (-> (s1st/swagger-executor)
+      (s1st/swagger-security)
       (s1st/swagger-validator)
       (s1st/swagger-parser)
+      (s1st/swagger-discovery)
       (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")
       (wrap-params))
 ```
@@ -42,13 +44,9 @@ The following swagger definition inputs are possible:
 ## Detailed usage
 
 TODO
+
 * explain different steps of the middleware and their dependencies, inputs and outputs
 * explain configuration options
-
-### Using different operationId mappings
-
-TODO :mapper [{"operationId" function-name} my-custom-resolver s1st/map-function-name]
-TODO how to integrate with 'component' lifecycle manager
 
 ## License
 
