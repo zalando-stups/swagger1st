@@ -45,7 +45,7 @@
   {(s/required-key "$ref") string})
 
 (def items-object
-  {(s/required-key "type")             string
+  {(s/optional-key "type")             string
    (s/optional-key "format")           string
    (s/optional-key "items")            (s/recursive #'items-object)
    (s/optional-key "collectionFormat") string
@@ -92,7 +92,7 @@
    (s/optional-key "description")      string
    (s/optional-key "maxProperties")    long
    (s/optional-key "minProperties")    long
-   (s/optional-key "required")         boolean
+   (s/optional-key "required")         [string]
    (s/optional-key "allOf")            (s/recursive #'schema-object)
    (s/optional-key "properties")       {string (s/recursive #'schema-object)}
    (s/optional-key "discriminator")    string

@@ -1,4 +1,4 @@
-(ns io.sarnowski.swagger1st.schema-test
+(ns io.sarnowski.swagger1st.schemas.schema-test
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [io.sarnowski.swagger1st.core :as core]
@@ -13,11 +13,11 @@
 
 (deftest minimal-definition-yaml
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/minimal.yaml")))
+              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/minimal.yaml")))
 
 (deftest minimal-definition-json
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/json-cp "io/sarnowski/swagger1st/minimal.json")))
+              (core/load-swagger-definition ::core/json-cp "io/sarnowski/swagger1st/schemas/minimal.json")))
 
 (deftest user-api-definition
   (s/validate schema-2-0/root-object
@@ -25,8 +25,12 @@
 
 (deftest default-definition
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/default.yaml")))
+              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/default.yaml")))
 
 (deftest simple-ref-definition
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/simple-ref.yaml")))
+              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/simple-ref.yaml")))
+
+(deftest kio-definition
+  (s/validate schema-2-0/root-object
+              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/kio.yaml")))

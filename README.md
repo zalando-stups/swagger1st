@@ -23,13 +23,26 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
 
 (def app
   (-> (s1st/swagger-executor)
+      (s1st/swagger-security)
       (s1st/swagger-validator)
       (s1st/swagger-parser)
+      (s1st/swagger-discovery)
       (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")
       (wrap-params))
 ```
 
-The following swagger definition inputs are possible:
+## Middlewares in detail
+
+The here described middlewares should also be run in the same order. They are intentionally split up in order to plug
+in other middlewares in between the process (or to disable certain features).
+
+### swagger-mapper
+
+The mapper parses the given definition and maps incoming request to a defined operation. After this middleware, the
+request carries the `:swagger` key with the original swagger definition and the `:swagger-request` key if the request
+matched a defined operation. The `:swagger-request` contains the denormalized definition of this operation.
+
+In order to load the swagger definition, you have to specify the source type:
 
 * **direct** - swagger definition already as clojure data structures
 * **json** - a string containing a JSON formatted swagger definition
@@ -39,16 +52,98 @@ The following swagger definition inputs are possible:
 * **yaml-file** - a reference to a file, containing YAML
 * **yaml-cp** - a reference to a classpath resource, containing YAML
 
-## Detailed usage
+```clojure
+(io.sarnowski.swagger1st.core/swagger-mapper [definition-type] [definition-source])
+```
 
-TODO
-* explain different steps of the middleware and their dependencies, inputs and outputs
-* explain configuration options
+### swagger-discovery
 
-### Using different operationId mappings
+The discovery middleware exposes a standard endpoint `/.discovery` which provides a JSON document, containing URLs to
+the swagger definition and the UI:
 
-TODO :mapper [{"operationId" function-name} my-custom-resolver s1st/map-function-name]
-TODO how to integrate with 'component' lifecycle manager
+```json
+{
+    "definition": "/swagger.json",
+    "ui": "/ui/"
+}
+```
+
+```clojure
+(io.sarnowski.swagger1st.core/swagger-discovery [:discovery "/.discovery"]
+                                                [:definition "/swagger.json"]
+                                                [:ui "/ui/"])
+```
+
+### swagger-parser
+
+The parser extracts the defined parameters from its different sources and deserializes bodies if necessary. It requires
+the `wrap-params` middleware to be run beforehand in order to correctly parse parameters. After the parsing, the
+`:parameters` key will be attached to the request, containing a map of all possible parameter types (`in` definitions)
+which them self contain the parameters as keywords of their names. For example:
+
+```clojure
+{
+  ; standard ring request including :swagger and :swagger-request keys
+  :parameters {
+    :path {
+      :name "userId"
+    }
+    :query {
+      :page 1
+      :pageSize 20
+    }
+  }
+}
+```
+
+```clojure
+(io.sarnowski.swagger1st.core/swagger-parser)
+```
+
+### swagger-validator
+
+The validator middleware will validate all parsed parameters according to their definition.
+
+TODO not implemented yet!
+
+```clojure
+(io.sarnowski.swagger1st.core/swagger-validator)
+```
+
+### swagger-security
+
+The security middleware will enforce defined security restrictions and handle OAuth 2.0 flows.
+
+TODO not implemented yet!
+
+```clojure
+(io.sarnowski.swagger1st.core/swagger-security)
+```
+
+### swagger-executor
+
+The executor is not a middleware but the final handler that uses the operation definition's `operationId` to match the
+function to be called. The default implementation matches the operationId directly as a clojure function. It is possible
+to configure an own resolver function. Resolver function must take one parameter, they will get the operationId in and
+must return a function to-be-called or nil if resolution wasn't possible. (Hint: this is also fulfilled by a map) It is
+possible to chain multiple handlers for fallbacks.
+
+```clojure
+(s1st/swagger-executor :mappers [
+
+   ; manual mapping of operationIds to functions
+   {"my-operation-id-1" my-special-function
+    "my-operation-id-2" my-very-special-function}
+
+   ; fallback directly resolve function
+   s1st/resolve-function
+
+   ])
+```
+
+```clojure
+(io.sarnowski.swagger1st.core/swagger-executor [:mappers [list of resolver-functions]])
+```
 
 ## License
 

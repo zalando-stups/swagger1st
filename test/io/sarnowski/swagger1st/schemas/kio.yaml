@@ -1,0 +1,193 @@
+swagger: '2.0'
+info:
+  title: Kio API
+  description: Kio manages applications
+  version: "1.0.0"
+host: kio.stups.example.org
+schemes:
+  - https
+basePath: /
+produces:
+  - application/json
+paths:
+  /applications:
+    get:
+      summary: Read applications
+      description: |
+        Lists all registered applications
+      operationId: "kio.core/readApplications"
+      tags:
+        - Applications
+      responses:
+        200:
+          description: List of all applications
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ApplicationSummary'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /applications/{applicationId}:
+    get:
+      summary: Read application
+      description: |
+        Returns details about one application
+      operationId: "kio.core/readApplication"
+      tags:
+        - Applications
+      parameters:
+        - name: applicationId
+          in: path
+          type: string
+          description: ID of the application
+          required: true
+      responses:
+        200:
+          description: Details of one application
+          schema:
+            $ref: '#/definitions/Application'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+    put:
+      summary: Save application
+      description: |
+        Creates or updates an application
+      operationId: "kio.core/saveApplication"
+      tags:
+        - Applications
+      consumes:
+        - application/json
+      parameters:
+        - name: applicationId
+          in: path
+          type: string
+          description: ID of the application
+          required: true
+          pattern: "^[a-z][a-z0-9-]+$"
+        - name: application
+          in: body
+          description: Application details that will be saved
+          schema:
+            $ref: '#/definitions/ApplicationDetails'
+          required: true
+      responses:
+        200:
+          description: Application was updated
+        201:
+          description: Application was created
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+    delete:
+      summary: Delete application
+      description: |
+        Deletes an application
+      operationId: "kio.core/deleteApplication"
+      tags:
+        - Applications
+      parameters:
+        - name: applicationId
+          in: path
+          type: string
+          description: ID of the application
+          required: true
+      responses:
+        200:
+          description: Application was deleted
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  Application:
+    properties:
+      id:
+        type: string
+        description: Unique identifier
+      name:
+        type: string
+        description: A human-readable name
+      teamId:
+        type: string
+        description: ID of the team, responsible for this application
+      description:
+        type: string
+        description: Purpose of this application
+      url:
+        type: string
+        description: Live URL of the application
+      scmUrl:
+        type: string
+        description: URL of SCM repository
+      documentationUrl:
+        type: string
+        description: URL of documentation
+
+  ApplicationDetails:
+    properties:
+      name:
+        type: string
+        description: A human-readable name
+        minLength: 1
+      teamId:
+        type: string
+        description: ID of the team, responsible for this application
+      description:
+        type: string
+        description: Purpose of this application
+      url:
+        type: string
+        description: Live URL of the application
+      scmUrl:
+        type: string
+        description: URL of SCM repository
+      documentationUrl:
+        type: string
+        description: URL of documentation
+    required:
+      - name
+      - teamId
+      - description
+      - scmUrl
+    example:
+      name: Kio
+      teamId: stups
+      description: Registry for applications
+      url: https://kio.stups.example.org
+      scmUrl: git@github.com:zalando-stups/kio.git
+      documentationUrl: https://zalando-stups.github.io
+
+  ApplicationSummary:
+    properties:
+      id:
+        type: string
+        description: Unique identifier
+      name:
+        type: string
+        description: A human-readable name
+      teamId:
+        type: string
+        description: ID of the team, responsible for this application
+    example:
+      id: kio
+      name: Kio
+      teamId: stups
+
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
