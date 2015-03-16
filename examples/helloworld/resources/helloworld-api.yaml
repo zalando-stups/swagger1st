@@ -1,7 +1,7 @@
 swagger: "2.0"
 
 info:
-  title: swagger1st example app
+  title: swagger1st helloworld example
   version: "1.0"
 
 paths:
@@ -9,7 +9,7 @@ paths:
     post:
       summary: Generate greeting
       description: Generates a greeting message.
-      operationId: example.core/create-greeting
+      operationId: helloworld.core/create-greeting
       produces:
         - application/json
       responses:
