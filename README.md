@@ -31,6 +31,15 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
       (wrap-params))
 ```
 
+## Examples
+
+The [examples](examples/) directory contains the following examples:
+
+* [Hello, World!](examples/helloworld/)
+    * The simplest setup as a starting point for own applications.
+* [TODO](examples/todo/)
+    * A TODO list application, showing integration with the lifecycle framework [component](https://github.com/stuartsierra/component).
+
 ## Middlewares in detail
 
 The here described middlewares should also be run in the same order. They are intentionally split up in order to plug
