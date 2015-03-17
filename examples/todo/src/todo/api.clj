@@ -1,10 +1,15 @@
 (ns todo.api
   (:require [io.sarnowski.swagger1st.core :as s1st]
             [ring.middleware.params :refer [wrap-params]]
+            [ring.util.response :as r]
             [com.stuartsierra.component :as component]
             [org.httpkit.server :as httpkit]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [todo.db :as db]))
 
+; 'definition' will be configured during instantiation
+; 'httpd' is the internal state of the HTTP server
+; 'db' will be injected via the lifecycle before start
 (defrecord API [definition httpd db]
   component/Lifecycle
 
@@ -53,12 +58,19 @@
 ;;; the real business logic! mapped in the todo-api.yaml
 
 (defn get-todo-entries [request db]
-  (list-todos db))
+  (let [todos (db/list-todos db)]
+    (-> (r/response todos)
+        (r/content-type "application/json")
+        (r/status 200))))
 
-(defn get-todo-entries [request db]
+(defn add-todo-entry [request db]
   (log/info "adding new TODO entry")
-  (add-todo db (get-in request [:parameters :body :title])))
+  (db/add-todo db (get-in request [:parameters :body :title]))
+  (-> (r/response nil)
+      (r/status 200)))
 
-(defn get-todo-entries [request db]
+(defn delete-todo-entry [request db]
   (log/info "deleting TODO entry")
-  (del-todo db (get-in request [:parameters :query :id])))
+  (db/del-todo db (get-in request [:parameters :query :id]))
+  (-> (r/response nil)
+      (r/status 200)))

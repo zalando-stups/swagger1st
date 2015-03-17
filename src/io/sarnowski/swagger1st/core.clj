@@ -202,26 +202,30 @@
 
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification."
-  [chain-handler swagger-definition-type swagger-definition]
+  [chain-handler swagger-definition-type swagger-definition & {:keys [surpress-favicon]
+                                                               :or   {surpress-favicon true}}]
   (let [definition (schema/validate swagger-2-0/root-object
                                     (load-swagger-definition swagger-definition-type swagger-definition))
         lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
 
     (fn [request]
-      (let [[request-key swagger-request] (lookup-swagger-request request)]
-        (log/debug "swagger-request:" swagger-request)
-        (let [response (chain-handler (-> request
-                                          (assoc :swagger definition)
-                                          (assoc :swagger-request swagger-request)
-                                          (assoc :swagger-request-key request-key)))]
-          (serialize-response request response))))))
+      (if (and surpress-favicon (= (:uri request) "/favicon.ico"))
+        (-> (r/response "No favicon available.")
+            (r/status 404))
+        (let [[request-key swagger-request] (lookup-swagger-request request)]
+          (log/debug "swagger-request:" swagger-request)
+          (let [response (chain-handler (-> request
+                                            (assoc :swagger definition)
+                                            (assoc :swagger-request swagger-request)
+                                            (assoc :swagger-request-key request-key)))]
+            (serialize-response request response)))))))
 
 (defn- swaggerui-template
   "Loads the swagger ui template (index.html) and replaces certain keywords."
   [{definition :swagger} definition-url]
   (let [template (slurp (io/resource "io/sarnowski/swagger1st/swaggerui/index.html"))
-        vars {"$TITLE$" (get-in definition ["info" "title"])
+        vars {"$TITLE$"      (get-in definition ["info" "title"])
               "$DEFINITION$" definition-url}]
     (reduce (fn [template [var val]] (string/replace template var val)) template vars)))
 
