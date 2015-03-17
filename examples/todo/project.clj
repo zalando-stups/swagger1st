@@ -9,4 +9,10 @@
                  [org.slf4j/slf4j-simple "1.7.7"]]
 
   :main ^:skip-aot todo.core
-  :profiles {:uberjar {:aot :all}})
+
+  :profiles {:uberjar {:aot :all}
+
+             :dev {:repl-options {:init-ns user}
+                   :source-paths ["dev"]
+                   :dependencies [[org.clojure/tools.namespace "0.2.10"]
+                                  [org.clojure/java.classpath "0.2.2"]]}})
