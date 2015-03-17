@@ -202,7 +202,7 @@
 
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification."
-  [chain-handler swagger-definition-type swagger-definition & {:keys [surpress-favicon]
+  [chain-handler swagger-definition-type swagger-definition & {:keys [surpress-favicon cors-origin]
                                                                :or   {surpress-favicon true}}]
   (let [definition (schema/validate swagger-2-0/root-object
                                     (load-swagger-definition swagger-definition-type swagger-definition))
@@ -219,7 +219,14 @@
                                             (assoc :swagger definition)
                                             (assoc :swagger-request swagger-request)
                                             (assoc :swagger-request-key request-key)))]
-            (serialize-response request response)))))))
+            (let [response (serialize-response request response)]
+              (if cors-origin
+                (-> response
+                    (r/header "Access-Control-Allow-Origin" cors-origin)
+                    (r/header "Access-Control-Max-Age" "3600")
+                    (r/header "Access-Control-Allow-Methods" "GET, POST, DELETE, PUT, PATCH, OPTIONS")
+                    (r/header "Access-Control-Allow-Headers" "*"))
+                response))))))))
 
 (defn- swaggerui-template
   "Loads the swagger ui template (index.html) and replaces certain keywords."
