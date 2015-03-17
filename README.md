@@ -61,8 +61,15 @@ In order to load the swagger definition, you have to specify the source type:
 * **yaml-file** - a reference to a file, containing YAML
 * **yaml-cp** - a reference to a classpath resource, containing YAML
 
+Optional arguments:
+
+* `:surpress-favicon` if `/favicon.ico` requests should be ignored, enabled by default
+* `:cors-origin` disabled by default, can be set to a domain like '*.zalando.de' and leads to the
+  [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) being set.
+
+
 ```clojure
-(io.sarnowski.swagger1st.core/swagger-mapper [definition-type] [definition-source])
+(io.sarnowski.swagger1st.core/swagger-mapper [definition-type] [definition-source] [optional-arguments])
 ```
 
 ### swagger-discovery
