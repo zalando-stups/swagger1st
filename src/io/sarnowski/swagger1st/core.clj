@@ -303,7 +303,11 @@
         supported-content-types {"application/json" (fn [body] (json/read-json (slurp body)))}]
     (if (allowed-content-types content-type)                ; TODO could be checked on initialization of ring handler chain
       (if-let [deserialize-fn (get supported-content-types content-type)]
-        (deserialize-fn (:body request))
+        (try
+          (deserialize-fn (:body request))
+          (catch Exception e
+            (throw (ex-info "Malformed body." {:http-code    400
+                                               :content-type content-type}))))
         (:body request))
       (throw (ex-info "Content type not allowed."
                       {:http-code             406
