@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- EDITED -->
   <title>$TITLE$</title>
   <link href='css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
@@ -28,10 +29,13 @@
       if (url && url.length > 1) {
         url = decodeURIComponent(url[1]);
       } else {
+        /* EDITED */
         url = "$DEFINITION$";
       }
       window.swaggerUi = new SwaggerUi({
         url: url,
+        /* EDITED disable validator */
+        validatorUrl: null,
         dom_id: "swagger-ui-container",
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
         onComplete: function(swaggerApi, swaggerUi){
@@ -85,7 +89,7 @@
   <div class="swagger-ui-wrap">
     <a id="logo" href="http://swagger.io">swagger</a>
     <form id='api_selector'>
-      <!--
+      <!-- EDITED disabled
       <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>
       -->
       <div class='input'><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text"/></div>

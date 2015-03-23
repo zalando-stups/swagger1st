@@ -238,10 +238,11 @@
 
 (defn swagger-discovery
   "A ring middleware that exposes the swagger definition and the swagger UI for public use."
-  [chain-handler & {:keys [discovery definition ui]
-                    :or   {discovery  "/.discovery"
-                           definition "/swagger.json"
-                           ui         "/ui/"}}]
+  [chain-handler & {:keys [discovery definition ui overwrite-host?]
+                    :or   {discovery       "/.discovery"
+                           definition      "/swagger.json"
+                           ui              "/ui/"
+                           overwrite-host? true}}]
   (fn [request]
     (if (:swagger-request request)
       (chain-handler request)
@@ -250,7 +251,10 @@
           (= discovery path) (-> (r/response {:definition definition
                                               :ui         ui})
                                  (r/header "Content-Type" "application/json"))
-          (= definition path) (-> (r/response (:swagger request))
+          (= definition path) (-> (r/response (-> (:swagger request)
+                                                  (assoc "host" (or
+                                                                  (-> request :headers (get "host"))
+                                                                  (-> request :server-name)))))
                                   (r/header "Content-Type" "application/json"))
           (= ui path) (-> (r/response (swaggerui-template request definition))
                           (r/header "Content-Type" "text/html"))
