@@ -71,7 +71,7 @@
 (deftest users
 
   (is (= (app (-> (mock/request :post "/user/123")
-                  (mock/header "Content-Type" "application/json")
+                  (mock/header "Content-Type" "application/json; charset=UTF-8")
                   (mock/body (json/write-str {:name "sarnowski"}))))
          {:status 200}))
 

@@ -293,11 +293,15 @@
   "Extract a parameter from the request body."
   [request parameter-definition]
   (let [request-definition (:swagger-request request)
-        content-type (get (:headers request) "content-type")
+        ; TODO honor charset= definitions of content-type header
+        content-type (first (string/split (or
+                                            (get (:headers request) "content-type")
+                                            "application/octet-stream")
+                                          #";"))
         allowed-content-types (into #{} (get request-definition "consumes"))
         ; TODO make this configurable
         supported-content-types {"application/json" (fn [body] (json/read-json (slurp body)))}]
-    (if (allowed-content-types content-type)
+    (if (allowed-content-types content-type)                ; TODO could be checked on initialization of ring handler chain
       (if-let [deserialize-fn (get supported-content-types content-type)]
         (deserialize-fn (:body request))
         (:body request))
