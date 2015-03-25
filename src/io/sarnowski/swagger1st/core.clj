@@ -200,8 +200,16 @@
       (assoc response :body (serializer (:body response)))
       response)))
 
+(defn- add-cors-headers [response cors-origin]
+  (-> response
+      (r/header "Access-Control-Allow-Origin" cors-origin)
+      (r/header "Access-Control-Max-Age" "3600")
+      (r/header "Access-Control-Allow-Methods" "GET, POST, DELETE, PUT, PATCH, OPTIONS")
+      (r/header "Access-Control-Allow-Headers" "*")))
+
 (defn swagger-mapper
-  "A ring middleware that uses a swagger definition for mapping a request to the specification."
+  "A ring middleware that uses a swagger definition for mapping a request to the specification.
+   Hint: if you set cors-origin, all OPTIONS requests will be ignored and used solely for CORS."
   [chain-handler swagger-definition-type swagger-definition & {:keys [surpress-favicon cors-origin]
                                                                :or   {surpress-favicon true}}]
   (let [definition (schema/validate swagger-2-0/root-object
@@ -210,9 +218,17 @@
     (log/debug "swagger-definition" definition)
 
     (fn [request]
-      (if (and surpress-favicon (= (:uri request) "/favicon.ico"))
+      (cond
+        (and surpress-favicon (= "/favicon.ico" (:uri request)))
         (-> (r/response "No favicon available.")
             (r/status 404))
+
+        (and cors-origin (= :options (:request-method request)))
+        (-> (r/response nil)
+            (r/status 200)
+            (add-cors-headers cors-origin))
+
+        :else
         (let [[request-key swagger-request] (lookup-swagger-request request)]
           (log/debug "swagger-request:" swagger-request)
           (let [response (chain-handler (-> request
@@ -221,11 +237,7 @@
                                             (assoc :swagger-request-key request-key)))]
             (let [response (serialize-response request response)]
               (if cors-origin
-                (-> response
-                    (r/header "Access-Control-Allow-Origin" cors-origin)
-                    (r/header "Access-Control-Max-Age" "3600")
-                    (r/header "Access-Control-Allow-Methods" "GET, POST, DELETE, PUT, PATCH, OPTIONS")
-                    (r/header "Access-Control-Allow-Headers" "*"))
+                (add-cors-headers response cors-origin)
                 response))))))))
 
 (defn- swaggerui-template
