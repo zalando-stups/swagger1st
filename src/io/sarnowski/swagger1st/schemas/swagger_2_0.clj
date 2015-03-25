@@ -155,7 +155,7 @@
    (s/optional-key "parameters")        [(s/either parameter-object reference-object)]
    (s/optional-key "schemes")           [s-string]
    (s/optional-key "deprecated")        s-boolean
-   (s/optional-key "security")          security-requirement-object
+   (s/optional-key "security")          [security-requirement-object]
    (s/optional-key (s/pred extension?)) s/Any})
 
 (def path-object
