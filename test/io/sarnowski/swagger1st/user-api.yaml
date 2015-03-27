@@ -28,12 +28,7 @@ paths:
       description: Registers or changes a user's profile in the system.
       operationId: io.sarnowski.swagger1st.core-test/create-or-update-user
       parameters:
-        -
-          name: profile
-          in: body
-          description: The user's profile
-          required: true
-          type: string
+        - $ref: '#/parameters/Profile'
       responses:
         200:
           description: user created
@@ -47,8 +42,7 @@ paths:
           description: user deleted
 
     parameters:
-      -
-        name: id
+      - name: id
         in: path
         description: ID of the user
         required: true
@@ -64,6 +58,14 @@ paths:
           description: system is working
           schema:
             type: boolean
+
+parameters:
+  Profile:
+    name: profile
+    in: body
+    description: The user's profile
+    required: true
+    type: string
 
 definitions:
   Profile:

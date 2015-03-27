@@ -40,20 +40,25 @@
   "Resolves a $ref reference to its content."
   [r d]
   (let [path (rest (string/split r #"/"))]
+    (log/info "getting data from path" path)
     (get-in d path)))
-
-(defn- denormalize-ref
-  "If a $ref is detected, the referenced content is returned, else the original content."
-  [definition data]
-  (if-let [r (get data "$ref")]
-    (get-definition r definition)
-    data))
 
 (defn- denormalize-refs
   "Searches for $ref objects and replaces those with their target."
   [definition]
-  (let [f (fn [[k v]] [k (denormalize-ref definition v)])]
-    (walk/prewalk (fn [x] (if (map? x) (into {} (map f x)) x)) definition)))
+  (walk/postwalk (fn [element]
+                   (if (map? element)
+                     (do
+                       (log/info "element IS MAP:" element)
+                       (if-let [r (get element "$ref")]
+                         (do
+                           (log/info "found ref" element)
+                           (get-definition r definition))
+                         element))
+                     (do
+                       (log/info "element is not a map:" element)
+                       element)))
+                 definition))
 
 (defn- inherit-map
   "Merges a map from parent to definition, overwriting keys with definition."

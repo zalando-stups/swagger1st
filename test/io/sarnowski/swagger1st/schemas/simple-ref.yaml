@@ -14,12 +14,7 @@ paths:
           required: true
           type: number
           format: double
-        - name: longitude
-          in: query
-          description: Longitude component of location.
-          required: true
-          type: number
-          format: double
+        - $ref: '#/parameters/TestParam'
       tags:
         - Products
       responses:
@@ -33,6 +28,15 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+
+parameters:
+  TestParam:
+    name: longitude
+    in: query
+    description: Longitude component of location.
+    required: true
+    type: number
+    format: double
 
 definitions:
   Product:

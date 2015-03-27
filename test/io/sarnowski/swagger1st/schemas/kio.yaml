@@ -1,193 +1,456 @@
 swagger: '2.0'
+
+# basic meta information
 info:
   title: Kio API
-  description: Kio manages applications
-  version: "1.0.0"
-host: kio.stups.example.org
-schemes:
-  - https
+  version: '0.2'
+  description: Kio is STUPS' application registry.
+
+externalDocs:
+  description: STUPS overview
+  url: http://zalando-stups.github.io/
+
+# technical configuration
 basePath: /
 produces:
-  - application/json
+- application/json
+consumes:
+- application/json
+
 paths:
-  /applications:
+
+  # applications
+
+  '/apps':
     get:
-      summary: Read applications
+      summary: list applications
       description: |
-        Lists all registered applications
-      operationId: "kio.core/readApplications"
+        Lists all registered applications.
       tags:
         - Applications
+      operationId: 'org.zalando.stups.kio.api/read-applications'
+      security:
+      - oauth2:
+        - userinfo
       responses:
         200:
           description: List of all applications
           schema:
             type: array
             items:
-              $ref: '#/definitions/ApplicationSummary'
+              $ref: '#/definitions/ApplicationSummaryRead'
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Error'
 
-  /applications/{applicationId}:
+  '/apps/{application_id}':
     get:
-      summary: Read application
+      summary: read application
       description: |
         Returns details about one application
-      operationId: "kio.core/readApplication"
       tags:
-        - Applications
+      - Applications
+      operationId: 'org.zalando.stups.kio.api/read-application'
+      security:
+      - oauth2:
+        - userinfo
       parameters:
-        - name: applicationId
-          in: path
-          type: string
-          description: ID of the application
-          required: true
+      - $ref: '#/parameters/ApplicationID'
       responses:
         200:
           description: Details of one application
           schema:
-            $ref: '#/definitions/Application'
+            $ref: '#/definitions/ApplicationDetailRead'
+        404:
+          description: Not found
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Error'
 
     put:
-      summary: Save application
+      summary: create or update application
       description: |
-        Creates or updates an application
-      operationId: "kio.core/saveApplication"
+        Creates or updates an application.
       tags:
-        - Applications
-      consumes:
-        - application/json
+      - Applications
+      operationId: "org.zalando.stups.kio.api/create-or-update-application!"
+      security:
+      - oauth2:
+        - application/write
       parameters:
-        - name: applicationId
-          in: path
-          type: string
-          description: ID of the application
-          required: true
-          pattern: "^[a-z][a-z0-9-]+$"
-        - name: application
-          in: body
-          description: Application details that will be saved
-          schema:
-            $ref: '#/definitions/ApplicationDetails'
-          required: true
+      - $ref: '#/parameters/ApplicationID'
+      - name: application
+        in: body
+        description: Application details that will be saved.
+        schema:
+          $ref: '#/definitions/ApplicationWrite'
+        required: true
       responses:
         200:
-          description: Application was updated
-        201:
-          description: Application was created
+          description: Application was saved.
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/Error'
 
-    delete:
-      summary: Delete application
+  # versions
+
+  '/apps/{application_id}/versions':
+    get:
+      summary: list versions
       description: |
-        Deletes an application
-      operationId: "kio.core/deleteApplication"
+        Returns a list of all versions of an application.
       tags:
-        - Applications
+        - Versions
+      operationId: 'org.zalando.stups.kio.api/read-versions-by-application'
+      security:
+      - oauth2:
+        - userinfo
       parameters:
-        - name: applicationId
-          in: path
-          type: string
-          description: ID of the application
-          required: true
+      - $ref: '#/parameters/ApplicationID'
       responses:
         200:
-          description: Application was deleted
-        default:
-          description: Unexpected error
+          description: List of versions
           schema:
-            $ref: '#/definitions/Error'
+            type: array
+            items:
+              $ref: '#/definitions/VersionSummaryRead'
+        404:
+          description: Not found
+        default:
+          $ref: '#/responses/Error'
+
+  '/apps/{application_id}/versions/{version_id}':
+    get:
+      summary: read version
+      description: |
+        Returns a list of all versions of an application.
+      tags:
+        - Versions
+      operationId: 'org.zalando.stups.kio.api/read-version-by-application'
+      security:
+      - oauth2:
+        - userinfo
+      parameters:
+      - $ref: '#/parameters/ApplicationID'
+      - $ref: '#/parameters/VersionID'
+      responses:
+        200:
+          description: Returns detailed information
+          schema:
+            $ref: '#/definitions/VersionDetailRead'
+        404:
+          description: Not found
+        default:
+          $ref: '#/responses/Error'
+
+    put:
+      summary: create or update version
+      description: |
+        Creates or updates a version.
+      tags:
+      - Versions
+      operationId: "org.zalando.stups.kio.api/create-or-update-version!"
+      security:
+      - oauth2:
+        - application/write
+      parameters:
+      - $ref: '#/parameters/ApplicationID'
+      - $ref: '#/parameters/VersionID'
+      - name: version
+        in: body
+        description: Version details that will be saved.
+        schema:
+          $ref: '#/definitions/VersionWrite'
+        required: true
+      responses:
+        200:
+          description: Version was saved.
+        default:
+          $ref: '#/responses/Error'
+
+  # approvals
+
+  '/apps/{application_id}/versions/{version_id}/approvals':
+    get:
+      summary: list approvals
+      description: |
+        Returns a list of all approvals of a version.
+      tags:
+        - Approvals
+      operationId: 'org.zalando.stups.kio.api/read-approvals-by-version'
+      security:
+      - oauth2:
+        - userinfo
+      parameters:
+      - $ref: '#/parameters/ApplicationID'
+      - $ref: '#/parameters/VersionID'
+      responses:
+        200:
+          description: List of approvals
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ApprovalRead'
+        404:
+          description: Not found
+        default:
+          $ref: '#/responses/Error'
+
+    post:
+      summary: approve version
+      description: |
+        Approves a version.
+      tags:
+      - Approvals
+      operationId: "org.zalando.stups.kio.api/approve-version!"
+      security:
+      - oauth2:
+        - application/write
+      parameters:
+      - $ref: '#/parameters/ApplicationID'
+      - $ref: '#/parameters/VersionID'
+      - name: approval
+        in: body
+        description: Approval information
+        schema:
+          $ref: '#/definitions/ApprovalWrite'
+        required: true
+      responses:
+        200:
+          description: Version was approved.
+        default:
+          $ref: '#/responses/Error'
+
+# definitions
+
+parameters:
+  ApplicationID:
+    name: application_id
+    in: path
+    type: string
+    description: ID of the application
+    required: true
+    pattern: "^[a-z][a-z0-9-]*[a-z0-9]$"
+
+  VersionID:
+    name: version_id
+    in: path
+    type: string
+    description: ID of the version
+    required: true
+    pattern: "^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$"
+
+responses:
+  Error:
+    description: An error occured.
+    schema:
+      $ref: '#/definitions/Error'
 
 definitions:
-  Application:
+  ApplicationSummaryRead:
     properties:
       id:
         type: string
-        description: Unique identifier
-      name:
-        type: string
-        description: A human-readable name
-      teamId:
+        description: Unique identifier of the application
+      team_id:
         type: string
         description: ID of the team, responsible for this application
+      name:
+        type: string
+        description: A human-readable name of the application
+    example:
+      id: kio
+      team_id: stups
+      name: Kio
+
+  ApplicationDetailsRead:
+    properties:
+      id:
+        type: string
+        description: Unique identifier of the application
+      team_id:
+        type: string
+        description: ID of the team, responsible for this application
+      active:
+        type: boolean
+        description: If the application is active
+      name:
+        type: string
+        description: A human-readable name of the application
+      subtitle:
+        type: string
+        description: An additional title for the application
       description:
         type: string
         description: Purpose of this application
-      url:
+      service_url:
         type: string
-        description: Live URL of the application
-      scmUrl:
+        description: URL of the application
+      scm_url:
         type: string
         description: URL of SCM repository
-      documentationUrl:
+      documentation_url:
         type: string
         description: URL of documentation
+    example:
+      id: kio
+      team_id: stups
+      active: true
+      name: Kio
+      subtitle: STUPS' application registry
+      description: Kio manages all application base information.
+      service_url: https://kio.example.com/
+      scm_url: https://github.com/zalando-stups/kio.git
+      documentation_url: https://github.com/zalando-stups/kio
 
-  ApplicationDetails:
+  ApplicationWrite:
     properties:
+      team_id:
+        type: string
+        description: ID of the team, responsible for this application
+      active:
+        type: boolean
+        description: if the application is active
       name:
         type: string
         description: A human-readable name
         minLength: 1
-      teamId:
+      subtitle:
         type: string
-        description: ID of the team, responsible for this application
+        description: An additional title for the application
+        minLength: 1
       description:
         type: string
         description: Purpose of this application
-      url:
+      service_url:
         type: string
-        description: Live URL of the application
-      scmUrl:
+        description: URL of the application
+      scm_url:
         type: string
         description: URL of SCM repository
-      documentationUrl:
+      documentation_url:
         type: string
         description: URL of documentation
     required:
-      - name
-      - teamId
-      - description
-      - scmUrl
+    - team_id
+    - active
+    - name
+    - subtitle
+    - description
+    - service_url
+    - scm_url
+    - documentation_url
     example:
+      team_id: stups
+      active: true
       name: Kio
-      teamId: stups
-      description: Registry for applications
-      url: https://kio.stups.example.org
-      scmUrl: git@github.com:zalando-stups/kio.git
-      documentationUrl: https://zalando-stups.github.io
+      subtitle: STUPS' application registry
+      description: Kio manages all application base information.
+      service_url: https://kio.example.com/
+      scm_url: https://github.com/zalando-stups/kio.git
+      documentation_url: https://github.com/zalando-stups/kio
 
-  ApplicationSummary:
+  VersionSummaryRead:
     properties:
       id:
         type: string
-        description: Unique identifier
-      name:
+        description: Unique identifier of the version
+      application_id:
         type: string
-        description: A human-readable name
-      teamId:
+        description: ID of the version's application
+      artifact:
         type: string
-        description: ID of the team, responsible for this application
+        description: Software artifact reference of this version
     example:
-      id: kio
-      name: Kio
-      teamId: stups
+      id: 1.0
+      application_id: kio
+      artifact: docker://stups/kio:1.0
+
+  VersionDetailRead:
+    properties:
+      id:
+        type: string
+        description: Unique identifier of the version
+      application_id:
+        type: string
+        description: ID of the version's application
+      artifact:
+        type: string
+        description: Software artifact reference of this version
+      notes:
+        type: string
+        description: Release notes in Markdown format
+    example:
+      id: 1.0
+      application_id: kio
+      artifact: docker://stups/kio:1.0
+      notes: |
+        **Release 1.0**
+
+        * initial commit
+        * bugfixes
+
+  VersionWrite:
+    properties:
+      artifact:
+        type: string
+        description: Software artifact reference of this version
+      notes:
+        type: string
+        description: Release notes in Markdown format
+    required:
+    - artifact
+    example:
+      artifact: docker://stups/kio:1.0
+      notes: |
+        **Release 1.0**
+
+        * initial commit
+        * bugfixes
+
+  ApprovalRead:
+    properties:
+      application_id:
+        type: string
+        description: ID of the application
+      version_id:
+        type: string
+        description: ID of the application's version
+      approval_type:
+        type: string
+        description: Kind of approval like 'TESTED' or 'REVIEWED'.
+      user_id:
+        type: string
+        description: ID of the user who approved the version
+      created_at:
+        type: datetime
+        description: Point in time when the version was approved
+    example:
+      application_id: kio
+      version_id: 1.0
+      approval_type: TESTED
+      user_id: tobi
+      created_at: '2015-04-25T16:25:00'
+
+  ApprovalWrite:
+    properties:
+      approval_type:
+        type: string
+        description: Kind of approval like 'TESTED' or 'REVIEWED'.
+    required:
+    - approval_type
+    example:
+      approval_type: TESTED
 
   Error:
+    type: object
     properties:
-      code:
-        type: integer
-        format: int32
       message:
         type: string
-      fields:
-        type: string
+    example:
+      message: Internal Server Error
+
+securityDefinitions:
+  oauth2:
+    type: oauth2
+    description: OAuth 2.0 access control.
+    scopes:
+      userinfo: Grants everyone read access to all applications.
+      application/write: Grants write access to a team's applications.
