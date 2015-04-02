@@ -9,9 +9,9 @@ paths:
     post:
       summary: Generate greeting
       description: Generates a greeting message.
-      operationId: helloworld.core/create-greeting
+      operationId: helloworld/create-greeting
       produces:
-        - application/json
+        - text/plain
       responses:
         200:
           description: greeting response
