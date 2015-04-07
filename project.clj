@@ -3,7 +3,10 @@
   :url "https://github.com/sarnowski/swagger1st"
 
   :license {:name "ISC License"
-            :url "http://opensource.org/licenses/ISC"}
+            :url "http://opensource.org/licenses/ISC"
+            :distribution :repo}
+
+  :scm {:url "git@github.com:sarnowski/swagger1st.git"}
 
   :min-lein-version "2.0.0"
 
