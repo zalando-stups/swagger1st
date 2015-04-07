@@ -12,7 +12,9 @@ Currently only supports Swagger 2.0 specification.
 
 Use the following dependency:
 
-[![Clojars Project](http://clojars.org/io.sarnowski/swagger1st/latest-version.svg)](http://clojars.org/io.sarnowski/swagger1st)
+    [io.sarnowski/swagger1st <latest>]
+
+from Maven central.
 
 Add the swagger1st middleware into your ring handler chain and specify the schema location.
 

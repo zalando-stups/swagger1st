@@ -26,5 +26,13 @@
                                   [org.slf4j/jcl-over-slf4j "1.7.7"]
                                   [org.slf4j/slf4j-simple "1.7.7"]]}}
 
-  :deploy-repositories [["releases" :clojars]]
-  :signing {:gpg-key "tobias@sarnowski.io"})
+  :pom-addition [:developers
+                 [:developer
+                  [:name "Tobias Sarnowski"]
+                  [:url "http://www.sarnowski.io"]
+                  [:email "tobias@sarnowski.io"]
+                  [:timezone "+1"]]]
+
+  :signing {:gpg-key "tobias@sarnowski.io"}
+  :deploy-repositories {"releases" {:url "https://oss.sonatype.org/service/local/staging/deploy/maven2/" :creds :gpg}
+                        "snapshots" {:url "https://oss.sonatype.org/content/repositories/snapshots/" :creds :gpg}})
