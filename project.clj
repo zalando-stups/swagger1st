@@ -16,7 +16,10 @@
                  [org.clojure/data.json "0.2.5"]
                  [circleci/clj-yaml "0.5.3"]
 
-                 [prismatic/schema "0.3.7"]]
+                 [prismatic/schema "0.3.7"]
+
+                 [ring-basic-authentication "1.0.5"]
+                 [clj-http-lite "0.2.1"]]
 
   :plugins [[lein-cloverage "1.0.2"]]
 

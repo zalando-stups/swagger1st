@@ -365,12 +365,39 @@
     ; TODO required validation
     (chain-handler request)))
 
+(defn- check-security
+  "Finds and executes a handler for a security definition."
+  [request name requirements handlers]
+  (if-let [definition (get-in request [:swagger "securityDefinitions" name])]
+    (if-let [handler (get handlers name)]
+      (handler request definition requirements)
+      (throw (ex-info "securityHandler not defined" {:http-code 501})))
+    (throw (ex-info "securityDefinition not defined" {:http-code 500}))))
+
+(defn- enforce-security
+  "Tries all security definitions of a request, if one accepts it."
+  [chain-handler request security handlers]
+  (log/info "SECURITY" security)
+  (let [all-results (map (fn [def]
+                           (let [[name requirements] (first def)]
+                           (check-security request name requirements handlers)))
+                         security)]
+    ; if handler returned a request, everything is fine, else interpret it as response
+    (if-let [request (some (fn [result]
+                             (if (:swagger-request result) result nil))
+                           all-results)]
+      (chain-handler request)
+      ; take the error response of the first security def
+      (let [response (first all-results)]
+        response))))
+
 (defn swagger-security
   "A ring middleware that uses a swagger definition for enforcing security constraints."
-  [chain-handler]
+  [chain-handler handlers]
   (fn [request]
-    ; TODO noop currently, validate request (and response?!) from swagger def
-    (chain-handler request)))
+    (if-let [security (get-in request [:swagger-request "security"])]
+      (enforce-security chain-handler request security handlers)
+      (chain-handler request))))
 
 (defn map-function-name
   "Simple resolver function that resolves the operationId as a function name (including namespace)."

@@ -17,6 +17,10 @@ paths:
       summary: Reads a user
       description: Reads a user's profile.
       operationId: io.sarnowski.swagger1st.core-test/read-user
+      security:
+        - oauth2_def:
+          - user/read
+        - userpw_def: []
       responses:
         200:
           description: user deleted
@@ -27,6 +31,10 @@ paths:
       summary: Create or update a user
       description: Registers or changes a user's profile in the system.
       operationId: io.sarnowski.swagger1st.core-test/create-or-update-user
+      security:
+        - oauth2_def:
+          - user/read
+          - user/write
       parameters:
         - $ref: '#/parameters/Profile'
       responses:
@@ -37,6 +45,10 @@ paths:
       summary: Deletes a user
       description: Deletes a user's profile from the system.
       operationId: io.sarnowski.swagger1st.core-test/delete-user
+      security:
+        - oauth2_def:
+          - user/read
+          - user/write
       responses:
         200:
           description: user deleted
@@ -72,3 +84,15 @@ definitions:
     properties:
       name:
         type: string
+
+securityDefinitions:
+  userpw_def:
+    type: basic
+    description: Basic Auth  for users
+
+  oauth2_def:
+    type: oauth2
+    description: OAuth 2.0 access control.
+    scopes:
+      user/read: Grants everyone read access to all applications.
+      user/write: Grants write access to a team's applications.

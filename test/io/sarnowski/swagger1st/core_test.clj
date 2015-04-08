@@ -17,9 +17,15 @@
       (print response)
       response)))
 
+(defn ignore-security [request definition requirements]
+  ; just return the request will accept the call
+  request)
+  ;(-> (response "Forbidden") (status 403)))
+
 (def app
   (-> (s1st/swagger-executor)
-      (s1st/swagger-security)
+      (s1st/swagger-security {"oauth2_def" ignore-security
+                              "userpw_def" ignore-security})
       (s1st/swagger-validator)
 
       (test-request-logging)
