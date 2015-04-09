@@ -251,7 +251,7 @@
 (defn swagger-discovery
   "A ring middleware that exposes the swagger definition and the swagger UI for public use."
   [chain-handler & {:keys [discovery definition ui overwrite-host?]
-                    :or   {discovery       "/.discovery"
+                    :or   {discovery       "/.well-known/schema-discovery"
                            definition      "/swagger.json"
                            ui              "/ui/"
                            overwrite-host? true}}]
@@ -260,8 +260,9 @@
       (chain-handler request)
       (let [path (:uri request)]
         (cond
-          (= discovery path) (-> (r/response {:definition definition
-                                              :ui         ui})
+          (= discovery path) (-> (r/response {:schema-url  definition
+                                              :schema-type "swagger-2.0"
+                                              :ui-url      ui})
                                  (r/header "Content-Type" "application/json"))
           (= definition path) (-> (r/response (-> (:swagger request)
                                                   (assoc "host" (or
@@ -380,7 +381,7 @@
   (log/info "SECURITY" security)
   (let [all-results (map (fn [def]
                            (let [[name requirements] (first def)]
-                           (check-security request name requirements handlers)))
+                             (check-security request name requirements handlers)))
                          security)]
     ; if handler returned a request, everything is fine, else interpret it as response
     (if-let [request (some (fn [result]

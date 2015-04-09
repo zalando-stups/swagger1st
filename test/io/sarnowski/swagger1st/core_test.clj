@@ -78,17 +78,18 @@
          {:status 200}))
 
   (is (= (app (mock/request :get "/user/123"))
-         {:status 200
+         {:status  200
           :headers {"Content-Type" "application/json"}
-          :body (json/write-str {:name "sarnowski"})}))
+          :body    (json/write-str {:name "sarnowski"})}))
 
   (is (= (app (mock/request :delete "/user/123"))
          {:status 200})))
 
 (deftest discovery
 
-  (is (= (app (mock/request :get "/.discovery"))
-         {:status  200
-          :headers {"Content-Type" "application/json"}
-          :body    (json/write-str {:definition "/swagger.json"
-                                    :ui         "/ui/"})})))
+  (let [result (app (mock/request :get "/.well-known/schema-discovery"))
+        discovery (json/read-str (:body result))]
+    (is (= discovery)
+        {:schema-url  "/swagger.json"
+         :schema-type "swagger-2.0"
+         :ui-url      "/ui/"})))
