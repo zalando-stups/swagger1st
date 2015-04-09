@@ -90,6 +90,6 @@
   (let [result (app (mock/request :get "/.well-known/schema-discovery"))
         discovery (json/read-str (:body result))]
     (is (= discovery)
-        {:schema-url  "/swagger.json"
-         :schema-type "swagger-2.0"
-         :ui-url      "/ui/"})))
+        {:schema_url  "/swagger.json"
+         :schema_type "swagger-2.0"
+         :ui_url      "/ui/"})))

@@ -260,9 +260,9 @@
       (chain-handler request)
       (let [path (:uri request)]
         (cond
-          (= discovery path) (-> (r/response {:schema-url  definition
-                                              :schema-type "swagger-2.0"
-                                              :ui-url      ui})
+          (= discovery path) (-> (r/response {:schema_url  definition
+                                              :schema_type "swagger-2.0"
+                                              :ui_url      ui})
                                  (r/header "Content-Type" "application/json"))
           (= definition path) (-> (r/response (-> (:swagger request)
                                                   (assoc "host" (or
