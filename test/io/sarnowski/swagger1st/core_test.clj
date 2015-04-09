@@ -3,6 +3,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.mock.request :as mock]
             [io.sarnowski.swagger1st.core :as s1st]
+            [io.sarnowski.swagger1st.security :as s1stsec]
             [ring.util.response :refer :all]
             [clojure.tools.logging :as log]
             [clojure.pprint :refer [pprint]]
@@ -17,15 +18,10 @@
       (print response)
       response)))
 
-(defn ignore-security [request definition requirements]
-  ; just return the request will accept the call
-  request)
-  ;(-> (response "Forbidden") (status 403)))
-
 (def app
   (-> (s1st/swagger-executor)
-      (s1st/swagger-security {"oauth2_def" ignore-security
-                              "userpw_def" ignore-security})
+      (s1st/swagger-security {"oauth2_def" (s1stsec/allow-all)
+                              "userpw_def" (s1stsec/allow-all)})
       (s1st/swagger-validator)
 
       (test-request-logging)
