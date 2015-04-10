@@ -23,14 +23,14 @@
 (defn- extract-token
   "Extracts the bearer token from the Authorization header."
   [request]
-  (if-let [authorization (get-in request :headers "authorization")]
+  (if-let [authorization (get-in request [:headers "authorization"])]
     (when (.startsWith authorization "Bearer ")
       (.substring authorization (count "Bearer ")))))
 
 (defn- deny-response
   "Send forbidden response."
   [request reason]
-  (log/warn "Access denied on %s because %s." (select-keys request [:remote-addr :request-method :uri :headers]) reason)
+  (log/warn "Access denied on" (select-keys request [:remote-addr :request-method :uri :headers]) "because" reason ".")
   (-> (ring/response "Forbidden")
       (ring/status 403)))
 
@@ -58,5 +58,5 @@
                   request
                   (deny-response request "scopes not granted")))
               (deny-response request (str "denied: " (:status result))))
-            (throw ex-info "TokenInfo URL not available" {:http-code 503})))
-        (deny-response request "no token given")))))
+            (throw ex-info "TokenInfo URL not available" {:http-code 503}))))
+      (deny-response request "no token given"))))

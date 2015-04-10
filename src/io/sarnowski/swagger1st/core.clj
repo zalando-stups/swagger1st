@@ -378,7 +378,7 @@
 (defn- enforce-security
   "Tries all security definitions of a request, if one accepts it."
   [chain-handler request security handlers]
-  (log/info "SECURITY" security)
+  (log/debug "Enforcing security checks for" (get-in request [:swagger-request "operationId"]))
   (let [all-results (map (fn [def]
                            (let [[name requirements] (first def)]
                              (check-security request name requirements handlers)))
@@ -387,9 +387,15 @@
     (if-let [request (some (fn [result]
                              (if (:swagger-request result) result nil))
                            all-results)]
-      (chain-handler request)
+      (do
+        (log/debug "Security check OK for" (get-in request [:swagger-request "operationId"]))
+        (chain-handler request))
       ; take the error response of the first security def
       (let [response (first all-results)]
+        (log/debug "Security check FAILED for" (get-in request [:swagger-request "operationId"])
+                   "; security definition:" security
+                   "; response:" response
+                   "; all results:" all-results)
         response))))
 
 (defn swagger-security
