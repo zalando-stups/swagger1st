@@ -36,6 +36,19 @@
 
 ;;; Runtime dispatching functions
 
+;(-> (swagger-context)
+;    (swagger-mapper)
+;    (swagger-security)
+;    (swagger-executor))
+
+(defn swagger-context
+  "Loads a swagger definition and produces a context which will be used by the swagger middlewares to initialize."
+  [swagger-definition-type swagger-definition]
+  (let [definition (schema/validate swagger-2-0/root-object
+                                    (load-swagger-definition swagger-definition-type swagger-definition))]
+    {:definition     definition
+     :chain-handlers (list)}))
+
 (defn- get-definition
   "Resolves a $ref reference to its content."
   [r d]
@@ -210,35 +223,35 @@
 (defn swagger-mapper
   "A ring middleware that uses a swagger definition for mapping a request to the specification.
    Hint: if you set cors-origin, all OPTIONS requests will be ignored and used solely for CORS."
-  [chain-handler swagger-definition-type swagger-definition & {:keys [surpress-favicon cors-origin]
-                                                               :or   {surpress-favicon true}}]
-  (let [definition (schema/validate swagger-2-0/root-object
-                                    (load-swagger-definition swagger-definition-type swagger-definition))
-        lookup-swagger-request (create-swagger-request-lookup definition)]
+  [{:keys [definition] :as context} & {:keys [surpress-favicon cors-origin]
+                                       :or   {surpress-favicon true}}]
+  (let [lookup-swagger-request (create-swagger-request-lookup definition)]
     (log/debug "swagger-definition" definition)
 
-    (fn [request]
-      (cond
-        (and surpress-favicon (= "/favicon.ico" (:uri request)))
-        (-> (r/response "No favicon available.")
-            (r/status 404))
+    (let [chain-handler
+          (fn [next-handler]
+            (fn [request]
+              (cond
+                (and surpress-favicon (= "/favicon.ico" (:uri request)))
+                (-> (r/response "No favicon available.")
+                    (r/status 404))
 
-        (and cors-origin (= :options (:request-method request)))
-        (-> (r/response nil)
-            (r/status 200)
-            (add-cors-headers cors-origin))
+                (and cors-origin (= :options (:request-method request)))
+                (-> (r/response nil)
+                    (r/status 200)
+                    (add-cors-headers cors-origin))
 
-        :else
-        (let [[request-key swagger-request] (lookup-swagger-request request)]
-          (log/debug "swagger-request:" swagger-request)
-          (let [response (chain-handler (-> request
-                                            (assoc :swagger definition)
-                                            (assoc :swagger-request swagger-request)
-                                            (assoc :swagger-request-key request-key)))]
-            (let [response (serialize-response request response)]
-              (if cors-origin
-                (add-cors-headers response cors-origin)
-                response))))))))
+                :else
+                (let [[request-key swagger-request] (lookup-swagger-request request)]
+                  (log/debug "swagger-request:" swagger-request)
+                  (let [response (next-handler (-> request
+                                                   (assoc :swagger-request swagger-request)
+                                                   (assoc :swagger-request-key request-key)))]
+                    (let [response (serialize-response request response)]
+                      (if cors-origin
+                        (add-cors-headers response cors-origin)
+                        response)))))))]
+      (update-in context [:chain-handlers] conj chain-handler))))
 
 (defn- swaggerui-template
   "Loads the swagger ui template (index.html) and replaces certain keywords."
@@ -250,30 +263,33 @@
 
 (defn swagger-discovery
   "A ring middleware that exposes the swagger definition and the swagger UI for public use."
-  [chain-handler & {:keys [discovery definition ui overwrite-host?]
-                    :or   {discovery       "/.well-known/schema-discovery"
-                           definition      "/swagger.json"
-                           ui              "/ui/"
-                           overwrite-host? true}}]
-  (fn [request]
-    (if (:swagger-request request)
-      (chain-handler request)
-      (let [path (:uri request)]
-        (cond
-          (= discovery path) (-> (r/response {:schema_url  definition
-                                              :schema_type "swagger-2.0"
-                                              :ui_url      ui})
-                                 (r/header "Content-Type" "application/json"))
-          (= definition path) (-> (r/response (-> (:swagger request)
-                                                  (assoc "host" (or
-                                                                  (-> request :headers (get "host"))
-                                                                  (-> request :server-name)))))
-                                  (r/header "Content-Type" "application/json"))
-          (= ui path) (-> (r/response (swaggerui-template request definition))
-                          (r/header "Content-Type" "text/html"))
-          (.startsWith path ui) (let [path (.substring path (count ui))]
-                                  (-> (r/response (io/input-stream (io/resource (str "io/sarnowski/swagger1st/swaggerui/" path))))))
-          :else (chain-handler request))))))
+  [{:keys [definition] :as context} & {:keys [discovery-path definition-path ui-path overwrite-host?]
+                                       :or   {discovery-path  "/.well-known/schema-discovery"
+                                              definition-path "/swagger.json"
+                                              ui-path         "/ui/"
+                                              overwrite-host? true}}]
+  (let [chain-handler
+        (fn [next-handler]
+          (fn [request]
+            (if (:swagger-request request)
+              (next-handler request)
+              (let [path (:uri request)]
+                (cond
+                  (= discovery-path path) (-> (r/response {:schema_url  definition-path
+                                                           :schema_type "swagger-2.0"
+                                                           :ui_url      ui-path})
+                                              (r/header "Content-Type" "application/json"))
+                  (= definition-path path) (-> (r/response (-> definition
+                                                               (assoc "host" (or
+                                                                               (-> request :headers (get "host"))
+                                                                               (-> request :server-name)))))
+                                               (r/header "Content-Type" "application/json"))
+                  (= ui-path path) (-> (r/response (swaggerui-template request definition-path))
+                                       (r/header "Content-Type" "text/html"))
+                  (.startsWith path ui-path) (let [path (.substring path (count ui-path))]
+                                               (-> (r/response (io/input-stream (io/resource (str "io/sarnowski/swagger1st/swaggerui/" path))))))
+                  :else (next-handler request))))))]
+    (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn- extract-parameter-path
   "Extract a parameter from the request path."
@@ -343,33 +359,39 @@
 
 (defn swagger-parser
   "A ring middleware that uses a swagger definition for parsing parameters and crafting responses."
-  [chain-handler]
-  (fn [request]
-    (if-let [swagger-request (:swagger-request request)]
-      (let [parameter-groups (group-by first
-                                       (map (fn [definition]
-                                              (extract-parameter request definition))
-                                            (get swagger-request "parameters")))
-            parameter-groups (into {}
-                                   (map (fn [[group parameters]]
-                                          [group (into {} (map (fn [[_ k v]] [k v]) parameters))])
-                                        parameter-groups))]
-        (chain-handler (assoc request :parameters parameter-groups)))
-      (chain-handler request))))
+  [context]
+  (let [chain-handler
+        (fn [next-handler]
+          (fn [request]
+            (if-let [swagger-request (:swagger-request request)]
+              (let [parameter-groups (group-by first
+                                               (map (fn [definition]
+                                                      (extract-parameter request definition))
+                                                    (get swagger-request "parameters")))
+                    parameter-groups (into {}
+                                           (map (fn [[group parameters]]
+                                                  [group (into {} (map (fn [[_ k v]] [k v]) parameters))])
+                                                parameter-groups))]
+                (next-handler (assoc request :parameters parameter-groups)))
+              (next-handler request))))]
+    (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn swagger-validator
   "A ring middleware that uses a swagger definition for validating incoming requests and their responses."
-  [chain-handler]
-  (fn [request]
-    ; TODO noop currently, validate request (and response?!) from swagger def
-    ; TODO type validation
-    ; TODO required validation
-    (chain-handler request)))
+  [context]
+  (let [chain-handler
+        (fn [next-handler]
+          (fn [request]
+            ; TODO noop currently, validate request (and response?!) from swagger def
+            ; TODO type validation
+            ; TODO required validation
+            (next-handler request)))]
+    (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn- check-security
   "Finds and executes a handler for a security definition."
-  [request name requirements handlers]
-  (if-let [definition (get-in request [:swagger "securityDefinitions" name])]
+  [context request name requirements handlers]
+  (if-let [definition (get-in context [:definition "securityDefinitions" name])]
     (if-let [handler (get handlers name)]
       (handler request definition requirements)
       (throw (ex-info "securityHandler not defined" {:http-code 501})))
@@ -377,11 +399,11 @@
 
 (defn- enforce-security
   "Tries all security definitions of a request, if one accepts it."
-  [chain-handler request security handlers]
+  [chain-handler context request security handlers]
   (log/debug "Enforcing security checks for" (get-in request [:swagger-request "operationId"]))
   (let [all-results (map (fn [def]
                            (let [[name requirements] (first def)]
-                             (check-security request name requirements handlers)))
+                             (check-security context request name requirements handlers)))
                          security)]
     ; if handler returned a request, everything is fine, else interpret it as response
     (if-let [request (some (fn [result]
@@ -400,11 +422,14 @@
 
 (defn swagger-security
   "A ring middleware that uses a swagger definition for enforcing security constraints."
-  [chain-handler handlers]
-  (fn [request]
-    (if-let [security (get-in request [:swagger-request "security"])]
-      (enforce-security chain-handler request security handlers)
-      (chain-handler request))))
+  [context handlers]
+  (let [chain-handler
+        (fn [next-handler]
+          (fn [request]
+            (if-let [security (get-in request [:swagger-request "security"])]
+              (enforce-security next-handler context request security handlers)
+              (next-handler request))))]
+    (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn map-function-name
   "Simple resolver function that resolves the operationId as a function name (including namespace)."
@@ -420,25 +445,42 @@
       (recur operationId fallback-fns)
       nil)))
 
+(defn swagger-ring
+  "Allows easy integration of standard ring middleware into the swagger1st middleware's."
+  [context middleware-fn & args]
+  (let [chain-handler
+        (fn [next-handler]
+          (apply middleware-fn next-handler args))]
+    (update-in context [:chain-handlers] conj chain-handler)))
+
 (defn swagger-executor
   "A ring middleware that uses a swagger definition for executing the given function."
-  [& {:keys [mappers]
-      :or   {mappers [map-function-name]}}]
-  (fn [request]
-    (if-let [swagger-request (:swagger-request request)]
-      (if-let [operationId (get swagger-request "operationId")]
-        (do
-          (log/trace "matched swagger defined route for operation" operationId)
+  [context & {:keys [mappers]
+              :or   {mappers [map-function-name]}}]
+  (let [handler
+        (fn [request]
+          (if-let [swagger-request (:swagger-request request)]
+            (if-let [operationId (get swagger-request "operationId")]
+              (do
+                (log/trace "matched swagger defined route for operation" operationId)
 
-          ; found the definition, find mapping
-          (if-let [call-fn (resolve-function operationId mappers)]
-            (do
-              (log/trace "found mapping for operation" operationId "to" call-fn)
-              (call-fn request))
+                ; found the definition, find mapping
+                (if-let [call-fn (resolve-function operationId mappers)]
+                  (do
+                    (log/trace "found mapping for operation" operationId "to" call-fn)
+                    (call-fn request))
 
-            (do
-              (log/error "could not resolve handler for request" operationId)
-              (throw (ex-info "Operation not implemented." {:http-code 501}))))))
+                  (do
+                    (log/error "could not resolve handler for request" operationId)
+                    (throw (ex-info "Operation not implemented." {:http-code 501}))))))
 
-      ; definition not found, skip for our middleware
-      (throw (ex-info "Operation not defined." {:http-code 400})))))
+            ; definition not found, skip for our middleware
+            (throw (ex-info "Operation not defined." {:http-code 400}))))]
+    ; build chain from chain-handlers list
+    (reduce
+      (fn [result next-handler]
+        (next-handler result))
+      handler
+      (:chain-handlers context))))
+
+

@@ -11,26 +11,24 @@
 
 ;; infrastructure setup incl. exception handler
 
-(defn- test-request-logging [next-fn]
+(defn- test-request-logging [next-handler]
   (fn [request]
     (pprint request)
-    (let [response (next-fn request)]
+    (let [response (next-handler request)]
       (print response)
       response)))
 
 (def app
-  (-> (s1st/swagger-executor)
+  (-> (s1st/swagger-context ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
+      (s1st/swagger-ring wrap-params)
+      (s1st/swagger-mapper)
+      (s1st/swagger-discovery)
+      (s1st/swagger-parser)
+      (s1st/swagger-ring test-request-logging)
+      (s1st/swagger-validator)
       (s1st/swagger-security {"oauth2_def" (s1stsec/allow-all)
                               "userpw_def" (s1stsec/allow-all)})
-      (s1st/swagger-validator)
-
-      (test-request-logging)
-
-      (s1st/swagger-parser)
-      (s1st/swagger-discovery)
-      (s1st/swagger-mapper ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
-
-      (wrap-params)))
+      (s1st/swagger-executor)))
 
 
 ;; application endpoints, referenced by the swagger spec

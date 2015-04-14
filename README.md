@@ -21,16 +21,19 @@ Add the swagger1st middleware into your ring handler chain and specify the schem
 ```clojure
 (ns example
   (:require [io.sarnowski.swagger1st.core :as s1st]
+            [io.sarnowski.swagger1st.security :as s1stsec]
             [ring.middleware.params :refer [wrap-params]]))
 
 (def app
-  (-> (s1st/swagger-executor)
-      (s1st/swagger-security)
-      (s1st/swagger-validator)
-      (s1st/swagger-parser)
+  (-> (s1st/swagger-context ::s1st/yaml-cp "example.yaml")
+      (s1st/swagger-ring wrap-params)
+      (s1st/swagger-mapper)
       (s1st/swagger-discovery)
-      (s1st/swagger-mapper ::s1st/yaml-cp "example/api.yaml")
-      (wrap-params))
+      (s1st/swagger-parser)
+      (s1st/swagger-validator)
+      (s1st/swagger-security {"oauth2_def" (s1stsec/allow-all)
+                              "userpw_def" (s1stsec/allow-all)})
+      (s1st/swagger-executor)))
 ```
 
 ## Examples
