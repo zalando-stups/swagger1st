@@ -13,10 +13,10 @@
 ;; swagger1st setup (ring handler)
 
 (def app
-  (-> (s1st/swagger-executor)
-      (s1st/swagger-security)
-      (s1st/swagger-validator)
-      (s1st/swagger-parser)
+  (-> (s1st/swagger-context ::s1st/yaml-cp "helloworld-api.yaml")
+      (s1st/swagger-ring wrap-params)
+      (s1st/swagger-mapper)
       (s1st/swagger-discovery)
-      (s1st/swagger-mapper ::s1st/yaml-cp "helloworld-api.yaml")
-      (wrap-params)))
+      (s1st/swagger-parser)
+      (s1st/swagger-validator)
+      (s1st/swagger-executor)))

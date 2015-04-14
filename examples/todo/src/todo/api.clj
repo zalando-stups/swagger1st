@@ -27,13 +27,13 @@
                             (fn [request] (api-fn request db))))
 
               ; the actual ring setup
-              handler (-> (s1st/swagger-executor :mappers [db-mapper])
-                          (s1st/swagger-security)
-                          (s1st/swagger-validator)
-                          (s1st/swagger-parser)
+              handler (-> (s1st/swagger-context ::s1st/yaml-cp definition)
+                          (s1st/swagger-ring wrap-params)
+                          (s1st/swagger-mapper)
                           (s1st/swagger-discovery)
-                          (s1st/swagger-mapper ::s1st/yaml-cp definition)
-                          (wrap-params))]
+                          (s1st/swagger-parser)
+                          (s1st/swagger-validator)
+                          (s1st/swagger-executor :mappers [db-mapper]))]
 
           ; use httpkit as ring implementation
           (assoc this :httpd (httpkit/run-server handler {:port 8080}))))))

@@ -3,7 +3,7 @@
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [ring "1.3.2"]
-                 [io.sarnowski/swagger1st "0.4.0-SNAPSHOT"]
+                 [io.sarnowski/swagger1st "0.7.0"]
                  [com.stuartsierra/component "0.2.3"]
                  [http-kit "2.1.16"]
                  [org.slf4j/slf4j-simple "1.7.7"]]
