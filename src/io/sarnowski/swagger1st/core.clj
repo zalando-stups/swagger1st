@@ -196,13 +196,12 @@
 
 (defn- create-swagger-request-lookup
   "Creates a function that can do efficient lookups of requests."
-  [definition]
-  (let [swagger-requests (create-swagger-requests definition)]
-    (fn [request]
-      (->> swagger-requests
-           (filter #(request-matches? % request))
-           ; if we have multiple matches then its not well defined, just choose the first
-           first))))
+  [swagger-requests]
+  (fn [request]
+    (->> swagger-requests
+         (filter #(request-matches? % request))
+         ; if we have multiple matches then its not well defined, just choose the first
+         first)))
 
 (defn- serialize-response
   "Serializes the response body according to the Content-Type."
@@ -221,11 +220,12 @@
       (r/header "Access-Control-Allow-Headers" "*")))
 
 (defn swagger-mapper
-  "A ring middleware that uses a swagger definition for mapping a request to the specification.
+  "A swagger middleware that uses a swagger definition for mapping a request to the specification.
    Hint: if you set cors-origin, all OPTIONS requests will be ignored and used solely for CORS."
   [{:keys [definition] :as context} & {:keys [surpress-favicon cors-origin]
                                        :or   {surpress-favicon true}}]
-  (let [lookup-swagger-request (create-swagger-request-lookup definition)]
+  (let [swagger-requests (create-swagger-requests definition)
+        lookup-swagger-request (create-swagger-request-lookup swagger-requests)]
     (log/debug "swagger-definition" definition)
 
     (let [chain-handler
@@ -251,18 +251,20 @@
                       (if cors-origin
                         (add-cors-headers response cors-origin)
                         response)))))))]
-      (update-in context [:chain-handlers] conj chain-handler))))
+      (-> context
+          (update-in [:chain-handlers] conj chain-handler)
+          (assoc :requests swagger-requests)))))
 
 (defn- swaggerui-template
   "Loads the swagger ui template (index.html) and replaces certain keywords."
-  [{definition :swagger} definition-url]
+  [{definition :definition} definition-url]
   (let [template (slurp (io/resource "io/sarnowski/swagger1st/swaggerui/index.html"))
         vars {"$TITLE$"      (get-in definition ["info" "title"])
               "$DEFINITION$" definition-url}]
     (reduce (fn [template [var val]] (string/replace template var val)) template vars)))
 
 (defn swagger-discovery
-  "A ring middleware that exposes the swagger definition and the swagger UI for public use."
+  "A swagger middleware that exposes the swagger definition and the swagger UI for public use."
   [{:keys [definition] :as context} & {:keys [discovery-path definition-path ui-path overwrite-host?]
                                        :or   {discovery-path  "/.well-known/schema-discovery"
                                               definition-path "/swagger.json"
@@ -284,7 +286,7 @@
                                                                                (-> request :headers (get "host"))
                                                                                (-> request :server-name)))))
                                                (r/header "Content-Type" "application/json"))
-                  (= ui-path path) (-> (r/response (swaggerui-template request definition-path))
+                  (= ui-path path) (-> (r/response (swaggerui-template context definition-path))
                                        (r/header "Content-Type" "text/html"))
                   (.startsWith path ui-path) (let [path (.substring path (count ui-path))]
                                                (-> (r/response (io/input-stream (io/resource (str "io/sarnowski/swagger1st/swaggerui/" path))))))
@@ -358,7 +360,7 @@
     parameter))
 
 (defn swagger-parser
-  "A ring middleware that uses a swagger definition for parsing parameters and crafting responses."
+  "A swagger middleware that uses a swagger definition for parsing parameters and crafting responses."
   [context]
   (let [chain-handler
         (fn [next-handler]
@@ -377,14 +379,15 @@
     (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn swagger-validator
-  "A ring middleware that uses a swagger definition for validating incoming requests and their responses."
-  [context]
+  "A swagger middleware that uses a swagger definition for validating incoming requests and their responses.
+    response-mode: ::fail, ::warn, ::ignore"
+  [context & {:keys [response-check]
+              :or   {response-check ::warn}}]
+  ; TODO prepare prismatic schema data structures for all requests
   (let [chain-handler
         (fn [next-handler]
           (fn [request]
-            ; TODO noop currently, validate request (and response?!) from swagger def
-            ; TODO type validation
-            ; TODO required validation
+            ; TODO check arguments and response against prismatic schema data structures
             (next-handler request)))]
     (update-in context [:chain-handlers] conj chain-handler)))
 
@@ -421,14 +424,23 @@
         response))))
 
 (defn swagger-security
-  "A ring middleware that uses a swagger definition for enforcing security constraints."
+  "A swagger middleware that uses a swagger definition for enforcing security constraints."
   [context handlers]
+  ; TODO prepare security lookups so that runtime lookup is faster
   (let [chain-handler
         (fn [next-handler]
           (fn [request]
             (if-let [security (get-in request [:swagger-request "security"])]
               (enforce-security next-handler context request security handlers)
               (next-handler request))))]
+    (update-in context [:chain-handlers] conj chain-handler)))
+
+(defn swagger-ring
+  "Allows easy integration of standard ring middleware into the swagger1st middleware's."
+  [context middleware-fn & args]
+  (let [chain-handler
+        (fn [next-handler]
+          (apply middleware-fn next-handler args))]
     (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn map-function-name
@@ -445,16 +457,8 @@
       (recur operationId fallback-fns)
       nil)))
 
-(defn swagger-ring
-  "Allows easy integration of standard ring middleware into the swagger1st middleware's."
-  [context middleware-fn & args]
-  (let [chain-handler
-        (fn [next-handler]
-          (apply middleware-fn next-handler args))]
-    (update-in context [:chain-handlers] conj chain-handler)))
-
 (defn swagger-executor
-  "A ring middleware that uses a swagger definition for executing the given function."
+  "A swagger middleware that uses a swagger definition for executing the given function."
   [context & {:keys [mappers]
               :or   {mappers [map-function-name]}}]
   (let [handler
