@@ -7,7 +7,10 @@
             [clj-yaml.core :as yaml]
             [io.sarnowski.swagger1st.schemas.swagger-2-0 :as swagger-2-0]
             [schema.core :as schema]
-            [ring.util.response :as r]))
+            [schema.utils]
+            [ring.util.response :as r])
+  (:import (clojure.lang ExceptionInfo)
+           (java.text DateFormat)))
 
 ;;; Load definitions
 
@@ -293,6 +296,27 @@
                   :else (next-handler request))))))]
     (update-in context [:chain-handlers] conj chain-handler)))
 
+(defn- infer-item-value
+  "'Casts' a value based on the definition to the concrete form (e.g. string -> integer)."
+  [value definition]
+  (let [transformers {"integer"  #(Integer/parseInt %)
+                      "long"     #(Long/parseLong %)
+                      "float"    #(Float/parseFloat %)
+                      "double"   #(Double/parseDouble %)
+                      "string"   #(String. %)
+                      "byte"     #(String. %)
+                      "boolean"  #(Boolean/parseBoolean %)
+                      "date"     #(.parse (DateFormat/getTimeInstance) %)
+                      "dateTime" #(.parse (DateFormat/getTimeInstance) %)}]
+    (if-let [type (get definition "type")]
+      (if-let [transformer (get transformers type)]
+        (try
+          (transformer value)
+          (catch Exception e
+            (throw (ex-info (str "Argument " (get definition "name") " in " (get definition "in") " is of wrong type.") {:http-code 400}))))
+        (throw (ex-info "type not supported for type inference" {:http-code 500})))
+      value)))
+
 (defn- extract-parameter-path
   "Extract a parameter from the request path."
   [request definition]
@@ -303,22 +327,26 @@
         keys (->> keys
                   (remove nil?)
                   (into {}))]
-    (get keys (keyword (get definition "name")))))
+    (-> (get keys (keyword (get definition "name")))
+        (infer-item-value definition))))
 
 (defn- extract-parameter-query
   "Extract a parameter from the request url."
   [{query-params :query-params} definition]
-  (get query-params (get definition "name")))
+  (-> (get query-params (get definition "name"))
+      (infer-item-value definition)))
 
 (defn- extract-parameter-header
   "Extract a parameter from the request headers."
   [{headers :headers} definition]
-  (get headers (get definition "name")))
+  (-> (get headers (get definition "name"))
+      (infer-item-value definition)))
 
 (defn- extract-parameter-form
   "Extract a parameter from the request body form."
   [{form-params :form-params} definition]
-  (get form-params (get definition "name")))
+  (-> (get form-params (get definition "name"))
+      (infer-item-value definition)))
 
 (defn- extract-parameter-body
   "Extract a parameter from the request body."
@@ -348,14 +376,14 @@
 (defn- extract-parameter
   "Extracts a parameter from the request according to the definition."
   [request definition]
-  (let [type (keyword (get definition "in"))
+  (let [in (keyword (get definition "in"))
         extractors {:path   extract-parameter-path
                     :query  extract-parameter-query
                     :header extract-parameter-header
                     :form   extract-parameter-form
                     :body   extract-parameter-body}
-        extractor (get extractors type)
-        parameter [type (keyword (get definition "name")) (extractor request definition)]]
+        extractor (get extractors in)
+        parameter [in (keyword (get definition "name")) (extractor request definition)]]
     (log/trace "parameter:" parameter)
     parameter))
 
@@ -378,17 +406,57 @@
               (next-handler request))))]
     (update-in context [:chain-handlers] conj chain-handler)))
 
+(defn parse-item-validator
+  "Validates one item definition as specified by swagger."
+  [item]
+  (if-let [type (get item "type")]
+    (if-let [primitive-validator (get swagger-2-0/primitives type)]
+      primitive-validator
+      (throw (ex-info (str "Invalid schema definition type " type) {:http-code 500})))
+    schema/Any))
+
+(defn- parse-request-validator
+  "Creates a validator map with a compound key of {:name :in} and a prismatic schema validation data structure."
+  [request]
+  (map (fn [parameter]
+         [(keyword (get parameter "in"))
+          (keyword (get parameter "name"))
+          (parse-item-validator parameter)])
+       (get request "parameters")))
+
+(defn- validate-request
+  "Validates all request validators against an actual request."
+  [request request-validator]
+  (let [errors (atom [])]
+    (doseq [[in name validator] request-validator]
+      (let [value (get-in request [:parameters in name])]
+        (try
+          (schema/validate validator value)
+          (catch ExceptionInfo e
+            (swap! errors conj {:name name :in in :detail (ex-data e)})))))
+    (when-not (empty? @errors)
+      (let [payload {:http-code         412
+                     :invalid-arguments (map (fn [error]
+                                               (assoc error :detail (-> error :detail :error schema.utils/validation-error-explain str)))
+                                             @errors)}]
+        (log/trace "rejecting request because of invalid arguments:" payload)
+        (throw (ex-info "Invalid arguments." payload))))))
+
 (defn swagger-validator
-  "A swagger middleware that uses a swagger definition for validating incoming requests and their responses.
-    response-mode: ::fail, ::warn, ::ignore"
-  [context & {:keys [response-check]
-              :or   {response-check ::warn}}]
-  ; TODO prepare prismatic schema data structures for all requests
-  (let [chain-handler
+  "A swagger middleware that uses a swagger definition for validating incoming requests"
+  [context]
+  (let [request-validators (into {} (map (fn [[k v]] [k (parse-request-validator v)]) (:requests context)))
+        chain-handler
         (fn [next-handler]
           (fn [request]
-            ; TODO check arguments and response against prismatic schema data structures
-            (next-handler request)))]
+            (log/debug "Validators:" request-validators)
+            (if-let [request-validator (get request-validators (:swagger-request-key request))]
+              (do
+                (validate-request request request-validator)
+                (next-handler request))
+              (do
+                (log/trace "no validators found for request" (:swagger-request-key request) "; maybe no parameters at all?")
+                (next-handler request)))))]
     (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn- check-security
@@ -425,13 +493,13 @@
 
 (defn swagger-security
   "A swagger middleware that uses a swagger definition for enforcing security constraints."
-  [context handlers]
+  [context security-handler]
   ; TODO prepare security lookups so that runtime lookup is faster
   (let [chain-handler
         (fn [next-handler]
           (fn [request]
             (if-let [security (get-in request [:swagger-request "security"])]
-              (enforce-security next-handler context request security handlers)
+              (enforce-security next-handler context request security security-handler)
               (next-handler request))))]
     (update-in context [:chain-handlers] conj chain-handler)))
 
@@ -486,5 +554,3 @@
         (next-handler result))
       handler
       (:chain-handlers context))))
-
-

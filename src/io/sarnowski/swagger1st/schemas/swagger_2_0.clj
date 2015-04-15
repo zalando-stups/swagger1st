@@ -17,6 +17,17 @@
 (defn extension? [^String k]
   (.startsWith "x-" k))
 
+(def primitives
+  {"integer" s-integer
+   "long" s-long
+   "float" s-float
+   "double" s-double
+   "string" s-string
+   "byte" s-byte
+   "boolean" s-boolean
+   "date" s-date
+   "dateTime" s-dateTime})
+
 ;;; complex types
 
 (def contact-object

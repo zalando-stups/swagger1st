@@ -5,7 +5,6 @@
             [io.sarnowski.swagger1st.core :as s1st]
             [io.sarnowski.swagger1st.security :as s1stsec]
             [ring.util.response :refer :all]
-            [clojure.tools.logging :as log]
             [clojure.pprint :refer [pprint]]
             [clojure.data.json :as json]))
 

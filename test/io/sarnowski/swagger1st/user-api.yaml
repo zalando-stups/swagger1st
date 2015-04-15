@@ -77,7 +77,6 @@ parameters:
     in: body
     description: The user's profile
     required: true
-    type: string
 
 definitions:
   Profile:

@@ -1,0 +1,46 @@
+swagger: "2.0"
+
+info:
+  title: validation tests
+  version: "1.0"
+
+produces:
+  - application/json
+consumes:
+  - application/json
+
+paths:
+  /none/{unit}:
+    get:
+      summary: none
+      operationId: io.sarnowski.swagger1st.validation-test/noop
+      parameters:
+        - name: unit
+          in: path
+      responses:
+        200:
+          description: "OK"
+
+  /primitive/string/{unit}:
+    get:
+      summary: s-string
+      operationId: io.sarnowski.swagger1st.validation-test/noop
+      parameters:
+        - name: unit
+          in: path
+          type: string
+      responses:
+        200:
+          description: "OK"
+
+  /primitive/int/{unit}:
+    get:
+      summary: s-int
+      operationId: io.sarnowski.swagger1st.validation-test/noop
+      parameters:
+        - name: unit
+          in: path
+          type: integer
+      responses:
+        200:
+          description: "OK"
