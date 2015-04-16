@@ -54,6 +54,22 @@ paths:
 # required, items, collectionFormat
 #
 
+  /required:
+    get:
+      summary: required
+      operationId: io.sarnowski.swagger1st.validation-test/noop
+      parameters:
+        - name: required_unit
+          in: query
+          type: integer
+        - name: optional_unit
+          in: query
+          type: integer
+          required: false
+      responses:
+        200:
+          description: "OK"
+
 #
 # multiple parameter tests
 #

@@ -49,6 +49,16 @@
   (is (= 200 (status (app (mock/request :get "/primitive/int/12345")))))
 
   ; int does not allow string
-  (is (= 400 (status (app (mock/request :get "/primitive/int/foobar")))))
+  (is (= 400 (status (app (mock/request :get "/primitive/int/foobar"))))))
 
-  )
+(deftest required
+
+  ; only required parameters are fine
+  (is (= 200 (status (app (mock/request :get "/required?required_unit=1")))))
+
+  ; optionals are also fine
+  (is (= 200 (status (app (mock/request :get "/required?required_unit=1&optional_unit=2")))))
+
+  ; missing a required one is wrnog
+  (is (= [{:name :required_unit, :in :query, :detail "(not (integer? nil))"}]
+         (status (app (mock/request :get "/required"))))))

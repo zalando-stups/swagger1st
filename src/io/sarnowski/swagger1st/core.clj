@@ -299,23 +299,25 @@
 (defn- infer-item-value
   "'Casts' a value based on the definition to the concrete form (e.g. string -> integer)."
   [value definition]
-  (let [transformers {"integer"  #(Integer/parseInt %)
-                      "long"     #(Long/parseLong %)
-                      "float"    #(Float/parseFloat %)
-                      "double"   #(Double/parseDouble %)
-                      "string"   #(String. %)
-                      "byte"     #(String. %)
-                      "boolean"  #(Boolean/parseBoolean %)
-                      "date"     #(.parse (DateFormat/getTimeInstance) %)
-                      "dateTime" #(.parse (DateFormat/getTimeInstance) %)}]
-    (if-let [type (get definition "type")]
-      (if-let [transformer (get transformers type)]
-        (try
-          (transformer value)
-          (catch Exception e
-            (throw (ex-info (str "Argument " (get definition "name") " in " (get definition "in") " is of wrong type.") {:http-code 400}))))
-        (throw (ex-info "type not supported for type inference" {:http-code 500})))
-      value)))
+  (if (nil? value)
+    value
+    (let [transformers {"integer"  #(Integer/parseInt %)
+                        "long"     #(Long/parseLong %)
+                        "float"    #(Float/parseFloat %)
+                        "double"   #(Double/parseDouble %)
+                        "string"   #(String. %)
+                        "byte"     #(String. %)
+                        "boolean"  #(Boolean/parseBoolean %)
+                        "date"     #(.parse (DateFormat/getTimeInstance) %)
+                        "dateTime" #(.parse (DateFormat/getTimeInstance) %)}]
+      (if-let [type (get definition "type")]
+        (if-let [transformer (get transformers type)]
+          (try
+            (transformer value)
+            (catch Exception e
+              (throw (ex-info (str "Argument " (get definition "name") " in " (get definition "in") " is of wrong type.") {:http-code 400}))))
+          (throw (ex-info "type not supported for type inference" {:http-code 500})))
+        value))))
 
 (defn- extract-parameter-path
   "Extract a parameter from the request path."
@@ -411,8 +413,12 @@
   [item]
   (if-let [type (get item "type")]
     (if-let [primitive-validator (get swagger-2-0/primitives type)]
-      primitive-validator
-      (throw (ex-info (str "Invalid schema definition type " type) {:http-code 500})))
+      (if (get item "required" true)
+        primitive-validator
+        (schema/maybe primitive-validator))
+
+      ;(throw (ex-info (str "Invalid schema definition type " type) {:http-code 500}))) TODO instead of Any
+      schema/Any)
     schema/Any))
 
 (defn- parse-request-validator
