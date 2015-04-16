@@ -1,4 +1,4 @@
-(defproject io.sarnowski/swagger1st "0.8.0-SNAPSHOT"
+(defproject io.sarnowski/swagger1st "0.8.0"
   :description "A ring middleware that does routing based on a swagger definition."
   :url "https://github.com/sarnowski/swagger1st"
 
