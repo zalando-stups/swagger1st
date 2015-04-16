@@ -10,6 +10,11 @@ consumes:
   - application/json
 
 paths:
+
+#
+# primitive tests
+#
+
   /none/{unit}:
     get:
       summary: none
@@ -44,3 +49,19 @@ paths:
       responses:
         200:
           description: "OK"
+
+#
+# required, items, collectionFormat
+#
+
+#
+# multiple parameter tests
+#
+
+#
+# items parameter tests
+#
+
+#
+# schema parameter tests
+#
