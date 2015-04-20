@@ -3,7 +3,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.mock.request :as mock]
             [io.sarnowski.swagger1st.core :as s1st]
-            [io.sarnowski.swagger1st.security :as s1stsec]
+            [io.sarnowski.swagger1st.util.security :as s1stsec]
             [ring.util.response :refer :all]
             [clojure.pprint :refer [pprint]]
             [clojure.data.json :as json]))
@@ -18,16 +18,16 @@
       response)))
 
 (def app
-  (-> (s1st/swagger-context ::s1st/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
-      (s1st/swagger-ring wrap-params)
-      (s1st/swagger-mapper)
-      (s1st/swagger-discovery)
-      (s1st/swagger-parser)
-      (s1st/swagger-ring test-request-logging)
-      (s1st/swagger-validator)
-      (s1st/swagger-security {"oauth2_def" (s1stsec/allow-all)
+  (-> (s1st/context :yaml-cp "io/sarnowski/swagger1st/user-api.yaml")
+      (s1st/discoverer)
+      (s1st/ring wrap-params)
+      (s1st/mapper)
+      (s1st/parser)
+      (s1st/ring test-request-logging)
+      (s1st/validator)
+      (s1st/protector {"oauth2_def" (s1stsec/allow-all)
                               "userpw_def" (s1stsec/allow-all)})
-      (s1st/swagger-executor)))
+      (s1st/executor)))
 
 
 ;; application endpoints, referenced by the swagger spec
@@ -64,7 +64,7 @@
 
 (deftest health
 
-  (is (= (app (mock/request :get "/health"))
+  (is (= (app (mock/request :get "/.well-known/health"))
          {:status 200})))
 
 (deftest users

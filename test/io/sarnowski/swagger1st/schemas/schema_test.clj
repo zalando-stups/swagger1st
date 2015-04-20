@@ -1,7 +1,7 @@
 (ns io.sarnowski.swagger1st.schemas.schema-test
   (:require [clojure.test :refer :all]
             [schema.core :as s]
-            [io.sarnowski.swagger1st.core :as core]
+            [io.sarnowski.swagger1st.context :refer [load-swagger-definition]]
             [io.sarnowski.swagger1st.schemas.swagger-2-0 :as schema-2-0]))
 
 (deftest minimal-definition-edn
@@ -13,24 +13,24 @@
 
 (deftest minimal-definition-yaml
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/minimal.yaml")))
+              (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/schemas/minimal.yaml")))
 
 (deftest minimal-definition-json
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/json-cp "io/sarnowski/swagger1st/schemas/minimal.json")))
+              (load-swagger-definition :json-cp "io/sarnowski/swagger1st/schemas/minimal.json")))
 
 (deftest user-api-definition
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/user-api.yaml")))
+              (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/user-api.yaml")))
 
 (deftest default-definition
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/default.yaml")))
+              (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/schemas/default.yaml")))
 
 (deftest simple-ref-definition
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/simple-ref.yaml")))
+              (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/schemas/simple-ref.yaml")))
 
 (deftest kio-definition
   (s/validate schema-2-0/root-object
-              (core/load-swagger-definition ::core/yaml-cp "io/sarnowski/swagger1st/schemas/kio.yaml")))
+              (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/schemas/kio.yaml")))

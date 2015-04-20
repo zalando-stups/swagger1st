@@ -1,4 +1,4 @@
-(ns io.sarnowski.swagger1st.security
+(ns io.sarnowski.swagger1st.util.security
   (:require [ring.middleware.basic-authentication :refer [wrap-basic-authentication]]
             [clj-http.lite.client :as client]
             [ring.util.response :as ring]

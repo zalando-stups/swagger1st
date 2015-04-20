@@ -3,18 +3,16 @@
             [io.sarnowski.swagger1st.core :as s1st]
             [ring.middleware.params :refer [wrap-params]]
             [ring.util.response :refer [response]]
-            [ring.mock.request :as mock]
-            [clojure.data.json :as json]
-            [schema.core :as schema])
+            [ring.mock.request :as mock])
   (:import (clojure.lang ExceptionInfo)))
 
 (def app
-  (-> (s1st/swagger-context ::s1st/yaml-cp "io/sarnowski/swagger1st/validation-test.yaml")
-      (s1st/swagger-ring wrap-params)
-      (s1st/swagger-mapper)
-      (s1st/swagger-parser)
-      (s1st/swagger-validator)
-      (s1st/swagger-executor)))
+  (-> (s1st/context :yaml-cp "io/sarnowski/swagger1st/validation-test.yaml")
+      (s1st/ring wrap-params)
+      (s1st/mapper)
+      (s1st/parser)
+      (s1st/validator)
+      (s1st/executor)))
 
 (defn noop
   "Does nothing; used for swagger definition."
