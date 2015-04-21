@@ -2,7 +2,9 @@
   (:require [ring.util.response :as r]
             [clojure.walk :as walk]
             [clojure.data.json :as json]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [clojure.tools.logging :as log]
+            [io.sarnowski.swagger1st.util.api :as api]))
 
 (defn- get-definition
   "Resolves a $ref reference to its content."
@@ -151,10 +153,10 @@
 (defn lookup-request
   "Creates a function that can do efficient lookups of requests."
   [requests request]
-    (->> requests
-         (filter #(request-matches? % request))
-         ; if we have multiple matches then its not well defined, just choose the first
-         first))
+  (->> requests
+       (filter (fn [[_ definition]] (request-matches? definition request)))
+       ; if we have multiple matches then its not well defined, just choose the first
+       first))
 
 (defn serialize-response
   "Serializes the response body according to the Content-Type."
@@ -164,3 +166,22 @@
       ; TODO check for allowed "produces" mimetypes and do object validation
       (assoc response :body (serializer (:body response)))
       response)))
+
+(defn setup-context
+  [{:keys [definition] :as context}]
+  (log/debug "definition:" definition)
+  (let [requests (create-requests definition)]
+    (log/debug "requests:" requests)
+    (assoc context :requests requests)))
+
+(defn correlate-request [{:keys [requests]} next-handler request]
+  (let [[key swagger-request] (lookup-request requests request)]
+    (if (nil? swagger-request)
+      (api/error 404 (str (.toUpperCase (-> request :request-method name)) " " (-> request :uri) " not found."))
+      (do
+        (log/debug "request" key "->" swagger-request)
+        (let [request (-> request
+                          (assoc-in [:swagger :request] swagger-request)
+                          (assoc-in [:swagger :key] key))
+              response (next-handler request)]
+          (serialize-response request response))))))

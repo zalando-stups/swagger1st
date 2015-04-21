@@ -1,13 +1,11 @@
 (ns io.sarnowski.swagger1st.core
   (:require [io.sarnowski.swagger1st.context :as context]
             [io.sarnowski.swagger1st.mapper :as mapper]
-            [io.sarnowski.swagger1st.discoverer :as discovery]
+            [io.sarnowski.swagger1st.discoverer :as discoverer]
             [io.sarnowski.swagger1st.parser :as parser]
             [io.sarnowski.swagger1st.validator :as validator]
             [io.sarnowski.swagger1st.protector :as protector]
             [io.sarnowski.swagger1st.executor :as executor]
-            [io.sarnowski.swagger1st.util.api :as api]
-            [clojure.tools.logging :as log]
             [ring.util.response :as r]))
 
 (defn context
@@ -27,13 +25,13 @@
 (defn chain-handler
   "Helper to create handler chains."
   [context & {:keys [on-init on-request]
-              :or {on-init (fn [context] context)
-                   on-update (fn [context next-handler request] (next-handler context))}}]
+              :or   {on-init    (fn [context] context)
+                     on-request (fn [context next-handler request] (next-handler request))}}]
   (let [context (on-init context)
-        chain-handler  (fn [next-handler]
-                         (fn [request]
-                           (let [request (assoc-in request [:swagger :context] context)]
-                             (on-request context next-handler request))))]
+        chain-handler (fn [next-handler]
+                        (fn [request]
+                          (let [request (assoc-in request [:swagger :context] context)]
+                            (on-request context next-handler request))))]
     (update-in context [:chain-handlers] conj chain-handler)))
 
 (defn discoverer
@@ -45,36 +43,18 @@
                      overwrite-host? true}}]
   (chain-handler
     context
-    :on-request
-    (fn [context next-handler request]
-      (if-let [response (discovery/process request (:definition context) {:discovery-path discovery-path
-                                                                          :definition-path definition-path
-                                                                          :ui-path ui-path
-                                                                          :overwrite-host? overwrite-host?})]
-        response
-        (next-handler request)))))
+    :on-request (partial discoverer/discover {:discovery-path  discovery-path
+                                              :definition-path definition-path
+                                              :ui-path         ui-path
+                                              :overwrite-host? overwrite-host?})))
 
 (defn mapper
   "A swagger middleware that uses a swagger definition for mapping a request to the specification."
   [context]
   (chain-handler
     context
-    :on-init
-      (fn [{:keys [definition] :as context}]
-        (log/debug "swagger-definition:" definition)
-        (assoc context :requests (mapper/create-requests definition)))
-    :on-request
-      (fn [{:keys [requests]} next-handler request]
-        (let [[key swagger-request] (mapper/lookup-request requests request)]
-          (if (nil? swagger-request)
-            (api/error 404 (str (.toUpperCase (-> request :request-method name)) " " (-> request :uri) " not found."))
-            (do
-              (log/debug "swagger-request ("  key "):" swagger-request)
-          (let [request (-> request
-                            (assoc-in [:swagger :request] swagger-request)
-                            (assoc-in [:swagger :key] key))
-                response (next-handler request)]
-            (mapper/serialize-response request response))))))))
+    :on-init mapper/setup-context
+    :on-request mapper/correlate-request))
 
 (defn parser
   "A swagger middleware that uses a swagger definition for parsing parameters and crafting responses."
@@ -101,16 +81,16 @@
 
 (defn executor
   "A swagger middleware that uses a swagger definition for executing the given function."
-  [context & {:keys [mappers]
-              :or   {mappers [executor/map-function-name]}
-              :as config}]
+  [context & {:keys [resolver]
+              :or   {resolver executor/operationId-to-function}}]
   (let [context (chain-handler
-    context
-    :on-request
-    (fn [context next-handler request]
-                  (executor/execute context next-handler request config)))]
+                  context
+                  :on-init (partial executor/find-functions resolver)
+                  :on-request executor/execute)]
+
+    ; now crunch the context together to an executable function chain
     (reduce
       (fn [result next-handler]
         (next-handler result))
-      (fn [context] (fn [next-handler] (fn [request] (throw (ex-info "no executor catched this" nil)))))
+      (fn [context] (fn [next-handler] (fn [request] (throw (ex-info "no executor catched this, swagger1st misconfigured" nil)))))
       (:chain-handlers context))))

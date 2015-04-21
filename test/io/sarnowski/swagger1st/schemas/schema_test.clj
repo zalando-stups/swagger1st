@@ -4,6 +4,8 @@
             [io.sarnowski.swagger1st.context :refer [load-swagger-definition]]
             [io.sarnowski.swagger1st.schemas.swagger-2-0 :as schema-2-0]))
 
+; some sample definitions, all are valid
+
 (deftest minimal-definition-edn
   (s/validate schema-2-0/root-object {"swagger" "2.0"
                                       "info"    {"title"   "minimal schema"
@@ -21,7 +23,7 @@
 
 (deftest user-api-definition
   (s/validate schema-2-0/root-object
-              (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/user-api.yaml")))
+              (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/integration.yaml")))
 
 (deftest default-definition
   (s/validate schema-2-0/root-object

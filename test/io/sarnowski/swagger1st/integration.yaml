@@ -16,21 +16,21 @@ paths:
     get:
       summary: Reads a user
       description: Reads a user's profile.
-      operationId: io.sarnowski.swagger1st.core-test/read-user
+      operationId: io.sarnowski.swagger1st.integration/read-user
       security:
         - oauth2_def:
           - user/read
         - userpw_def: []
       responses:
         200:
-          description: user deleted
+          description: user read
           schema:
             $ref: '#/definitions/Profile'
 
     post:
       summary: Create or update a user
       description: Registers or changes a user's profile in the system.
-      operationId: io.sarnowski.swagger1st.core-test/create-or-update-user
+      operationId: io.sarnowski.swagger1st.integration/create-or-update-user
       security:
         - oauth2_def:
           - user/read
@@ -44,7 +44,7 @@ paths:
     delete:
       summary: Deletes a user
       description: Deletes a user's profile from the system.
-      operationId: io.sarnowski.swagger1st.core-test/delete-user
+      operationId: io.sarnowski.swagger1st.integration/delete-user
       security:
         - oauth2_def:
           - user/read
@@ -60,11 +60,11 @@ paths:
         required: true
         type: string
 
-  /health:
+  /.well-known/health:
     get:
       summary: Get health status
       description: Provides health system information
-      operationId: io.sarnowski.swagger1st.core-test/read-health
+      operationId: io.sarnowski.swagger1st.integration/read-health
       responses:
         200:
           description: system is working

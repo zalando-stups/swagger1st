@@ -18,7 +18,7 @@ paths:
   /none/{unit}:
     get:
       summary: none
-      operationId: io.sarnowski.swagger1st.validation-test/noop
+      operationId: io.sarnowski.swagger1st.core-test/noop
       parameters:
         - name: unit
           in: path
@@ -29,7 +29,7 @@ paths:
   /primitive/string/{unit}:
     get:
       summary: s-string
-      operationId: io.sarnowski.swagger1st.validation-test/noop
+      operationId: io.sarnowski.swagger1st.core-test/noop
       parameters:
         - name: unit
           in: path
@@ -41,7 +41,7 @@ paths:
   /primitive/int/{unit}:
     get:
       summary: s-int
-      operationId: io.sarnowski.swagger1st.validation-test/noop
+      operationId: io.sarnowski.swagger1st.core-test/noop
       parameters:
         - name: unit
           in: path
@@ -57,7 +57,7 @@ paths:
   /required:
     get:
       summary: required
-      operationId: io.sarnowski.swagger1st.validation-test/noop
+      operationId: io.sarnowski.swagger1st.core-test/noop
       parameters:
         - name: required_unit
           in: query

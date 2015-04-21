@@ -1,37 +1,37 @@
 (ns io.sarnowski.swagger1st.executor
-  (:require [clojure.tools.logging :as log]))
+  (:require [clojure.tools.logging :as log]
+            [io.sarnowski.swagger1st.util.api :as api]))
 
-(defn map-function-name
+(defn function-by-name
   "Simple resolver function that resolves the operationId as a function name (including namespace)."
-  [operationId]
-  (resolve (symbol operationId)))
+  [f]
+  (let [fn-sym (symbol f)
+        fn-ns (symbol (namespace fn-sym))
+        fn-name (symbol (name fn-sym))]
+    (require [fn-ns])
+    (ns-resolve fn-ns fn-name)))
 
-(defn- resolve-function
+(defn operationId-to-function
   "Resolves the target function with multiple resolver functions. First in list will 'win'."
-  [operationId [first-fn & fallback-fns]]
-  (if-let [function (first-fn operationId)]
-    function
-    (if fallback-fns
-      (recur operationId fallback-fns)
-      nil)))
+  [request]
+  (let [operationId (get request "operationId")]
+    (function-by-name operationId)))
+
+(defn find-functions
+  "Finds all functions that get executed on request."
+  [resolver context]
+  (let [executors (into {} (map (fn [[k v]]
+                                  (if-let [operation (resolver v)]
+                                  [k operation]
+                                  (api/throw-error 500 "no operation found" v)))
+                                (:requests context)))]
+    (log/debug "executors:" executors)
+    (assoc context :executors executors)))
 
 (defn execute
   "A swagger middleware that uses a swagger definition for executing the given function."
-  [context next-handler request {:keys [mappers]}]
-  (if-let [swagger-request (:swagger-request request)]
-    (if-let [operationId (get swagger-request "operationId")]
-      (do
-        (log/trace "matched swagger defined route for operation" operationId)
-
-        ; found the definition, find mapping
-        (if-let [call-fn (resolve-function operationId mappers)]
-          (do
-            (log/trace "found mapping for operation" operationId "to" call-fn)
-            (call-fn request))
-
-          (do
-            (log/error "could not resolve handler for request" operationId)
-            (throw (ex-info "Operation not implemented." {:http-code 501}))))))
-
-    ; definition not found, skip for our middleware
-    (throw (ex-info "Operation not defined." {:http-code 400}))))
+  [context _ request]
+  (let [key (-> request :swagger :key)
+        operation (get (-> context :executors) key)]
+    (log/debug "executing" key "->" operation)
+    (operation request)))

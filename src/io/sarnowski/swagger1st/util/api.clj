@@ -4,6 +4,18 @@
 
 ; common helpers for APIs
 
+(defn error
+  "Creates an error object."
+  [http-code message & [details]]
+  {:http-code http-code
+   :message message
+   :details details})
+
+(defn throw-error
+  "Throws an error object."
+  [http-code message & [details]]
+  (throw (ex-info message (error http-code message details))))
+
 ; TODO surpress favicon
 ; TODO supports CORS headers
 ; TODO provide OPTIONS for all paths

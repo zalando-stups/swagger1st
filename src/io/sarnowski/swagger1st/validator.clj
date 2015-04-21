@@ -32,7 +32,7 @@
   (let [validators (into {} (map (fn [[k v]]
                                    [k (parse-request-validator v)])
                                  (:requests context)))]
-    (log/debug "Validators:" validators)
+    (log/debug "validators:" validators)
     (assoc context :validators validators)))
 
 (defn- validate-request

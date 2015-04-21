@@ -1,22 +1,12 @@
 (ns io.sarnowski.swagger1st.validation-test
   (:require [clojure.test :refer :all]
-            [io.sarnowski.swagger1st.core :as s1st]
+            [io.sarnowski.swagger1st.core-test :refer :all]
             [ring.middleware.params :refer [wrap-params]]
             [ring.util.response :refer [response]]
             [ring.mock.request :as mock])
   (:import (clojure.lang ExceptionInfo)))
 
-(def app
-  (-> (s1st/context :yaml-cp "io/sarnowski/swagger1st/validation-test.yaml")
-      (s1st/ring wrap-params)
-      (s1st/mapper)
-      (s1st/parser)
-      (s1st/validator)
-      (s1st/executor)))
-
-(defn noop
-  "Does nothing; used for swagger definition."
-  [request] (response nil))
+(def app (create-app "validation_test.yaml"))
 
 (defmacro status
   "Returns the status code of an http call or the http-code of an exception."

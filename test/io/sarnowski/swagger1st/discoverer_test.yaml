@@ -1,0 +1,18 @@
+swagger: "2.0"
+
+info:
+  title: discoverer-test
+  version: "1.0"
+
+produces:
+  - application/json
+consumes:
+  - application/json
+
+paths:
+  /:
+    get:
+      operationId: io.sarnowski.swagger1st.core-test/noop
+      responses:
+        200:
+          description: noop
