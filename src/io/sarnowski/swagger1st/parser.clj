@@ -31,94 +31,11 @@
                 (if (get definition "format")
                   (str " with format '" (get definition "format") "'")
                   "")
-                (if (get definition "pattern")
-                  (str " with pattern '" (get definition "pattern") "'")
-                  "")
                 " because " (apply str (map (fn [v] (if (keyword? v) (name v) v)) reason)) ".")
            {:http-code  400
             :value      value
             :path       path
             :definition definition})))
-
-(comment
-
-  (def primitives {"integer" Number
-                   "number"  Number
-                   "string"  String
-                   "boolean" Boolean})
-
-  (def primitive? (into #{} (keys primitives)))
-
-
-
-  (defn parse-value
-    "'Casts' a value based on the definition to the concrete form (e.g. string -> integer)."
-    [value definition & [path]]
-    (let [path (if path path [(get definition "in") (get definition "name")])
-          value-type (get definition "type")
-          err (partial throw-value-error value definition path)]
-
-      (when-not definition
-        (err "it is not defined"))
-
-      (when-not value-type
-        value)
-
-      (cond
-        (= "object" value-type)
-        (if (map? value)
-          (do
-            ; check all required keys are present
-            (let [provided-keys (into #{} (keys value))
-                  required-keys (into #{} (map keyword (get definition "required")))]
-              (doseq [required-key required-keys]
-                (when-not (contains? provided-keys required-key)
-                  (err "it misses the key '" (name required-key) "'"))))
-            ; traverse into all keys
-            (into {}
-                  (map (fn [[k v]]
-                         [k (parse-value v (get-in definition ["properties" (name k)]) (conj path k))])
-                       value)))
-          (err "it is not an object"))
-
-        ; check nil after object because object has another notion of required
-        (nil? value)
-        (if (get definition "required")
-          (err "it is required")
-          nil)
-
-        (= "array" value-type)
-        (if (seq value)
-          (let [items-definition (get definition "items")
-                items-counter (atom 0)]
-            (map (fn [v] (parse-value v items-definition (conj path (swap! items-counter inc)))) value))
-          (err "it is not an array"))
-
-        :else
-        (do
-          (when-not (primitive? value-type)
-            ; TODO setup step, not runtime
-            (err "its type is not supported"))
-
-          (let [value (if (and (string? value) (not (= "string" value-type)))
-                        (if-let [string-transformer (or (get string-transformers (get definition "format"))
-                                                        (get string-transformers value-type))]
-                          (try
-                            (string-transformer value)
-                            (catch Exception e
-                              (err "it cannot be transformed: " (.getMessage e))))
-                          ; TODO setup step, not runtime
-                          (err "its format is not supported"))
-                        value)]
-
-            (when (and (= "string" value-type) (contains? definition "pattern"))
-              ; TODO prepare pattern on setup
-              (let [pattern (re-pattern (get definition "pattern"))]
-                (when-not (re-matches pattern value)
-                  (err "it does not match the given pattern '" (get definition "pattern") "'"))))
-
-            ; TODO checks on minimum, maximum, etc.
-            value))))))
 
 (defn extract-parameter-path
   "Extract a parameter from the request path."
@@ -215,17 +132,50 @@
             (get definition "type")))
 
 (defmethod create-value-parser "object" [definition path]
-  (fn [value]
-    value))
+  (let [required-keys (into #{} (map keyword (get definition "required")))
+        key-parsers (map (fn [[k v]]
+                           [k (create-value-parser v (conj path k))])
+                         (get definition "properties"))]
+    (fn [value]
+      (let [err (partial throw-value-error value definition path)]
+        (if (map? value)
+          (do
+            ; check all required keys are present
+            (let [provided-keys (into #{} (keys value))]
+              (doseq [required-key required-keys]
+                (when-not (contains? provided-keys required-key)
+                  (err "it misses the key '" (name required-key) "'"))))
+            ; traverse into all keys
+            (into {}
+                  (map (fn [[k v]]
+                         (if-let [parser (key-parsers k)]
+                           [k (parser v)]
+                           (err "the given attribute '" k "' is not defined")))
+                       value)))
+          (err "it is not an object"))))))
 
 (defmethod create-value-parser "array" [definition path]
-  (fn [value]
-    value))
+  (let [items-definition (get definition "items")
+        items-parser (create-value-parser items-definition path)]
+    (fn [value]
+      (let [err (partial throw-value-error value definition path)]
+        (if (seq value)
+          (map (fn [v] (items-parser v)) value))
+        (err "it is not an array")))))
 
 (defmethod create-value-parser "string" [definition path]
-  (fn [value]
-    (let [value (coerce-string value definition path)]
-      value)))
+  (let [check-pattern (if (contains? definition "pattern")
+                        (let [pattern (re-pattern (get definition "pattern"))]
+                          (fn [value]
+                            (let [err (partial throw-value-error value definition path)]
+                              (when-not (re-matches pattern value)
+                                (err "it does not match the given pattern '" (get definition "pattern") "'")))))
+                        ; noop
+                        (fn [value] nil))]
+    (fn [value]
+      (let [value (coerce-string value definition path)]
+        (check-pattern value)
+        value))))
 
 (defmethod create-value-parser "integer" [definition path]
   (fn [value]

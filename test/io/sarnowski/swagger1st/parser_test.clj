@@ -16,7 +16,8 @@
   (is (= "123" (parse "123" {"type" "string"})))
   (is (= 0.5 (parse "0.5" {"type" "number"})))
   (is (= (t/date-time 2015 4 28) (parse "2015-04-28" {"type" "string" "format" "date"})))
-  (is (= (t/date-time 2015 4 28 10 56 12 98) (parse "2015-04-28T12:56:12.098+02:00" {"type" "string" "format" "date-time"}))))
+  (is (= (t/date-time 2015 4 28 10 56 12 98) (parse "2015-04-28T12:56:12.098+02:00" {"type" "string" "format" "date-time"})))
+  (is (= "foo" (parse "foo" {"type" "string" "pattern" "[a-z]+"}))))
 
 (deftest extract-path-parameters
   (is (= "baz"
