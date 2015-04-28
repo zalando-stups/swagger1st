@@ -7,7 +7,7 @@
   (if-let [definition (get-in context [:definition "securityDefinitions" name])]
     (if-let [handler (get handlers name)]
       (handler request definition requirements)
-      (throw (ex-info "securityHandler not defined" {:http-code 501})))
+      (throw (ex-info (str "securityHandler " name " not defined") {:http-code 501})))
     (throw (ex-info "securityDefinition not defined" {:http-code 500}))))
 
 (defn- enforce-security

@@ -3,6 +3,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.mock.request :as mock]
             [io.sarnowski.swagger1st.core-test :refer :all]
+            [io.sarnowski.swagger1st.util.security :as s1stsec]
             [ring.util.response :refer :all]
             [clojure.pprint :refer [pprint]]
             [clojure.data.json :as json]))
@@ -37,7 +38,8 @@
   {:status 200})
 
 
-(def app (create-app "integration.yaml"))
+(def app (create-app "integration.yaml" :security {"oauth2_def" (s1stsec/allow-all)
+                                                   "userpw_def" (s1stsec/allow-all)}))
 
 
 ;; TESTS

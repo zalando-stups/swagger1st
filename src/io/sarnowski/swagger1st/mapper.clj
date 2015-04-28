@@ -165,14 +165,14 @@
       (assoc response :body (serializer (:body response)))
       response)))
 
-(defn setup-context
+(defn setup
   [{:keys [definition] :as context}]
   (log/debug "definition:" definition)
   (let [requests (create-requests definition)]
     (log/debug "requests:" requests)
     (assoc context :requests requests)))
 
-(defn correlate-request [{:keys [requests]} next-handler request]
+(defn correlate [{:keys [requests]} next-handler request]
   (let [[key swagger-request] (lookup-request requests request)]
     (if (nil? swagger-request)
       (api/error 404 (str (.toUpperCase (-> request :request-method name)) " " (-> request :uri) " not found."))

@@ -52,14 +52,15 @@
   [context]
   (chain-handler
     context
-    :on-init mapper/setup-context
-    :on-request mapper/correlate-request))
+    :on-init mapper/setup
+    :on-request mapper/correlate))
 
 (defn parser
   "A swagger middleware that uses a swagger definition for parsing parameters and crafting responses."
   [context]
   (chain-handler
     context
+    :on-init parser/setup
     :on-request parser/parse))
 
 (defn protector
