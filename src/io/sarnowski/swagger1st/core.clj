@@ -3,7 +3,6 @@
             [io.sarnowski.swagger1st.mapper :as mapper]
             [io.sarnowski.swagger1st.discoverer :as discoverer]
             [io.sarnowski.swagger1st.parser :as parser]
-            [io.sarnowski.swagger1st.validator :as validator]
             [io.sarnowski.swagger1st.protector :as protector]
             [io.sarnowski.swagger1st.executor :as executor]
             [ring.util.response :as r]))
@@ -62,14 +61,6 @@
   (chain-handler
     context
     :on-request parser/parse))
-
-(defn validator
-  "A swagger middleware that uses a swagger definition for validating incoming requests"
-  [context]
-  (chain-handler
-    context
-    :on-init validator/create-validators
-    :on-request validator/validate))
 
 (defn protector
   "A swagger middleware that uses a swagger definition for enforcing security constraints."

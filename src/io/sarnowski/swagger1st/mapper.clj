@@ -106,6 +106,7 @@
                      path-definition)]
     [[operation keyword-path] definition]))
 
+; TODO flatten 'allOf' definitions
 (defn extract-requests
   "Extracts request-key->operation-definition from a swagger definition."
   [definition]

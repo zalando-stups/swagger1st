@@ -18,6 +18,8 @@
 
                  [prismatic/schema "0.3.7"]
 
+                 [clj-time "0.9.0"]
+
                  [ring-basic-authentication "1.0.5"]
                  [clj-http-lite "0.2.1"]]
 

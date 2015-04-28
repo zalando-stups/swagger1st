@@ -25,7 +25,6 @@
       (s1st/mapper)
       (s1st/parser)
       (s1st/ring request-logging)
-      (s1st/validator)
       (s1st/protector security)
       (s1st/executor)))
 

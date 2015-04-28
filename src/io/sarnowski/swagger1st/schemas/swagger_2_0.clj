@@ -3,30 +3,19 @@
 
 ;;; Basic types
 
-; TODO stricter type checking
-(def s-integer s/Int)
 (def s-long s/Int)
 (def s-float s/Num)
-(def s-double s/Num)
 (def s-string s/Str)
-(def s-byte s/Str)
 (def s-boolean s/Bool)
-(def s-date s/Str)
-(def s-dateTime s/Str)
 
 (defn extension? [^String k]
   (.startsWith "x-" k))
 
 (def primitives
-  {"integer" s-integer
-   "long" s-long
-   "float" s-float
-   "double" s-double
+  {"integer" s-long
+   "number" s-float
    "string" s-string
-   "byte" s-byte
-   "boolean" s-boolean
-   "date" s-date
-   "dateTime" s-dateTime})
+   "boolean" s-boolean})
 
 ;;; complex types
 
