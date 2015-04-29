@@ -23,7 +23,7 @@
                  [ring-basic-authentication "1.0.5"]
                  [clj-http-lite "0.2.1"]]
 
-  :plugins [[lein-cloverage "1.0.2"]]
+  :plugins [[lein-cloverage "1.0.3"]]
 
   :profiles {:dev {:dependencies [[ring/ring-mock "0.2.0"]
                                   [ring/ring-core "1.3.2"]

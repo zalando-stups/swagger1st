@@ -116,15 +116,17 @@
                           "date-time" #(f/parse date-time-formatter %)})
 
 (defn coerce-string [value definition path]
-  (let [err (partial throw-value-error value definition path)]
-    (if-let [string-transformer (or (get string-transformers (get definition "format"))
-                                    (get string-transformers (get definition "type")))]
-      (try
-        (string-transformer value)
-        (catch Exception e
-          (err "it cannot be transformed: " (.getMessage e))))
-      ; TODO check on setup, not runtime
-      (err "its format is not supported"))))
+  (if (string? value)
+    (let [err (partial throw-value-error value definition path)]
+      (if-let [string-transformer (or (get string-transformers (get definition "format"))
+                                      (get string-transformers (get definition "type")))]
+        (try
+          (string-transformer value)
+          (catch Exception e
+            (err "it cannot be transformed: " (.getMessage e))))
+        ; TODO check on setup, not runtime
+        (err "its format is not supported")))
+    value))
 
 (defmulti create-value-parser
           "Creates a parser function that takes a value and coerces and validates it."
@@ -133,9 +135,9 @@
 
 (defmethod create-value-parser "object" [definition path]
   (let [required-keys (into #{} (map keyword (get definition "required")))
-        key-parsers (map (fn [[k v]]
-                           [k (create-value-parser v (conj path k))])
-                         (get definition "properties"))]
+        key-parsers (into {} (map (fn [[k v]]
+                                    [(keyword k) (create-value-parser v (conj path k))])
+                                  (get definition "properties")))]
     (fn [value]
       (let [err (partial throw-value-error value definition path)]
         (if (map? value)
@@ -160,8 +162,8 @@
     (fn [value]
       (let [err (partial throw-value-error value definition path)]
         (if (seq value)
-          (map (fn [v] (items-parser v)) value))
-        (err "it is not an array")))))
+          (map (fn [v] (items-parser v)) value)
+          (err "it is not an array"))))))
 
 (defmethod create-value-parser "string" [definition path]
   (let [check-pattern (if (contains? definition "pattern")
@@ -173,24 +175,46 @@
                         ; noop
                         (fn [value] nil))]
     (fn [value]
-      (let [value (coerce-string value definition path)]
-        (check-pattern value)
-        value))))
+      (let [err (partial throw-value-error value definition path)
+            value (coerce-string value definition path)]
+        (if (or (nil? value) (and (string? value) (empty? value)))
+          (if (get definition "required")
+            (err "it is required")
+            value)
+          (do
+            (when (string? value)
+              (check-pattern value))
+            value))))))
 
 (defmethod create-value-parser "integer" [definition path]
   (fn [value]
-    (let [value (coerce-string value definition path)]
-      value)))
+    (let [err (partial throw-value-error value definition path)
+          value (coerce-string value definition path)]
+      (if (nil? value)
+        (if (get definition "required")
+          (err "it is required")
+          value)
+        value))))
 
 (defmethod create-value-parser "number" [definition path]
   (fn [value]
-    (let [value (coerce-string value definition path)]
-      value)))
+    (let [err (partial throw-value-error value definition path)
+          value (coerce-string value definition path)]
+      (if (nil? value)
+        (if (get definition "required")
+          (err "it is required")
+          value)
+        value))))
 
 (defmethod create-value-parser "boolean" [definition path]
   (fn [value]
-    (let [value (coerce-string value definition path)]
-      value)))
+    (let [err (partial throw-value-error value definition path)
+          value (coerce-string value definition path)]
+      (if (nil? value)
+        (if (get definition "required")
+          (err "it is required")
+          value)
+        value))))
 
 (defmethod create-value-parser :default [definition path]
   ; ignore this value and just pass through

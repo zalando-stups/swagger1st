@@ -76,10 +76,12 @@ parameters:
     name: profile
     in: body
     description: The user's profile
-    required: true
+    schema:
+      $ref: '#/definitions/Profile'
 
 definitions:
   Profile:
+    type: object
     properties:
       name:
         type: string

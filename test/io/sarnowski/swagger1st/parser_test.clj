@@ -9,15 +9,68 @@
   (let [parser (p/create-value-parser definition ["test"])]
     (parser value)))
 
-(deftest parse-values
+; TODO test error cases
+
+(deftest string-values
   (is (= nil (parse nil {"type" "string"})))
   (is (= "foo" (parse "foo" {"type" "string"})))
-  (is (= 123 (parse "123" {"type" "integer"})))
   (is (= "123" (parse "123" {"type" "string"})))
+
+  (is (= (t/date-time 2015 4 28)
+         (parse "2015-04-28" {"type"   "string"
+                              "format" "date"})))
+  (is (= (t/date-time 2015 4 28 10 56 12 98)
+         (parse "2015-04-28T12:56:12.098+02:00" {"type"   "string"
+                                                 "format" "date-time"})))
+
+  (is (= "foo" (parse "foo" {"type"    "string"
+                             "pattern" "[a-z]+"}))))
+
+(deftest integer-values
+  (is (= 123 (parse "123" {"type" "integer"})))
+
+  (is (= 123 (parse "123" {"type"    "integer"
+                           "format " "int32"})))
+  (is (= 123 (parse "123" {"type"    "integer"
+                           "format " "int64"}))))
+
+(deftest number-values
   (is (= 0.5 (parse "0.5" {"type" "number"})))
-  (is (= (t/date-time 2015 4 28) (parse "2015-04-28" {"type" "string" "format" "date"})))
-  (is (= (t/date-time 2015 4 28 10 56 12 98) (parse "2015-04-28T12:56:12.098+02:00" {"type" "string" "format" "date-time"})))
-  (is (= "foo" (parse "foo" {"type" "string" "pattern" "[a-z]+"}))))
+
+  (is (= 0.5 (parse "0.5" {"type"   "number"
+                           "format" "float"})))
+  (is (= 0.5 (parse "0.5" {"type"   "number"
+                           "format" "double"}))))
+
+(deftest boolean-values
+  (is (= true (parse "true" {"type" "boolean"})))
+  (is (= false (parse "false" {"type" "boolean"}))))
+
+(deftest array-values
+  (is (= ["foo" "bar"] (parse ["foo" "bar"]
+                              {"type"  "array"
+                               "items" {"type" "string"}})))
+
+  (is (= [5 6] (parse [5 6]
+                      {"type"  "array"
+                       "items" {"type" "integer"}})))
+
+  (is (= [(t/date-time 2015 4 28 10 56 12 98)]
+         (parse ["2015-04-28T12:56:12.098+02:00"]
+                {"type"  "array"
+                 "items" {"type"   "string"
+                          "format" "date-time"}}))))
+
+(deftest object-values
+  (is (= {:foo "bar"} (parse {:foo "bar"}
+                             {"type"       "object"
+                              "properties" {"foo" {"type" "string"}}})))
+
+  (is (= {:foo (t/date-time 2015 4 28 10 56 12 98)}
+         (parse {:foo "2015-04-28T12:56:12.098+02:00"}
+                {"type"       "object"
+                 "properties" {"foo" {"type"   "string"
+                                      "format" "date-time"}}}))))
 
 (deftest extract-path-parameters
   (is (= "baz"
