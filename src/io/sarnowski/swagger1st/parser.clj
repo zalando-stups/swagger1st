@@ -84,8 +84,8 @@
         (try
           (deserialize-fn (:body request))
           (catch Exception e
-            (throw (ex-info ("Malformed body. (" (str e)) {:http-code    400
-                                                           :content-type content-type}))))
+            (throw (ex-info (str "Malformed body. (" (str e)) {:http-code    400
+                                                               :content-type content-type}))))
         ; TODO check during setup
         (throw-value-error nil parameter-definition [(get parameter-definition "in") (get parameter-definition "name")] "its content-type is not supported"))
       (throw (ex-info "Content type not allowed."
