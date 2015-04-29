@@ -13,8 +13,8 @@
 
 (defn operationId-to-function
   "Resolves the target function with multiple resolver functions. First in list will 'win'."
-  [request]
-  (let [operationId (get request "operationId")]
+  [request-definition]
+  (let [operationId (get request-definition "operationId")]
     (function-by-name operationId)))
 
 (defn find-functions
@@ -22,8 +22,8 @@
   [resolver context]
   (let [executors (into {} (map (fn [[k v]]
                                   (if-let [operation (resolver v)]
-                                  [k operation]
-                                  (api/throw-error 500 "no operation found" v)))
+                                    [k operation]
+                                    (api/throw-error 500 "no operation found" v)))
                                 (:requests context)))]
     (log/debug "executors:" executors)
     (assoc context :executors executors)))

@@ -5,46 +5,49 @@
 ; common helpers for APIs
 
 (defn error
-  "Creates an error object."
-  [http-code message & [details]]
-  {:http-code http-code
-   :message message
-   :details details})
-
-(defn throw-error
-  "Throws an error object."
-  [http-code message & [details]]
-  (throw (ex-info message (error http-code message details))))
-
-; TODO surpress favicon
-; TODO supports CORS headers
-; TODO provide OPTIONS for all paths
-
-(comment
-
-  (fn [request]
-    (cond
-      (and surpress-favicon (= "/favicon.ico" (:uri request)))
-      (-> (r/response "No favicon available.")
-          (r/status 404))
-
-      (and cors-origin (= :options (:request-method request)))
-      (-> (r/response nil)
-          (r/status 200)
-          (add-cors-headers cors-origin))))
-
-  )
-
-(defn- cors-headers [response]
-  (-> response
-      (r/header "Access-Control-Allow-Origin" "*")
-      (r/header "Access-Control-Max-Age" "3600")
-      (r/header "Access-Control-Allow-Methods" "GET, POST, DELETE, PUT, PATCH, OPTIONS")
-      (r/header "Access-Control-Allow-Headers" "*")))
-
-(defn error
   "Generate an error response."
   [http-status message & [detail]]
   (-> (r/response (json/write-str {:message message :detail detail} :escape-slash false))
       (r/content-type "application/json")
       (r/status http-status)))
+
+(defn throw-error
+  "Throws an error object."
+  [http-code message & [details]]
+  (throw (ex-info message {:http-code http-code
+                           :message   message
+                           :details   details})))
+
+; common ring handlers for APIs
+
+(defn add-hsts-header
+  "Adds Strict-Transport-Security for HTTPS only."
+  [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (r/header response "Strict-Transport-Security" "max-age=10886400"))))
+
+(defn add-cors-headers
+  "Adds Access-Control-Allow-Headers header for common headers you might need."
+  [handler & {:keys [override-options]
+              :or   {override-options true}}]
+  (fn [request]
+    (let [response (if (and override-options
+                            (= :options (:request-method request)))
+                     (r/response nil)
+                     (handler request))]
+      (-> response
+          (r/header "Access-Control-Allow-Origin" "*")
+          (r/header "Access-Control-Max-Age" "3600")
+          (r/header "Access-Control-Allow-Methods" "GET, POST, DELETE, PUT, PATCH, OPTIONS")
+          (r/header "Access-Control-Allow-Headers" "*")))))
+
+(defn surpress-favicon-requests
+  "Returns a 404 for /favicon.ico requests."
+  [handler & {:keys [favicon-path]
+              :or   {favicon-path "/favicon.ico"}}]
+  (fn [request]
+    (if (= favicon-path (:uri request))
+      (-> (r/response "No favicon available.")
+          (r/status 404))
+      (handler request))))

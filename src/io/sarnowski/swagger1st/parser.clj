@@ -266,26 +266,27 @@
 (defn parse
   "Executes all prepared functions for the request."
   [{:keys [parsers]} next-handler request]
-  (let [parameters (->> (get parsers (-> request :swagger :key))
-                        ; execute all parsers of the request
-                        (map (fn [parser] (parser request)))
-                        ; group by "in"
-                        (group-by first)
-                        ; restructure to resemble the grouping: map[in][name] = value
-                        (map (fn [[parameter-in parameters]]
-                               [(keyword parameter-in) (into {} (map (fn [[pin pname pvalue]]
-                                                                       [(keyword pname) pvalue]) parameters))]))
-                        (into {}))]
-    (log/debug "parameters" parameters)
-    (try
+  (try
+    (let [parameters (->> (get parsers (-> request :swagger :key))
+                          ; execute all parsers of the request
+                          (map (fn [parser] (parser request)))
+                          ; group by "in"
+                          (group-by first)
+                          ; restructure to resemble the grouping: map[in][name] = value
+                          (map (fn [[parameter-in parameters]]
+                                 [(keyword parameter-in) (into {} (map (fn [[pin pname pvalue]]
+                                                                         [(keyword pname) pvalue]) parameters))]))
+                          (into {}))]
+      (log/debug "parameters" parameters)
       (let [response (next-handler (assoc request :parameters parameters))]
-        (serialize-response request response))
-      (catch Exception e
-        (if (and (instance? ExceptionInfo e) (contains? (ex-data e) :http-code))
-          ; nice errors
-          (let [{:keys [http-code] :as data} (ex-data e)]
-            (api/error http-code (.getMessage e) (dissoc data :http-code)))
-          ; unexpected errors
-          (do
-            (log/error e "internal server error" (str e))
-            (api/error 500 "Internal Server Error")))))))
+        (serialize-response request response)))
+
+    (catch Exception e
+      (if (and (instance? ExceptionInfo e) (contains? (ex-data e) :http-code))
+        ; nice errors
+        (let [{:keys [http-code] :as data} (ex-data e)]
+          (api/error http-code (.getMessage e) (dissoc data :http-code)))
+        ; unexpected errors
+        (do
+          (log/error e "internal server error" (str e))
+          (api/error 500 "Internal Server Error"))))))
