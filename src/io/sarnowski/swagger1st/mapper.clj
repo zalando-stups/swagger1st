@@ -156,15 +156,6 @@
        ; if we have multiple matches then its not well defined, just choose the first
        first))
 
-(defn serialize-response
-  "Serializes the response body according to the Content-Type."
-  [request response]
-  (let [supported-content-types {"application/json" json/write-str}]
-    (if-let [serializer (supported-content-types (get-in response [:headers "Content-Type"]))]
-      ; TODO check for allowed "produces" mimetypes and do object validation
-      (assoc response :body (serializer (:body response)))
-      response)))
-
 (defn setup
   [{:keys [definition] :as context}]
   (log/debug "definition:" definition)
@@ -176,10 +167,8 @@
   (let [[key swagger-request] (lookup-request requests request)]
     (if (nil? swagger-request)
       (api/error 404 (str (.toUpperCase (-> request :request-method name)) " " (-> request :uri) " not found."))
-      (do
-        (log/debug "request" key "->" swagger-request)
-        (let [request (-> request
+      (let [request (-> request
                           (assoc-in [:swagger :request] swagger-request)
-                          (assoc-in [:swagger :key] key))
-              response (next-handler request)]
-          (serialize-response request response))))))
+                          (assoc-in [:swagger :key] key))]
+          (log/debug "request" key "->" swagger-request)
+          (next-handler request)))))

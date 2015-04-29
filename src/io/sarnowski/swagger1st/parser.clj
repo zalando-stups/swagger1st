@@ -3,9 +3,11 @@
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [io.sarnowski.swagger1st.mapper :refer [split-path]]
-            [clj-time.format :as f])
+            [clj-time.format :as f]
+            [io.sarnowski.swagger1st.util.api :as api])
   (:import (org.joda.time DateTime)
-           (java.io PrintWriter)))
+           (java.io PrintWriter)
+           (clojure.lang ExceptionInfo)))
 
 (defn- serialize-date-time
   "Serializes a org.joda.time.DateTime to JSON in a compliant way."
@@ -252,6 +254,15 @@
                            requests))]
     (assoc context :parsers parsers)))
 
+(defn serialize-response
+  "Serializes the response body according to the Content-Type."
+  [request response]
+  (let [supported-content-types {"application/json" json/write-str}]
+    (if-let [serializer (supported-content-types (get-in response [:headers "Content-Type"]))]
+      ; TODO maybe check for allowed "produces" mimetypes and do object validation
+      (assoc response :body (serializer (:body response)))
+      response)))
+
 (defn parse
   "Executes all prepared functions for the request."
   [{:keys [parsers]} next-handler request]
@@ -262,7 +273,19 @@
                         (group-by first)
                         ; restructure to resemble the grouping: map[in][name] = value
                         (map (fn [[parameter-in parameters]]
-                               [parameter-in (into {} (map (fn [[pin pname pvalue]]
-                                                             [pname pvalue]) parameters))]))
+                               [(keyword parameter-in) (into {} (map (fn [[pin pname pvalue]]
+                                                                       [(keyword pname) pvalue]) parameters))]))
                         (into {}))]
-    (next-handler (assoc request :parameters parameters))))
+    (log/debug "parameters" parameters)
+    (try
+      (let [response (next-handler (assoc request :parameters parameters))]
+        (serialize-response request response))
+      (catch Exception e
+        (if (and (instance? ExceptionInfo e) (contains? (ex-data e) :http-code))
+          ; nice errors
+          (let [{:keys [http-code] :as data} (ex-data e)]
+            (api/error http-code (.getMessage e) (dissoc data :http-code)))
+          ; unexpected errors
+          (do
+            (log/error e "internal server error" (str e))
+            (api/error 500 "Internal Server Error")))))))

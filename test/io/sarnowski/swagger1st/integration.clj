@@ -28,6 +28,7 @@
 (defn create-or-update-user
   "Creates or updates a profile for a user in the user-db."
   [{{{:keys [id]} :path {:keys [profile]} :body} :parameters}]
+  (println "profile" profile)
   (swap! user-db assoc id profile)
   {:status 200})
 

@@ -106,11 +106,11 @@
   (StringReader. (json/write-str data)))
 
 (deftest extract-body-parameter
-  (is (= {:foo "bar"}
+  (is (= {:bar "baz"}
          (p/extract-parameter-body
            {:uri     "/foo"
             :headers {"content-type" "application/json"}
             :swagger {:request {"consumes" ["application/json"]}}
             :body    (json-body
-                       {:foo "bar"})}
+                       {:bar "baz"})}
            {"name" "testmap"}))))
