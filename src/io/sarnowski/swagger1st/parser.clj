@@ -20,6 +20,13 @@
 (extend DateTime json/JSONWriter
   {:-write serialize-date-time})
 
+(def json-content-type?
+  ; TODO could be more precise but also complex
+  ; examples:
+  ;  application/json
+  ;  application/vnd.order+json
+  #"application/.*json")
+
 (defn throw-value-error
   "Throws a validation error if value cannot be parsed or is invalid."
   [value definition path & reason]
@@ -72,26 +79,28 @@
   [request parameter-definition]
   (let [request-definition (-> request :swagger :request)
         ; TODO honor charset= definitions of content-type header
-        content-type (first (string/split (or
-                                            (get (:headers request) "content-type")
-                                            "application/octet-stream")
-                                          #";"))
+        [content-type charset] (string/split (or
+                                               (get (:headers request) "content-type")
+                                               "application/octet-stream")
+                                             #";")
+        content-type (string/trim content-type)
         allowed-content-types (into #{} (get request-definition "consumes"))
         ; TODO make this configurable
-        supported-content-types {"application/json" (fn [body] (json/read-json (slurp body)))}]
+        supported-content-types {json-content-type? (fn [body] (json/read-json (slurp body)))}]
+
     (if (allowed-content-types content-type)                ; TODO could be checked on initialization of ring handler chain
-      (if-let [deserialize-fn (get supported-content-types content-type)]
+      (if-let [deserialize-fn (second (first (filter (fn [[pattern _]] (re-matches pattern content-type)) supported-content-types)))]
         (try
           (deserialize-fn (:body request))
           (catch Exception e
-            (throw (ex-info (str "Malformed body. (" (str e)) {:http-code    400
-                                                               :content-type content-type}))))
-        ; TODO check during setup
-        (throw-value-error nil parameter-definition [(get parameter-definition "in") (get parameter-definition "name")] "its content-type is not supported"))
-      (throw (ex-info "Content type not allowed."
-                      {:http-code             406
-                       :content-type          content-type
-                       :allowed-content-types allowed-content-types})))))
+            (api/throw-error 400 (str "Body not parsable with given content type.")
+                             {:content-type content-type
+                              :error (str e)})))
+        ; if we cannot deserialize it, just forward it to the executing function
+        (:body request))
+      (api/throw-error 406 "Content type not allowed."
+                       {:content-type          content-type
+                        :allowed-content-types allowed-content-types}))))
 
 (def extractors
   {"path"     extract-parameter-path
