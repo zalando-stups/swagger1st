@@ -9,7 +9,7 @@
 (defn- deny-response
   "Send forbidden response."
   [reason]
-  (log/warnf "ACCESS DENIED on because %s." reason)
+  (log/warnf "ACCESS DENIED because %s." reason)
   (api/error 403 "Forbidden"))
 
 (defn allow-all
@@ -73,7 +73,7 @@
           (if-let [tokeninfo (resolve-access-token tokeninfo-url access-token)]
             ; check scopes
             (if (check-scopes-fn tokeninfo requirements)
-              request
+              (assoc request :tokeninfo tokeninfo)
               (deny-response "scopes not granted"))
             (deny-response "invalid access token"))
           (api/error 503 "token info misconfigured")))
