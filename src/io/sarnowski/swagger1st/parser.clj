@@ -266,7 +266,10 @@
 (defn serialize-response
   "Serializes the response body according to the Content-Type."
   [request response]
-  (let [supported-content-types {"application/json" json/write-str}]
+  (let [supported-content-types {"application/json" (fn [body]
+                                                      (if (string? body)
+                                                        body
+                                                        (json/write-str body)))}]
     (if-let [serializer (supported-content-types (get-in response [:headers "Content-Type"]))]
       ; TODO maybe check for allowed "produces" mimetypes and do object validation
       (assoc response :body (serializer (:body response)))
