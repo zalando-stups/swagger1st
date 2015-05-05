@@ -35,12 +35,13 @@
     (let [response (if (and override-options
                             (= :options (:request-method request)))
                      (r/response nil)
-                     (handler request))]
+                     (handler request))
+          request-headers (get-in request [:headers "access-control-request-headers"])]
       (-> response
           (r/header "Access-Control-Allow-Origin" "*")
           (r/header "Access-Control-Max-Age" "3600")
           (r/header "Access-Control-Allow-Methods" "GET, POST, DELETE, PUT, PATCH, OPTIONS")
-          (r/header "Access-Control-Allow-Headers" "*")))))
+          (r/header "Access-Control-Allow-Headers" request-headers)))))
 
 (defn surpress-favicon-requests
   "Returns a 404 for /favicon.ico requests."
