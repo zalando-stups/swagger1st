@@ -2,14 +2,22 @@
   (:require [ring.middleware.basic-authentication :refer [wrap-basic-authentication]]
             [clj-http.client :as client]
             [clojure.tools.logging :as log]
-            [io.sarnowski.swagger1st.util.api :as api]))
+            [io.sarnowski.swagger1st.util.api :as api]
+            [clj-time.core :as t])
+  (:import (java.io IOException)))
 
 ;; functions that generate security handler
 
-(defn- deny-response
+(defn- unauthorized
   "Send forbidden response."
   [reason]
-  (log/warnf "ACCESS DENIED because %s." reason)
+  (log/warnf "ACCESS DENIED (unauthorized) because %s." reason)
+  (api/error 401 "Unauthorized"))
+
+(defn- forbidden
+  "Send forbidden response."
+  [reason]
+  (log/warnf "ACCESS DENIED (forbidden) because %s." reason)
   (api/error 403 "Forbidden"))
 
 (defn allow-all
@@ -36,13 +44,22 @@
   "Checks with a tokeninfo endpoint for the token's validity and returns the session information if valid."
   [tokeninfo-url access-token]
   ; TODO make connection pool configurable!
-  (let [response (client/get tokeninfo-url
-                             {:query-params     {:access_token access-token}
-                              :throw-exceptions false
-                              :as               :json-string-keys})
-        body (:body response)]
-    (if (= 200 (:status response))
-      body
+  (try
+    (let [request-start (t/now)
+          response (client/get tokeninfo-url
+                               {:query-params     {:access_token access-token}
+                                :throw-exceptions false
+                                :as               :json-string-keys})
+          request-end (t/now)
+          body (:body response)
+          request-duration-ms (t/in-millis (t/interval request-start request-end))]
+      (when-not (< 10 request-duration-ms)
+        (log/warn "resolving tokeninfo took" request-duration-ms "ms"))
+      (if (= 200 (:status response))
+        body
+        nil))
+    (catch IOException e
+      (log/warn "could not get tokeninfo from" tokeninfo-url "because " (str e) "; rejecting token!")
       nil)))
 
 (defn check-consented-scopes
@@ -74,7 +91,7 @@
             ; check scopes
             (if (check-scopes-fn tokeninfo requirements)
               (assoc request :tokeninfo tokeninfo)
-              (deny-response "scopes not granted"))
-            (deny-response "invalid access token"))
+              (forbidden "scopes not granted"))
+            (unauthorized "invalid access token"))
           (api/error 503 "token info misconfigured")))
-      (deny-response "no access token given"))))
+      (unauthorized "no access token given"))))
