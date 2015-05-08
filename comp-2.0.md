@@ -90,7 +90,7 @@ regex pattern for the field name. Patterned fields can have multiple occurrences
 
 The Swagger representation of the API is made of a single file. However, parts of the definitions can be split into
 separate files, at the discretion of the user. This is applicable for `$ref` fields in the specification as follows from
-the [JSON Schema](http://json-schema.org) definitions **NS**.
+the [JSON Schema](http://json-schema.org) definitions **NS** #17.
 
 By convention, the Swagger specification file is named `swagger.json`.
 
@@ -101,12 +101,12 @@ Primitive data types in the Swagger Specification are based on the types support
 [Schema Object](#schemaObject) which is a subset of JSON Schema Draft 4 **OK**.
 
 An additional primitive data type `"file"` is used by the [Parameter Object](#parameterObject) and the
-[Response Object](#responseObject) to set the parameter type or the response as being a file **NS**.
+[Response Object](#responseObject) to set the parameter type or the response as being a file **NS** #18.
 
 <a name="dataTypeFormat"></a>Primitives have an optional modifier property `format`. Swagger uses several known formats
 to more finely define the data type being used. However, the `format` property is an open `string`-valued property, and
 can have any value to support documentation needs. Formats such as `"email"`, `"uuid"`, etc., can be used even though
-they are not defined by this specification. Types that are not accompanied by a `format` property follow their
+they are not defined by this specification **NS** #19. Types that are not accompanied by a `format` property follow their
 definition from the JSON Schema (except for `file` type which is defined above). The formats defined by the Swagger
 Specification are:
 
@@ -122,7 +122,7 @@ byte | `string` | `byte` | **OK** |
 boolean | `boolean` | | **OK** |
 date | `string` | `date` | **OK** | As defined by `full-date` - [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
 dateTime | `string` | `date-time` | **OK** | As defined by `date-time` - [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
-password | `string` | `password` | **NS** | Used to hint UIs the input needs to be obscured.
+password | `string` | `password` | **NS** #19 | Used to hint UIs the input needs to be obscured.
 
 ### Schema
 
@@ -138,7 +138,7 @@ Field Name | Type | Supported | Description
 <a name="swaggerSwagger"></a>swagger | `string` | **OK** | **Required.** Specifies the Swagger Specification version being used. It can be used by the Swagger UI and other clients to interpret the API listing. The value MUST be `"2.0"`.
 <a name="swaggerInfo"></a>info | [Info Object](#infoObject) | **NA** | **Required.** Provides metadata about the API. The metadata can be used by the clients if needed.
 <a name="swaggerHost"></a>host | `string` | **OK** | The host (name or ip) serving the API. This MUST be the host only and does not include the scheme nor sub-paths. It MAY include a port. If the `host` is not included, the host serving the documentation is to be used (including the port). The `host` does not support [path templating](#pathTemplating).
-<a name="swaggerBasePath"></a>basePath | `string` | **NS** | The base path on which the API is served, which is relative to the [`host`](#swaggerHost). If it is not included, the API is served directly under the `host`. The value MUST start with a leading slash (`/`). The `basePath` does not support [path templating](#pathTemplating). 
+<a name="swaggerBasePath"></a>basePath | `string` | **NS** #20 | The base path on which the API is served, which is relative to the [`host`](#swaggerHost). If it is not included, the API is served directly under the `host`. The value MUST start with a leading slash (`/`). The `basePath` does not support [path templating](#pathTemplating). 
 <a name="swaggerSchemes"></a>schemes | [`string`] | **NA** | The transfer protocol of the API. Values MUST be from the list: `"http"`, `"https"`, `"ws"`, `"wss"`. If the `schemes` is not included, the default scheme to be used is the one used to access the specification.
 <a name="swaggerConsumes"></a>consumes | [`string`] | **OK** | A list of MIME types the APIs can consume. This is global to all APIs but can be overridden on specific API calls. Value MUST be as described under [Mime Types](#mimeTypes).
 <a name="swaggerProduces"></a>produces | [`string`] | **OK** | A list of MIME types the APIs can produce. This is global to all APIs but can be overridden on specific API calls. Value MUST be as described under [Mime Types](#mimeTypes).
