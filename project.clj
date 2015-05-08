@@ -1,5 +1,5 @@
 (defproject io.sarnowski/swagger1st "0.12.0-SNAPSHOT"
-  :description "A ring middleware that does routing based on a swagger definition."
+  :description "A ring handler that does routing based on a swagger definition."
   :url "https://github.com/sarnowski/swagger1st"
 
   :license {:name "ISC License"
@@ -13,7 +13,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.3.1"]
 
-                 [org.clojure/data.json "0.2.5"]
+                 [org.clojure/data.json "0.2.6"]
                  [circleci/clj-yaml "0.5.3"]
 
                  [prismatic/schema "0.4.2"]
@@ -21,7 +21,7 @@
                  [clj-time "0.9.0"]
 
                  [ring-basic-authentication "1.0.5"]
-                 [clj-http "1.1.1"]]
+                 [clj-http "1.1.2"]]
 
   :plugins [[lein-cloverage "1.0.3"]]
 
@@ -29,10 +29,10 @@
                                   [ring/ring-core "1.3.2"]
                                   [ring/ring-devel "1.3.2"]
                                   [javax.servlet/servlet-api "2.5"]
-                                  [org.slf4j/slf4j-api "1.7.7"]
-                                  [org.slf4j/jul-to-slf4j "1.7.7"]
-                                  [org.slf4j/jcl-over-slf4j "1.7.7"]
-                                  [org.slf4j/slf4j-simple "1.7.7"]]}}
+                                  [org.slf4j/slf4j-api "1.7.12"]
+                                  [org.slf4j/jul-to-slf4j "1.7.12"]
+                                  [org.slf4j/jcl-over-slf4j "1.7.12"]
+                                  [org.slf4j/slf4j-simple "1.7.12"]]}}
 
   :pom-addition [:developers
                  [:developer

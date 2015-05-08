@@ -20,7 +20,7 @@
                          security)]
     ; if handler returned a request, everything is fine, else interpret it as response
     (if-let [request (some (fn [result]
-                             (if (-> result :swagger :request) result nil))
+                             (when (-> result :swagger :request) result))
                            all-results)]
       (do
         (log/debug "security check OK for" (get-in request [:swagger :request "operationId"]))

@@ -55,9 +55,7 @@
           request-duration-ms (t/in-millis (t/interval request-start request-end))]
       (when-not (< 10 request-duration-ms)
         (log/warn "resolving tokeninfo took" request-duration-ms "ms"))
-      (if (= 200 (:status response))
-        body
-        nil))
+      (when (= 200 (:status response)) body))
     (catch IOException e
       (log/warn "could not get tokeninfo from" tokeninfo-url "because " (str e) "; rejecting token!")
       nil)))
@@ -65,7 +63,7 @@
 (defn check-consented-scopes
   "Checks if every scope is mentioned in the 'scope' attribute of the token info."
   [tokeninfo scopes]
-  (let [consented-scopes (into #{} (get tokeninfo "scope"))]
+  (let [consented-scopes (set (get tokeninfo "scope"))]
     (every? consented-scopes scopes)))
 
 (defn check-corresponding-attributes

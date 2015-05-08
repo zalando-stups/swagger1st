@@ -138,7 +138,7 @@
    a keyword value, it is a dynamic segment."
   [path-template path-real]
   (when (= (count path-template) (count path-real))
-    (let [pairs (map #(vector %1 %2) path-template path-real)
+    (let [pairs (map vector path-template path-real)
           pair-matches? (fn [[t r]] (or (keyword? t) (= t r)))]
       (every? pair-matches? pairs))))
 

@@ -40,7 +40,7 @@
                 (if (get definition "format")
                   (str " with format '" (get definition "format") "'")
                   "")
-                " because " (apply str (map (fn [v] (if (keyword? v) (name v) v)) reason)) ".")
+                " because " (string/join (map (fn [v] (if (keyword? v) (name v) v)) reason)) ".")
            {:http-code  400
             :value      value
             :path       path
@@ -51,7 +51,7 @@
   [request definition]
   (let [[_ template-path] (-> request :swagger :key)
         ; TODO split paths before once and only access parsed paths here
-        parameters (map (fn [t r] (if (keyword? t) [t r] nil))
+        parameters (map (fn [t r] (when (keyword? t) [t r]))
                         template-path
                         (split-path (:uri request)))
         parameters (->> parameters
@@ -84,7 +84,7 @@
                                                "application/octet-stream")
                                              #";")
         content-type (string/trim content-type)
-        allowed-content-types (into #{} (get request-definition "consumes"))
+        allowed-content-types (set (get request-definition "consumes"))
         ; TODO make this configurable
         supported-content-types {json-content-type? (fn [body] (json/read-json (slurp body)))}]
 
@@ -145,7 +145,7 @@
             (get definition "type")))
 
 (defmethod create-value-parser "object" [definition path]
-  (let [required-keys (into #{} (map keyword (get definition "required")))
+  (let [required-keys (set (map keyword (get definition "required")))
         key-parsers (into {} (map (fn [[k v]]
                                     [(keyword k) (create-value-parser v (conj path k))])
                                   (get definition "properties")))]
@@ -154,7 +154,7 @@
         (if (map? value)
           (do
             ; check all required keys are present
-            (let [provided-keys (into #{} (keys value))]
+            (let [provided-keys (set (keys value))]
               (doseq [required-key required-keys]
                 (when-not (contains? provided-keys required-key)
                   (err "it misses the key '" (name required-key) "'"))))
@@ -173,7 +173,7 @@
     (fn [value]
       (let [err (partial throw-value-error value definition path)]
         (if (seq value)
-          (map (fn [v] (items-parser v)) value)
+          (map items-parser value)
           (err "it is not an array"))))))
 
 (defmethod create-value-parser "string" [definition path]
@@ -250,9 +250,7 @@
 (defn create-parsers
   "Creates a list of all parameter parser functions for a request that return a triple of [in out value] when called."
   [request-definition]
-  (map (fn [parameter-definition]
-         (create-parser parameter-definition))
-       (get request-definition "parameters")))
+  (map create-parser (get request-definition "parameters")))
 
 (defn setup
   "Prepares function calls for parsing parameters during request time."
@@ -272,7 +270,7 @@
                                                         (json/write-str body)))}]
     (if-let [serializer (supported-content-types (get-in response [:headers "Content-Type"]))]
       ; TODO maybe check for allowed "produces" mimetypes and do object validation
-      (assoc response :body (serializer (:body response)))
+      (update-in response [:body] serializer)
       response)))
 
 (defn parse
