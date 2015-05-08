@@ -433,7 +433,7 @@ Field Name | Type | s1st | Description
 <a name="operationTags"></a>tags | [`string`] | **N/A** | A list of tags for API documentation control. Tags can be used for logical grouping of operations by resources or any other qualifier.
 <a name="operationSummary"></a>summary | `string` | **N/A** | A short summary of what the operation does. For maximum readability in the swagger-ui, this field SHOULD be less than 120 characters.
 <a name="operationDescription"></a>description | `string` | **N/A** | A verbose explanation of the operation behavior. [GFM syntax](https://help.github.com/articles/github-flavored-markdown) can be used for rich text representation.
-<a name="operationExternalDocs"></a>externalDocs | **N/A** | [External Documentation Object](#externalDocumentationObject) | Additional external documentation for this operation.
+<a name="operationExternalDocs"></a>externalDocs | [External Documentation Object](#externalDocumentationObject) | **N/A** | Additional external documentation for this operation.
 <a name="operationId"></a>operationId | `string` | **OK** | A friendly name for the operation. The id MUST be unique among all operations described in the API. Tools and libraries MAY use the operation id to uniquely identify an operation.
 <a name="operationConsumes"></a>consumes | [`string`] | **OK** | A list of MIME types the operation can consume. This overrides the [`consumes`](#swaggerConsumes) definition at the Swagger Object. An empty value MAY be used to clear the global definition. Value MUST be as described under [Mime Types](#mimeTypes).
 <a name="operationProduces"></a>produces | [`string`] | **OK** | A list of MIME types the operation can produce. This overrides the [`produces`](#swaggerProduces) definition at the Swagger Object. An empty value MAY be used to clear the global definition. Value MUST be as described under [Mime Types](#mimeTypes).
@@ -1126,8 +1126,8 @@ to have a Tag Object per tag used there.
 Field Name | Type | s1st | Description
 ---|:---:|:---:|---
 <a name="tagName"></a>name | `string` | **N/A** | **Required.** The name of the tag.
-<a name="tagDescription"></a>description | **N/A** | `string` | A short description for the tag. [GFM syntax](https://help.github.com/articles/github-flavored-markdown) can be used for rich text representation.
-<a name="tagExternalDocs"></a>externalDocs | **N/A** | [External Documentation Object](#externalDocumentationObject) | Additional external documentation for this tag.
+<a name="tagDescription"></a>description | `string` | **N/A** | A short description for the tag. [GFM syntax](https://help.github.com/articles/github-flavored-markdown) can be used for rich text representation.
+<a name="tagExternalDocs"></a>externalDocs | [External Documentation Object](#externalDocumentationObject) | **N/A** | Additional external documentation for this tag.
 
 ##### Patterned Fields
 Field Pattern | Type | s1st | Description
@@ -2187,7 +2187,7 @@ Lists the available scopes for an OAuth2 security scheme.
 ##### Patterned Fields
 
 Field Pattern | Type | s1st | Description
----|:---:|---
+---|:---:|:---:|---
 <a name="scopesName"></a>{name} | `string` | **N/A** | Maps between a name of a scope to a short description of it (as the value of the property).
 
 ##### Scopes Object Example
