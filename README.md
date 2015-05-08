@@ -7,9 +7,6 @@ you specify your API in the [Swagger 2.0 Specification format](https://github.co
 sharing and reviewing your API. swagger1st will use it as a configuration file for processing incoming requests. During
 runtime, you can inspect and easily test your API with the built-in [Swagger UI](http://petstore.swagger.io/).
 
-[![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
-[![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
-
 ## Kickstart
 
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
@@ -72,7 +69,14 @@ specification:
 
 ## The Ring handler in detail
 
-TODO explain different chain handlers, what they output
+TODO explain different chain handlers, what they output, where you might want to hook into
+
+## Development on swagger1st
+
+[![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
+[![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
+
+TODO link to github, git clone, running tests, pull requests
 
 ## License
 
