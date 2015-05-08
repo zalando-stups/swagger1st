@@ -6,7 +6,7 @@ This examples shows the most basic usage of swagger1st.
 
 Using the [lein-ring](https://github.com/weavejester/lein-ring) plugin, you can easily start the application:
 
-    $ lein ring server
+    $ lein ring server-headless
 
 Navigate to [the UI](http://localhost:3000/ui/) to get the Swagger UI for discovery.
 
@@ -25,3 +25,6 @@ The following files are of special interest:
     * The `app` definition is the basic ring handler setup, pointing to the API definition.
     * Above the `app` definition, you find the actual business logic that is connected via the `operationId` attribute
       in the API definition.
+        * The request argument will get a normal ring request with some additional keys, most prominently the
+          `:parameters` key which holds all defined, parsed and validated input values according to the swagger
+          definition.
