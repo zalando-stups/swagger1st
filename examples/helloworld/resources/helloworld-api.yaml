@@ -11,7 +11,7 @@ paths:
       description: Generates a greeting message.
       operationId: helloworld/create-greeting
       produces:
-        - application/json
+        - text/plain
       responses:
         200:
           description: greeting response
