@@ -5,7 +5,8 @@ handling HTTP requests. This document is a copy of the Swagger 2.0 specification
 state of implementation. The following acronyms are used throughout the document to show the current state.
 
 * **OK** this is already supported
-* **NS** this is currently not supported and will be implemented
+* **NS**#123 this is currently not supported and will be implemented - the link and number behind it point to the GitHub
+  issue for this feature
 * **NA** this is not applicable, there is nothing to implement here (like `description` fields)
 
 # Swagger RESTful API Documentation Specification
@@ -90,7 +91,7 @@ regex pattern for the field name. Patterned fields can have multiple occurrences
 
 The Swagger representation of the API is made of a single file. However, parts of the definitions can be split into
 separate files, at the discretion of the user. This is applicable for `$ref` fields in the specification as follows from
-the [JSON Schema](http://json-schema.org) definitions **NS** #17.
+the [JSON Schema](http://json-schema.org) definitions **NS**[#17](https://github.com/sarnowski/swagger1st/issues/17).
 
 By convention, the Swagger specification file is named `swagger.json`.
 
@@ -101,12 +102,13 @@ Primitive data types in the Swagger Specification are based on the types support
 [Schema Object](#schemaObject) which is a subset of JSON Schema Draft 4 **OK**.
 
 An additional primitive data type `"file"` is used by the [Parameter Object](#parameterObject) and the
-[Response Object](#responseObject) to set the parameter type or the response as being a file **NS** #18.
+[Response Object](#responseObject) to set the parameter type or the response as being a file
+**NS**[#18](https://github.com/sarnowski/swagger1st/issues/18).
 
 <a name="dataTypeFormat"></a>Primitives have an optional modifier property `format`. Swagger uses several known formats
 to more finely define the data type being used. However, the `format` property is an open `string`-valued property, and
 can have any value to support documentation needs. Formats such as `"email"`, `"uuid"`, etc., can be used even though
-they are not defined by this specification **NS** #19. Types that are not accompanied by a `format` property follow their
+they are not defined by this specification **NS**[#19](https://github.com/sarnowski/swagger1st/issues/19). Types that are not accompanied by a `format` property follow their
 definition from the JSON Schema (except for `file` type which is defined above). The formats defined by the Swagger
 Specification are:
 
@@ -122,7 +124,7 @@ byte | `string` | `byte` | **OK** |
 boolean | `boolean` | | **OK** |
 date | `string` | `date` | **OK** | As defined by `full-date` - [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
 dateTime | `string` | `date-time` | **OK** | As defined by `date-time` - [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
-password | `string` | `password` | **NS** #19 | Used to hint UIs the input needs to be obscured.
+password | `string` | `password` | **NS**[#19](https://github.com/sarnowski/swagger1st/issues/19) | Used to hint UIs the input needs to be obscured.
 
 ### Schema
 
@@ -133,12 +135,12 @@ Declaration (version 1.2 and earlier) together into one document.
 
 ##### Fixed Fields
 
-Field Name | Type | Supported | Description
+Field Name | Type | s1st | Description
 ---|:---:|:---:|---
 <a name="swaggerSwagger"></a>swagger | `string` | **OK** | **Required.** Specifies the Swagger Specification version being used. It can be used by the Swagger UI and other clients to interpret the API listing. The value MUST be `"2.0"`.
 <a name="swaggerInfo"></a>info | [Info Object](#infoObject) | **NA** | **Required.** Provides metadata about the API. The metadata can be used by the clients if needed.
 <a name="swaggerHost"></a>host | `string` | **OK** | The host (name or ip) serving the API. This MUST be the host only and does not include the scheme nor sub-paths. It MAY include a port. If the `host` is not included, the host serving the documentation is to be used (including the port). The `host` does not support [path templating](#pathTemplating).
-<a name="swaggerBasePath"></a>basePath | `string` | **NS** #20 | The base path on which the API is served, which is relative to the [`host`](#swaggerHost). If it is not included, the API is served directly under the `host`. The value MUST start with a leading slash (`/`). The `basePath` does not support [path templating](#pathTemplating). 
+<a name="swaggerBasePath"></a>basePath | `string` | **NS**[#20](https://github.com/sarnowski/swagger1st/issues/20) | The base path on which the API is served, which is relative to the [`host`](#swaggerHost). If it is not included, the API is served directly under the `host`. The value MUST start with a leading slash (`/`). The `basePath` does not support [path templating](#pathTemplating). 
 <a name="swaggerSchemes"></a>schemes | [`string`] | **NA** | The transfer protocol of the API. Values MUST be from the list: `"http"`, `"https"`, `"ws"`, `"wss"`. If the `schemes` is not included, the default scheme to be used is the one used to access the specification.
 <a name="swaggerConsumes"></a>consumes | [`string`] | **OK** | A list of MIME types the APIs can consume. This is global to all APIs but can be overridden on specific API calls. Value MUST be as described under [Mime Types](#mimeTypes).
 <a name="swaggerProduces"></a>produces | [`string`] | **OK** | A list of MIME types the APIs can produce. This is global to all APIs but can be overridden on specific API calls. Value MUST be as described under [Mime Types](#mimeTypes).
@@ -159,8 +161,8 @@ the Swagger-UI for convenience.
 
 ##### Fixed Fields
 
-Field Name | Type | Supported | Description
----|:---:|---
+Field Name | Type | s1st | Description
+---|:---:|:---:|---
 <a name="infoTitle"></a>title | `string` | **NA** | **Required.** The title of the application.
 <a name="infoDescription"></a>description | **NA** | `string` | A short description of the application. [GFM syntax](https://help.github.com/articles/github-flavored-markdown) can be used for rich text representation.
 <a name="infoTermsOfService"></a>termsOfService | `string` | **NA** | The Terms of Service for the API.
@@ -174,7 +176,7 @@ Field Pattern | Type | Description
 ---|:---:|---
 <a name="operationExtensions"></a>^x- | Any | Allows extensions to the Swagger Schema. The field name MUST begin with
 `x-`, for example, `x-internal-id`. The value can be `null`, a primitive, an array or an object. See
-[Vendor Extensions](#vendorExtensions) for further details.
+[Vendor Extensions](#vendorExtensions) for further details **NA**.
 
 ##### Info Object Example:
 
@@ -216,11 +218,11 @@ Contact information for the exposed API.
 
 ##### Fixed Fields
 
-Field Name | Type | Description
----|:---:|---
-<a name="contactName"></a>name | `string` | The identifying name of the contact person/organization.
-<a name="contactUrl"></a>url | `string` | The URL pointing to the contact information. MUST be in the format of a URL.
-<a name="contactEmail"></a>email | `string` | The email address of the contact person/organization. MUST be in the format of an email address.
+Field Name | Type | s1st | Description
+---|:---:|:---:|---
+<a name="contactName"></a>name | `string` | **NA** | The identifying name of the contact person/organization.
+<a name="contactUrl"></a>url | `string` | **NA** | The URL pointing to the contact information. MUST be in the format of a URL.
+<a name="contactEmail"></a>email | `string` | **NA** | The email address of the contact person/organization. MUST be in the format of an email address.
 
 ##### Contact Object Example:
 
@@ -244,10 +246,10 @@ License information for the exposed API.
 
 ##### Fixed Fields
 
-Field Name | Type | Description
----|:---:|---
-<a name="licenseName"></a>name | `string` | **Required.** The license name used for the API.
-<a name="licenseUrl"></a>url | `string` | A URL to the license used for the API. MUST be in the format of a URL.
+Field Name | Type | s1st | Description
+---|:---:|:---:|---
+<a name="licenseName"></a>name | `string` | **NA** | **Required.** The license name used for the API.
+<a name="licenseUrl"></a>url | `string` | **NA** | A URL to the license used for the API. MUST be in the format of a URL.
 
 ##### License Object Example:
 
@@ -265,15 +267,16 @@ url: http://www.apache.org/licenses/LICENSE-2.0.html
 
 #### <a name="pathsObject"></a>Paths Object
 
-Holds the relative paths to the individual endpoints. The path is appended to the [`basePath`](#swaggerBasePath) in order to construct the full URL.
-The Paths may be empty, due to [ACL constraints](#securityFiltering).
+Holds the relative paths to the individual endpoints. The path is appended to the [`basePath`](#swaggerBasePath) in
+order to construct the full URL **NS**[#20](https://github.com/sarnowski/swagger1st/issues/20). The Paths may be empty,
+due to [ACL constraints](#securityFiltering).
 
 ##### Patterned Fields
 
-Field Pattern | Type | Description
----|:---:|---
-<a name="pathsPath"></a>/{path} | [Path Item Object](#pathItemObject) | A relative path to an individual endpoint. The field name MUST begin with a slash. The path is appended to the [`basePath`](#swaggerBasePath) in order to construct the full URL. [Path templating](#pathTemplating) is allowed.
-<a name="pathsExtensions"></a>^x- | Any | Allows extensions to the Swagger Schema. The field name MUST begin with `x-`, for example, `x-internal-id`. The value can be `null`, a primitive, an array or an object. See [Vendor Extensions](#vendorExtensions) for further details. 
+Field Pattern | Type | s1st | Description
+---|:---:|:---:|---
+<a name="pathsPath"></a>/{path} | [Path Item Object](#pathItemObject) | **OK** | A relative path to an individual endpoint. The field name MUST begin with a slash. The path is appended to the [`basePath`](#swaggerBasePath) in order to construct the full URL. [Path templating](#pathTemplating) is allowed.
+<a name="pathsExtensions"></a>^x- | Any | **NA** | Allows extensions to the Swagger Schema. The field name MUST begin with `x-`, for example, `x-internal-id`. The value can be `null`, a primitive, an array or an object. See [Vendor Extensions](#vendorExtensions) for further details. 
 
 ##### Paths Object Example
 
@@ -319,27 +322,28 @@ Field Pattern | Type | Description
 #### <a name="pathItemObject"></a>Path Item Object
 
 Describes the operations available on a single path.
-A Path Item may be empty, due to [ACL constraints](#securityFiltering). The path itself is still exposed to the documentation viewer but they will not know which operations and parameters are available.
+A Path Item may be empty, due to [ACL constraints](#securityFiltering). The path itself is still exposed to the
+documentation viewer but they will not know which operations and parameters are available.
 
 ##### Fixed Fields
 
-Field Name | Type | Description
----|:---:|---
-<a name="pathItemRef"></a>$ref | `string` | Allows for an external definition of this path item. The referenced structure MUST be in the format of a [Path Item Object](#pathItemObject). If there are conflicts between the referenced definition and this Path Item's definition, the behavior is *undefined*.
-<a name="pathItemGet"></a>get | [Operation Object](#operationObject) | A definition of a GET operation on this path.
-<a name="pathItemPut"></a>put | [Operation Object](#operationObject) | A definition of a PUT operation on this path.
-<a name="pathItemPost"></a>post | [Operation Object](#operationObject) | A definition of a POST operation on this path.
-<a name="pathItemDelete"></a>delete | [Operation Object](#operationObject) | A definition of a DELETE operation on this path.
-<a name="pathItemOptions"></a>options | [Operation Object](#operationObject) | A definition of a OPTIONS operation on this path.
-<a name="pathItemHead"></a>head | [Operation Object](#operationObject) | A definition of a HEAD operation on this path.
-<a name="pathItemPatch"></a>patch | [Operation Object](#operationObject) | A definition of a PATCH operation on this path.
-<a name="pathItemParameters"></a>parameters | [[Parameter Object](#parameterObject) <span>&#124;</span> [Reference Object](#referenceObject)] | A list of parameters that are applicable for all the operations described under this path. These parameters can be overridden at the operation level, but cannot be removed there. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a [name](#parameterName) and [location](#parameterIn). The list can use the [Reference Object](#referenceObject) to link to parameters that are defined at the [Swagger Object's parameters](#swaggerParameters). There can be one "body" parameter at most.
+Field Name | Type | s1st | Description
+---|:---:|:---:|---
+<a name="pathItemRef"></a>$ref | `string` | **OK** | Allows for an external definition of this path item. The referenced structure MUST be in the format of a [Path Item Object](#pathItemObject). If there are conflicts between the referenced definition and this Path Item's definition, the behavior is *undefined*.
+<a name="pathItemGet"></a>get | [Operation Object](#operationObject) | **OK** | A definition of a GET operation on this path.
+<a name="pathItemPut"></a>put | [Operation Object](#operationObject) | **OK** | A definition of a PUT operation on this path.
+<a name="pathItemPost"></a>post | [Operation Object](#operationObject) | **OK** | A definition of a POST operation on this path.
+<a name="pathItemDelete"></a>delete | [Operation Object](#operationObject) | **OK** | A definition of a DELETE operation on this path.
+<a name="pathItemOptions"></a>options | [Operation Object](#operationObject) | **OK** | A definition of a OPTIONS operation on this path.
+<a name="pathItemHead"></a>head | [Operation Object](#operationObject) | **OK** | A definition of a HEAD operation on this path.
+<a name="pathItemPatch"></a>patch | [Operation Object](#operationObject) | **OK** | A definition of a PATCH operation on this path.
+<a name="pathItemParameters"></a>parameters | [[Parameter Object](#parameterObject) <span>&#124;</span> [Reference Object](#referenceObject)] | **OK** | A list of parameters that are applicable for all the operations described under this path. These parameters can be overridden at the operation level, but cannot be removed there. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a [name](#parameterName) and [location](#parameterIn). The list can use the [Reference Object](#referenceObject) to link to parameters that are defined at the [Swagger Object's parameters](#swaggerParameters). There can be one "body" parameter at most.
 
 ##### Patterned Fields
 
-Field Pattern | Type | Description
----|:---:|---
-<a name="pathItemExtensions"></a>^x- | Any | Allows extensions to the Swagger Schema. The field name MUST begin with `x-`, for example, `x-internal-id`. The value can be `null`, a primitive, an array or an object. See [Vendor Extensions](#vendorExtensions) for further details. 
+Field Pattern | Type | s1st | Description
+---|:---:|:---:|---
+<a name="pathItemExtensions"></a>^x- | Any | **NA** | Allows extensions to the Swagger Schema. The field name MUST begin with `x-`, for example, `x-internal-id`. The value can be `null`, a primitive, an array or an object. See [Vendor Extensions](#vendorExtensions) for further details. 
 
 ##### Path Item Object Example
 
