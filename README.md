@@ -1,27 +1,28 @@
 # swagger1st (swagger first)
 
-A Clojure [Ring](https://github.com/ring-clojure/ring) middleware that does routing, serialization and validation based
-on [swagger](http://swagger.io/) definitions.
-
-Currently only supports Swagger 2.0 specification.
+swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that routes, parses and validates requests
+based on your [Swagger](http://swagger.io/) definition. Instead of defining routes and validation rules in your code,
+you specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec) using
+[their great tool set](http://editor.swagger.io/). The resulting definition is the ultimate format for documenting,
+sharing and reviewing your API. swagger1st will use it as a configuration file for processing incoming requests. During
+runtime, you can inspect and easily test your API with the built-in [Swagger UI](http://petstore.swagger.io/).
 
 [![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
 [![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
 
-## Usage
+## Kickstart
 
-Use the following dependency:
+Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
-    [io.sarnowski/swagger1st <latest>]
+    [io.sarnowski/swagger1st "<latest>"]
 
-from Maven central.
+[You find the latest version in Maven central.](http://repo1.maven.org/maven2/io/sarnowski/swagger1st/)
 
 The following setup creates a ring compliant handler.
 
 ```clojure
 (ns example
   (:require [io.sarnowski.swagger1st.core :as s1st]
-            [io.sarnowski.swagger1st.executor :as s1stexec]
             [io.sarnowski.swagger1st.util.api :as s1stapi]
             [io.sarnowski.swagger1st.util.security :as s1stsec]
             [ring.middleware.params :refer [wrap-params]]))
@@ -39,25 +40,39 @@ The following setup creates a ring compliant handler.
       (s1st/executor)))
 ```
 
-## Examples
+## Complete Example Projects
 
-The [examples](examples/) directory contains the following examples:
+The [examples](examples/) directory contains some examples, that can help you bootstrap a complete setup:
 
 * [Hello, World!](examples/helloworld/)
-    * The simplest setup as a starting point for own applications.
+    * The simplest setup as a starting point for own applications. This already shows all parts necessary to combine in
+      order to have a working API.
 * [TODO](examples/todo/)
-    * A TODO list application, showing integration with the lifecycle framework [component](https://github.com/stuartsierra/component).
+    * A TODO list application, showing integration with the lifecycle framework
+      [component](https://github.com/stuartsierra/component). This integration allows all request handlers to access the
+      defined dependencies like databases.
 * [Friboo](https://github.com/zalando-stups/friboo)
-    * Friboo is Zalando's opinionated Clojure microservice library which uses swagger1st at its base and als integrates
-      with the [component](https://github.com/stuartsierra/component) framework. See the following project who also use
-      Friboo with swagger1st:
+    * Friboo is [Zalando](http://tech.zalando.com/)'s opinionated Clojure microservice library which uses swagger1st at
+      its base for RESTful HTTP endpoints and also integrates with the
+      [component](https://github.com/stuartsierra/component) framework. See the following projects who are real world
+      applications of Zalando's cloud infrastructure based on Friboo with swagger1st:
         * [Kio](https://github.com/zalando-stups/kio)
+        * [essentials](https://github.com/zalando-stups/essentials)
         * [TWINTIP](https://github.com/zalando-stups/twintip)
         * [mint](https://github.com/zalando-stups/mint)
 
-## Middlewares in detail
+## Compatibility Overview
 
-TODO write new detailed documentation, old one is invalid after refactoring.
+swagger1st aims to implement all features of the Swagger 2.0 specification. Everything that you can define with Swagger
+should be handled by swagger1st, so that you only have to write your business logic. Version 1.0 will implement all
+elements (that makes sense to handle). Until then, the following document shows the current supported aspects of the
+specification:
+
+* [Swagger 2.0 Compatibility Document](comp-2.0.md)
+
+## The Ring handler in detail
+
+TODO explain different chain handlers, what they output
 
 ## License
 
