@@ -1,5 +1,10 @@
 # swagger1st (swagger first)
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st)
+[![Dependencies Status](http://jarkeeper.com/sarnowski/swagger1st/status.png)](http://jarkeeper.com/sarnowski/swagger1st)
+[![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
+[![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
+
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that routes, parses and validates requests
 based on your [Swagger](http://swagger.io/) definition. Instead of defining routes and validation rules in your code,
 you specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec) using
@@ -13,7 +18,9 @@ Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
     [io.sarnowski/swagger1st "<latest>"]
 
-[You find the latest version in Maven central.](http://repo1.maven.org/maven2/io/sarnowski/swagger1st/)
+You find the latest version in [Maven central](http://repo1.maven.org/maven2/io/sarnowski/swagger1st/):
+
+* [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st)
 
 The following setup creates a ring compliant handler.
 
@@ -69,8 +76,7 @@ TODO explain different chain handlers, what they output, where you might want to
 
 ## Development on swagger1st
 
-[![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
-[![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
+
 
 TODO link to github, git clone, running tests, pull requests
 
