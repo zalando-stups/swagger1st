@@ -32,7 +32,14 @@
                                   [org.slf4j/slf4j-api "1.7.12"]
                                   [org.slf4j/jul-to-slf4j "1.7.12"]
                                   [org.slf4j/jcl-over-slf4j "1.7.12"]
-                                  [org.slf4j/slf4j-simple "1.7.12"]]}}
+                                  [org.apache.logging.log4j/log4j-api "2.2"]
+                                  [org.apache.logging.log4j/log4j-core "2.2"]
+                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.2"]
+                                  [criterium "0.4.3"]]}}
+
+  :test-selectors {:default (complement :performance)
+                   :performance :performance
+                   :all (constantly true)}
 
   :pom-addition [:developers
                  [:developer
