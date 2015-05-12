@@ -66,6 +66,6 @@
         [mean-time] (:mean result)]
     (c/report-result result :verbose)
 
-    (is (< mean-time (microseconds 200)))
+    (is (< mean-time (microseconds 1000)))
 
     (set-log-level! "TRACE")))
