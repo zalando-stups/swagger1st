@@ -1,6 +1,6 @@
 # swagger1st (swagger first)
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st)
+![Maven Central](https://img.shields.io/maven-central/v/io.sarnowski/swagger1st.svg)
 [![Dependencies Status](http://jarkeeper.com/sarnowski/swagger1st/status.png)](http://jarkeeper.com/sarnowski/swagger1st)
 [![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
 [![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
@@ -20,7 +20,7 @@ Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
 You find the latest version in [Maven central](http://repo1.maven.org/maven2/io/sarnowski/swagger1st/):
 
-* [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.sarnowski/swagger1st)
+* ![Maven Central](https://img.shields.io/maven-central/v/io.sarnowski/swagger1st.svg)
 
 The following setup creates a ring compliant handler.
 
