@@ -1,7 +1,6 @@
 # swagger1st (swagger first)
 
 ![Maven Central](https://img.shields.io/maven-central/v/io.sarnowski/swagger1st.svg)
-[![Dependencies Status](http://jarkeeper.com/sarnowski/swagger1st/status.png)](http://jarkeeper.com/sarnowski/swagger1st)
 [![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
 [![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
 
