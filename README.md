@@ -4,12 +4,11 @@
 [![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
 [![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
 
-swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that routes, parses and validates requests
+swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
 based on your [Swagger](http://swagger.io/) definition. Instead of defining routes and validation rules in your code,
 you specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec) using
-[their great tool set](http://editor.swagger.io/). The resulting definition is the ultimate format for documenting,
-sharing and reviewing your API. swagger1st will use it as a configuration file for processing incoming requests. During
-runtime, you can inspect and easily test your API with the built-in [Swagger UI](http://petstore.swagger.io/).
+[their great tool set](http://editor.swagger.io/). This encourages an "API first" approach by letting you specify your API in a technology independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API. swagger1st will use it as a configuration file for processing incoming requests. This approach makes sure, that your implementation and specification never gets out of sync. During
+runtime, you can inspect and easily test your API with the built-in [Swagger UI](http://petstore.swagger.io/). You are also free to extend the interpretation of your definition according to your own needs.
 
 ## Kickstart
 
