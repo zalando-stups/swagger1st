@@ -3,19 +3,33 @@
             [io.sarnowski.swagger1st.parser :as p]
             [clj-time.core :as t]
             [clojure.data.json :as json])
-  (:import (java.io StringReader)))
+  (:import (java.io StringReader)
+           (clojure.lang ExceptionInfo)))
 
-(defn parse [value definition]
+(defn parse
+  "Parses a value according to its definition."
+  [value definition]
   (let [parser (p/create-value-parser definition ["test"])]
     (parser value)))
 
-; TODO test error cases
+(defmacro rejected
+  "Executes the expressions and returns true, if an ExceptionInfo with http-code 400 was thrown."
+  [& exp]
+  `(try
+     ~@exp
+     false
+     (catch ExceptionInfo e#
+       (if (= 400 (:http-code (ex-data e#)))
+         "rejected"
+         false))))
 
 (deftest string-values
+  ; real strings
   (is (= nil (parse nil {"type" "string"})))
   (is (= "foo" (parse "foo" {"type" "string"})))
   (is (= "123" (parse "123" {"type" "string"})))
 
+  ; dates
   (is (= (t/date-time 2015 4 28)
          (parse "2015-04-28" {"type"   "string"
                               "format" "date"})))
@@ -23,8 +37,22 @@
          (parse "2015-04-28T12:56:12.098+02:00" {"type"   "string"
                                                  "format" "date-time"})))
 
+  ; pattern matching
   (is (= "foo" (parse "foo" {"type"    "string"
-                             "pattern" "[a-z]+"}))))
+                             "pattern" "[a-z]+"})))
+  (is (rejected (parse "foo" {"type" "string"
+                              "pattern" "[A-Z]"})))
+
+  ; sizes
+  (is (= "foo" (parse "foo" {"type" "string"
+                             "minLength" 3})))
+  (is (rejected (parse "foo" {"type" "string"
+                              "minLength" 4})))
+
+  (is (= "foo" (parse "foo" {"type" "string"
+                             "maxLength" 3})))
+  (is (rejected (parse "foo" {"type" "string"
+                              "maxLength" 2}))))
 
 (deftest integer-values
   (is (= 123 (parse "123" {"type" "integer"})))
@@ -32,7 +60,30 @@
   (is (= 123 (parse "123" {"type"    "integer"
                            "format " "int32"})))
   (is (= 123 (parse "123" {"type"    "integer"
-                           "format " "int64"}))))
+                           "format " "int64"})))
+  ; sizes, minimum
+  (is (= 123 (parse "123" {"type" "integer"
+                           "minimum" 123})))
+  (is (rejected (parse "123" {"type" "integer"
+                              "minimum" 124})))
+  (is (= 123 (parse "123" {"type" "integer"
+                           "minimum" 122
+                           "exclusiveMinimum" true})))
+  (is (rejected (parse "123" {"type" "integer"
+                              "minimum" 123
+                              "exclusiveMinimum" true})))
+
+  ; sizes, maximum
+  (is (= 123 (parse "123" {"type" "integer"
+                           "maximum" 123})))
+  (is (rejected (parse "123" {"type" "integer"
+                              "maximum" 122})))
+  (is (= 123 (parse "123" {"type" "integer"
+                           "maximum" 124
+                           "exclusiveMaximum" true})))
+  (is (rejected (parse "123" {"type" "integer"
+                              "maximum" 123
+                              "exclusiveMaximum" true}))))
 
 (deftest number-values
   (is (= 0.5 (parse "0.5" {"type" "number"})))
@@ -40,7 +91,9 @@
   (is (= 0.5 (parse "0.5" {"type"   "number"
                            "format" "float"})))
   (is (= 0.5 (parse "0.5" {"type"   "number"
-                           "format" "double"}))))
+                           "format" "double"})))
+  ; see integer-values for validation tests as they are the same
+  )
 
 (deftest boolean-values
   (is (= true (parse "true" {"type" "boolean"})))
@@ -59,7 +112,40 @@
          (parse ["2015-04-28T12:56:12.098+02:00"]
                 {"type"  "array"
                  "items" {"type"   "string"
-                          "format" "date-time"}}))))
+                          "format" "date-time"}})))
+
+  ; sizes
+  (is (= ["foo" "bar"] (parse ["foo" "bar"]
+                              {"type" "array"
+                               "items" {"type" "string"}
+                               "minItems" 2})))
+  (is (rejected (parse ["foo" "bar"]
+                       {"type" "array"
+                        "items" {"type" "string"}
+                        "minItems" 3})))
+
+  (is (= ["foo" "bar"] (parse ["foo" "bar"]
+                              {"type" "array"
+                               "items" {"type" "string"}
+                               "maxItems" 2})))
+  (is (rejected (parse ["foo" "bar"]
+                       {"type" "array"
+                        "items" {"type" "string"}
+                        "maxItems" 1})))
+
+  ; unique items
+  (is (= ["foo" "bar"] (parse ["foo" "bar"]
+                              {"type" "array"
+                               "items" {"type" "string"}
+                               "uniqueItems" true})))
+  (is (= ["foo" "bar" "bar"] (parse ["foo" "bar" "bar"]
+                              {"type" "array"
+                               "items" {"type" "string"}
+                               "uniqueItems" false})))
+  (is (rejected (parse ["foo" "bar" "bar"]
+                       {"type" "array"
+                        "items" {"type" "string"}
+                        "uniqueItems" true}))))
 
 (deftest object-values
   (is (= {:foo "bar"} (parse {:foo "bar"}

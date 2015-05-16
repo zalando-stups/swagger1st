@@ -201,10 +201,10 @@
         check-size (fn [value]
                      (let [err (partial throw-value-error value definition path)]
                        (if-let [min-length (get definition "minLength")]
-                         (when-not (>= min-length (count value))
+                         (when-not (>= (count value) min-length)
                            (err "it is shorter than '" min-length "' characters")))
                        (if-let [max-length (get definition "maxLength")]
-                         (when-not (<= max-length (count value))
+                         (when-not (<= (count value) max-length)
                            (err "it is longer than '" max-length "' characters")))))]
     (fn [value]
       (let [err (partial throw-value-error value definition path)
