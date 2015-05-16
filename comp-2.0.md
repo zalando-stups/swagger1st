@@ -611,18 +611,18 @@ Field Name | Type | s1st | Description
 <a name="parameterItems"></a>items | [Items Object](#itemsObject) | **OK** | **Required if [`type`](#parameterType) is "array".** Describes the type of items in the array.
 <a name="parameterCollectionFormat"></a>collectionFormat | `string` | **MISSING**[#23](https://github.com/sarnowski/swagger1st/issues/23) | Determines the format of the array if type array is used. Possible values are: <ul><li>`csv` - comma separated values `foo,bar`. <li>`ssv` - space separated values `foo bar`. <li>`tsv` - tab separated values `foo\tbar`. <li>`pipes` - pipe separated values <code>foo&#124;bar</code>. <li>`multi` - corresponds to multiple parameter instances instead of multiple values for a single instance `foo=bar&foo=baz`. This is valid only for parameters [`in`](#parameterIn) "query" or "formData". </ul> Default value is `csv`.
 <a name="parameterDefault"></a>default | * | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | Sets a default value to the parameter. See http://json-schema.org/latest/json-schema-validation.html#anchor101. Unlike JSON Schema this value MUST conform to the defined [`type`](#parameterType) for this parameter.
-<a name="parameterMaximum"></a>maximum | `number` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
-<a name="parameterExclusiveMaximum"></a>exclusiveMaximum | `boolean` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
-<a name="parameterMinimum"></a>minimum | `number` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
-<a name="parameterExclusiveMinimum"></a>exclusiveMinimum | `boolean` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
-<a name="parameterMaxLength"></a>maxLength | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor26.
-<a name="parameterMinLength"></a>minLength | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor29.
+<a name="parameterMaximum"></a>maximum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
+<a name="parameterExclusiveMaximum"></a>exclusiveMaximum | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
+<a name="parameterMinimum"></a>minimum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
+<a name="parameterExclusiveMinimum"></a>exclusiveMinimum | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
+<a name="parameterMaxLength"></a>maxLength | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor26.
+<a name="parameterMinLength"></a>minLength | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor29.
 <a name="parameterPattern"></a>pattern | `string` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor33.
-<a name="parameterMaxItems"></a>maxItems | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor42.
-<a name="parameterMinItems"></a>minItems | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor45.
-<a name="parameterUniqueItems"></a>uniqueItems | `boolean` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor49.
+<a name="parameterMaxItems"></a>maxItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor42.
+<a name="parameterMinItems"></a>minItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor45.
+<a name="parameterUniqueItems"></a>uniqueItems | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor49.
 <a name="parameterEnum"></a>enum | [*] | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor76.
-<a name="parameterMultipleOf"></a>multipleOf | `number` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor14.
+<a name="parameterMultipleOf"></a>multipleOf | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor14.
 
 
 ##### Patterned Fields
