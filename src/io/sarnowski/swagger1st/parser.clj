@@ -171,10 +171,23 @@
   (let [items-definition (get definition "items")
         items-parser (create-value-parser items-definition path)]
     (fn [value]
-      (let [err (partial throw-value-error value definition path)]
-        (if (seq value)
-          (map items-parser value)
-          (err "it is not an array"))))))
+      (let [err (partial throw-value-error value definition path)
+            check-count (fn [value]
+                          (if-let [max-items (get definition "maxItems")]
+                            (when-not (<= (count value) max-items)
+                              (err "it has more than '" max-items "' items")))
+                          (if-let [min-items (get definition "minItems")]
+                            (when-not (>= (count value) min-items)
+                              (err "it has less than '" min-items "' items"))))
+            check-unique (fn [value]
+                           (if (get definition "uniqueItems")
+                             (when-not (apply distinct? value)
+                               (err "it has duplicate items"))))]
+        (when-not (instance? Iterable value)
+          (err "it is not an array"))
+        (check-count value)
+        (check-unique value)
+        (map items-parser value)))))
 
 (defmethod create-value-parser "string" [definition path]
   (let [check-pattern (if (contains? definition "pattern")
@@ -184,7 +197,15 @@
                               (when-not (re-matches pattern value)
                                 (err "it does not match the given pattern '" (get definition "pattern") "'")))))
                         ; noop
-                        (fn [value] nil))]
+                        (fn [value] nil))
+        check-size (fn [value]
+                     (let [err (partial throw-value-error value definition path)]
+                       (if-let [min-length (get definition "minLength")]
+                         (when-not (>= min-length (count value))
+                           (err "it is shorter than '" min-length "' characters")))
+                       (if-let [max-length (get definition "maxLength")]
+                         (when-not (<= max-length (count value))
+                           (err "it is longer than '" max-length "' characters")))))]
     (fn [value]
       (let [err (partial throw-value-error value definition path)
             value (coerce-string value definition path)]
@@ -194,28 +215,45 @@
             value)
           (do
             (when (string? value)
-              (check-pattern value))
+              (check-pattern value)
+              (check-size value))
             value))))))
 
-(defmethod create-value-parser "integer" [definition path]
+(defn create-value-parser-number [definition path]
   (fn [value]
     (let [err (partial throw-value-error value definition path)
-          value (coerce-string value definition path)]
+          value (coerce-string value definition path)
+          check-multiple-of (fn [value]
+                              (if-let [multiple-of (get definition "multipleOf")]
+                                (when-not (zero? (mod value multiple-of))
+                                  (err "it is not a multiple of '" multiple-of "'"))))
+          check-range (fn [value]
+                        (if-let [minimum (get definition "minimum")]
+                          (if (get definition "exclusiveMinimum")
+                            (when (<= value minimum)
+                              (err "it is lower than or equal to '" minimum "'"))
+                            (when (< value minimum)
+                              (err "it is lower than '" minimum "'"))))
+                        (if-let [maximum (get definition "maximum")]
+                          (if (get definition "exclusiveMaximum")
+                            (when (>= value maximum)
+                              (err "it is higher than or equal to '" maximum "'"))
+                            (when (> value maximum)
+                              (err "it is higher than '" maximum "'")))))]
       (if (nil? value)
         (if (get definition "required")
           (err "it is required")
           value)
-        value))))
+        (do
+          (check-multiple-of value)
+          (check-range value)
+          value)))))
+
+(defmethod create-value-parser "integer" [definition path]
+  (create-value-parser-number definition path))
 
 (defmethod create-value-parser "number" [definition path]
-  (fn [value]
-    (let [err (partial throw-value-error value definition path)
-          value (coerce-string value definition path)]
-      (if (nil? value)
-        (if (get definition "required")
-          (err "it is required")
-          value)
-        value))))
+  (create-value-parser-number definition path))
 
 (defmethod create-value-parser "boolean" [definition path]
   (fn [value]

@@ -791,18 +791,18 @@ Field Name | Type | s1st | Description
 <a name="itemsItems"></a>items | [Items Object](#itemsObject) | **OK** | **Required if [`type`](#itemsType) is "array".** Describes the type of items in the array.
 <a name="itemsCollectionFormat"></a>collectionFormat | `string` | **MISSING**[#23](https://github.com/sarnowski/swagger1st/issues/23) | Determines the format of the array if type array is used. Possible values are: <ul><li>`csv` - comma separated values `foo,bar`. <li>`ssv` - space separated values `foo bar`. <li>`tsv` - tab separated values `foo\tbar`. <li>`pipes` - pipe separated values <code>foo&#124;bar</code>. </ul> Default value is `csv`.
 <a name="itemsDefault"></a>default | * | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | Sets a default value to the data type. See http://json-schema.org/latest/json-schema-validation.html#anchor101. Unlike JSON Schema this value MUST conform to the defined [`type`](#itemsType) for the data type.
-<a name="itemsMaximum"></a>maximum | `number` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
-<a name="itemsMaximum"></a>exclusiveMaximum | `boolean` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
-<a name="itemsMinimum"></a>minimum | `number` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
-<a name="itemsExclusiveMinimum"></a>exclusiveMinimum | `boolean` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
-<a name="itemsMaxLength"></a>maxLength | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor26.
-<a name="itemsMinLength"></a>minLength | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor29.
+<a name="itemsMaximum"></a>maximum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
+<a name="itemsMaximum"></a>exclusiveMaximum | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
+<a name="itemsMinimum"></a>minimum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
+<a name="itemsExclusiveMinimum"></a>exclusiveMinimum | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
+<a name="itemsMaxLength"></a>maxLength | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor26.
+<a name="itemsMinLength"></a>minLength | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor29.
 <a name="itemsPattern"></a>pattern | `string` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor33.
-<a name="itemsMaxItems"></a>maxItems | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor42.
-<a name="itemsMinItems"></a>minItems | `integer` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor45.
-<a name="itemsUniqueItems"></a>uniqueItems | `boolean` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor49.
+<a name="itemsMaxItems"></a>maxItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor42.
+<a name="itemsMinItems"></a>minItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor45.
+<a name="itemsUniqueItems"></a>uniqueItems | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor49.
 <a name="itemsEnum"></a>enum | [*] | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor76.
-<a name="itemsMultipleOf"></a>multipleOf | `number` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor14.
+<a name="itemsMultipleOf"></a>multipleOf | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor14.
 
 ##### Items Object Examples
 
@@ -847,7 +847,6 @@ A container for the expected responses of an operation. The container maps a HTT
 response. It is not expected from the documentation to necessarily cover all possible HTTP response codes, since they
 may not be known in advance. However, it is expected from the documentation to cover a successful operation response and
 any known errors.
-
 The `default` can be used a default response object for all HTTP codes that are not covered individually by the
 specification.
 
@@ -1188,17 +1187,17 @@ The following properties are taken directly from the JSON Schema definition and 
 - title **N/A**
 - description **N/A** ([GFM syntax](https://help.github.com/articles/github-flavored-markdown) can be used for rich text representation)
 - default **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) (Unlike JSON Schema, the value MUST conform to the defined type for the Schema Object)
-- multipleOf **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- maximum **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- exclusiveMaximum **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- minimum **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- exclusiveMinimum **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- maxLength **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- minLength **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- pattern **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- maxItems **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- minItems **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- uniqueItems **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
+- multipleOf **OK**
+- maximum **OK**
+- exclusiveMaximum **OK**
+- minimum **OK**
+- exclusiveMinimum **OK**
+- maxLength **OK**
+- minLength **OK**
+- pattern **OK**
+- maxItems **OK**
+- minItems **OK**
+- uniqueItems **OK**
 - maxProperties **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
 - minProperties **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
 - required **OK**
