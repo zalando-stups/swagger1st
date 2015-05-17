@@ -16,9 +16,10 @@ Navigate to [the UI](http://localhost:8080/ui/) to get an overview via the Swagg
 The following files are of special interest:
 
 * [/src/todo/api.clj](src/todo/api.clj)
+    * All functions take not only a `request` parameter but also a `db` parameter which is the injected database.
+* [/src/todo/core.clj](src/todo/core.clj)
     * The API component manages the embedded HTTP server, also configuring the swagger1st middlewares.
-    * The special configuration to focus on is the `swagger-executor` `:mappers`.
+    * The special configuration to focus on is the `s1st/executor` `:resolver`.
         * The configured function is defined above, wrapping the default function resolution in a new function, adding
           the DB dependency as a second parameter.
-    * Below the component definition is the actual business logic. Note, that the function take 2 arguments instead of
-      only the request as defined above. The functions will always take the database as a second argument.
+
