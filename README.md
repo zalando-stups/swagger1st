@@ -70,13 +70,53 @@ specification:
 
 ## The Ring handler in detail
 
-TODO explain different chain handlers, what they output, where you might want to hook into
+* `s1st/context` (required)
+    * Creates a new context from a given definition. This context will be used by the next steps to prepare the execution
+      of requests.
+* `s1st/discoverer` (optional)
+    * The discoverer enables certain HTTP endpoints, that makes it easy to work with your API. In particular, this enables
+      the Swagger UI under the path `/ui/` and exposes the Swagger definition under `/swagger.json`.
+* `s1st/mapper` (required)
+    * The mapper denormalizes the given definition (e.g. resolves all `$ref`s) and figures out, which request definition
+      maps to the actual incoming request. After this function, your `request` map contains the `:swagger` key, which
+      contains a `:request` key containing the denormalized definition of the request and a `:key` key which can be used
+      to uniquely identify a request.
+* `s1st/parser` (required)
+    * The parser parses the incoming request according to the definition and validates all inputs.
+* `s1st/protector` (optional)
+    * The protector can enforce all security definitions for you. As the security check implementations vary depending on
+      your environment, this is only a framework to hook into the system and define callbacks for the actual checks.
+* `s1st/executor` (required)
+    * The executor executes your defined function in the end. At this point, the whole definition was validated and only
+      valid requests make it up until here. You can also specify an own function resolver function in order to hook into
+      your own framework.
 
 ## Development on swagger1st
 
+Source code can be found on [GitHub](https://github.com/sarnowski/swagger1st). Read [this documentation](https://guides.github.com/introduction/flow/)
+if you are just starting with GitHub. In addition, you need [Leiningen](http://leiningen.org/) as the build tool, make sure it works first.
 
+The following commands are a kickstarter for development:
 
-TODO link to github, git clone, running tests, pull requests
+```shell
+# get the source
+$ git clone https://github.com/sarnowski/swagger1st.git
+$ cd swagger1st
+
+# run the tests
+$ lein test
+
+# run all tests, including performance benchmarks
+$ lein test :all
+
+# build an own artifact for local development
+$ lein install
+
+# release a new version
+$ lein release :minor
+```
+
+For interactive development, you can start a REPL by typing `lein repl`.
 
 ## License
 
