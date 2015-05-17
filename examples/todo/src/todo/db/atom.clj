@@ -17,7 +17,7 @@
 
       (do
         (log/info "creating a new AtomDatabase")
-        (assoc this :data (atom [])))))
+        (assoc this :data (atom {})))))
 
   (stop [this]
 
@@ -36,16 +36,16 @@
   (list-todos [{data :data}]
     @data)
 
-  (add-todo [{data :data} title]
-    (log/info "storing new TODO entry:" title)
-    (swap! data conj
-           {:id    (str (UUID/randomUUID))
-            :title title}))
+  (add-todo [{data :data} todo-data]
+    (log/info "storing new TODO entry:" todo-data)
+    (let [id (str (UUID/randomUUID))]
+      (swap! data assoc id todo-data)
+      id))
 
   (del-todo [{data :data} id]
     (log/info "deleting TODO entry:" id)
-    (swap! data (fn [data]
-                  (into {} (remove #(= (:id data) id) data))))))
+    (swap! data dissoc id)
+    nil))
 
 
 (defn new-atom-db

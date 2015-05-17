@@ -10,8 +10,85 @@ paths:
       summary: get all TODO entries
       description: Returns a list of all TODO entries.
       operationId: todo.api/get-todo-entries
+      tags:
+        - TODO
       produces:
         - application/json
       responses:
         200:
           description: all TODO entries
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: "7456de75-abd7-4c60-a0ec-aad285ce6c93"
+                title:
+                  type: string
+                  example: clean bedroom
+                description:
+                  type: string
+                  example: |
+                    bedroom needs to be cleaned again
+
+    post:
+      summary: add new TODO entry
+      description: Creates a new TODO entry in your TODO list.
+      operationId: todo.api/add-todo-entry
+      tags:
+        - TODO
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: todo
+          in: body
+          description: data about your TODO
+          schema:
+            '$ref': '#/definitions/TODOData'
+      responses:
+        200:
+          description: new TODO entry stored
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: the generated ID for this entry
+                example: "7456de75-abd7-4c60-a0ec-aad285ce6c93"
+
+    delete:
+      summary: deletes a TODO entry
+      description: Deletes a TODO entry from your TODO list.
+      operationId: todo.api/delete-todo-entry
+      tags:
+        - TODO
+      parameters:
+        - name: id
+          in: query
+          type: string
+          required: true
+      responses:
+        200:
+          description: TODO entry deleted
+
+definitions:
+  TODOData:
+    type: object
+    properties:
+      title:
+        type: string
+        description: a short summary of the TODO
+        example: clean bedroom
+        minLength: 1
+      description:
+        type: string
+        description: full description of what you have to do
+        example: |
+          bedroom needs to be cleaned again
+    required:
+      - title
+      - description

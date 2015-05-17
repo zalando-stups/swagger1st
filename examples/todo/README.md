@@ -7,10 +7,9 @@ This example implements a TODO list, integrating the
 
 First, you have to build an uberjar, that embeds an HTTP server:
 
-    $ lein uberjar
-    $ java -jar target/todo.jar
+    $ lein run -m todo.core
 
-Navigate to [the UI](http://localhost:3000/ui/) to get an overview via the Swagger UI.
+Navigate to [the UI](http://localhost:8080/ui/) to get an overview via the Swagger UI.
 
 ## Things to look at
 
