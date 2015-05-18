@@ -181,7 +181,7 @@
                               (err "it has less than '" min-items "' items"))))
             check-unique (fn [value]
                            (if (get definition "uniqueItems")
-                             (when-not (apply distinct? value)
+                             (when-not (or (empty? value) (apply distinct? value))
                                (err "it has duplicate items"))))]
         (when-not (instance? Iterable value)
           (err "it is not an array"))

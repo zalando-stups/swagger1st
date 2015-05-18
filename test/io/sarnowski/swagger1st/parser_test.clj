@@ -145,7 +145,17 @@
   (is (rejected (parse ["foo" "bar" "bar"]
                        {"type" "array"
                         "items" {"type" "string"}
-                        "uniqueItems" true}))))
+                        "uniqueItems" true})))
+
+  (is (empty? (parse []
+                     {"type" "array"
+                      "items" {"type" "string"}
+                      "uniqueItems" true})))
+
+  (is (= ["foo"] (parse ["foo"]
+                        {"type" "array"
+                         "items" {"type" "string"}
+                         "uniqueItems" true}))))
 
 (deftest object-values
   (is (= {:foo "bar"} (parse {:foo "bar"}
