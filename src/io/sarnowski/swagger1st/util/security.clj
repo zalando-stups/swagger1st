@@ -43,18 +43,12 @@
 (defn resolve-access-token
   "Checks with a tokeninfo endpoint for the token's validity and returns the session information if valid."
   [tokeninfo-url access-token]
-  ; TODO make connection pool configurable!
   (try
-    (let [request-start (t/now)
-          response (client/get tokeninfo-url
+    (let [response (client/get tokeninfo-url
                                {:query-params     {:access_token access-token}
                                 :throw-exceptions false
                                 :as               :json-string-keys})
-          request-end (t/now)
-          body (:body response)
-          request-duration-ms (t/in-millis (t/interval request-start request-end))]
-      (when-not (< 10 request-duration-ms)
-        (log/warn "resolving tokeninfo took" request-duration-ms "ms"))
+          body (:body response)]
       (when (= 200 (:status response)) body))
     (catch IOException e
       (log/warn "could not get tokeninfo from" tokeninfo-url "because " (str e) "; rejecting token!")
@@ -78,14 +72,15 @@
    * config-fn takes one parameter for getting configuration values. Configuration values:
    ** :tokeninfo-url
    * check-scopes-fn takes tokeninfo and scopes data and returns if token is valid"
-  [get-config-fn check-scopes-fn]
+  [get-config-fn check-scopes-fn & {:keys [resolver-fn]
+                                    :or {resolver-fn resolve-access-token}}]
   (fn [request definition requirements]
     ; get access token from request
     (if-let [access-token (extract-access-token request)]
       (let [tokeninfo-url (get-config-fn :tokeninfo-url)]
         (if tokeninfo-url
           ; check access token
-          (if-let [tokeninfo (resolve-access-token tokeninfo-url access-token)]
+          (if-let [tokeninfo (resolver-fn tokeninfo-url access-token)]
             ; check scopes
             (if (check-scopes-fn tokeninfo requirements)
               (assoc request :tokeninfo tokeninfo)
