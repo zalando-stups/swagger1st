@@ -6,8 +6,8 @@
 
 (defn error
   "Generate an error response."
-  [http-status message & [detail]]
-  (-> (r/response (json/write-str {:message message :detail detail} :escape-slash false))
+  [http-status message & [details]]
+  (-> (r/response (json/write-str {:message message :details details} :escape-slash false))
       (r/content-type "application/json")
       (r/status http-status)))
 

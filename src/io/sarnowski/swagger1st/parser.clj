@@ -333,7 +333,7 @@
       (if (and (instance? ExceptionInfo e) (contains? (ex-data e) :http-code))
                                         ; nice errors
         (let [{:keys [http-code] :as data} (ex-data e)]
-          (api/error http-code (.getMessage e) (dissoc data :http-code)))
+          (api/error http-code (.getMessage e) (:details data)))
                                         ; unexpected errors
         (do
           (log/error e "internal server error" (str e))
