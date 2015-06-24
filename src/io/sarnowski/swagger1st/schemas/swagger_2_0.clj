@@ -100,7 +100,8 @@
    (s/optional-key "xml")              xml-object
    (s/optional-key "externalDocs")     external-documentation-object
    (s/optional-key "example")          s/Any
-   (s/optional-key "$ref")             s-string})
+   (s/optional-key "$ref")             s-string
+   (s/optional-key "x-swagger1st-keywordize") s/Any})
 
 (def header-object
   (merge

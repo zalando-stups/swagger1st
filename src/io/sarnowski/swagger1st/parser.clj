@@ -87,7 +87,10 @@
         content-type (string/trim content-type)
         allowed-content-types (set (get request-definition "consumes"))
         ; TODO make this configurable
-        supported-content-types {json-content-type? (fn [body] (json/read-json (slurp body)))}]
+        supported-content-types {json-content-type? (fn [body] (let [slurped-body (slurp body)
+                                                                     keywordize? (get parameter-definition "x-swagger1st-keywordize" true)
+                                                                     json-body (json/read-json slurped-body keywordize?)]
+                                                                     json-body))}]
 
     (if (allowed-content-types content-type)                ; TODO could be checked on initialization of ring handler chain
       (if-let [deserialize-fn (second (first (filter (fn [[pattern _]] (re-matches pattern content-type)) supported-content-types)))]
