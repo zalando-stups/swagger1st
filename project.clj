@@ -10,31 +10,31 @@
 
   :min-lein-version "2.0.0"
 
-  :dependencies [[org.clojure/clojure "1.6.0"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.logging "0.3.1"]
 
                  [org.clojure/data.json "0.2.6"]
-                 [circleci/clj-yaml "0.5.3"]
+                 [circleci/clj-yaml "0.5.4"]
 
-                 [prismatic/schema "0.4.2"]
+                 [prismatic/schema "0.4.4"]
 
-                 [clj-time "0.9.0"]
+                 [clj-time "0.11.0"]
 
                  [ring-basic-authentication "1.0.5"]
-                 [clj-http "1.1.2"]]
+                 [clj-http "2.0.0"]]
 
   :plugins [[lein-cloverage "1.0.3"]]
 
   :profiles {:dev {:dependencies [[ring/ring-mock "0.2.0"]
-                                  [ring/ring-core "1.3.2"]
-                                  [ring/ring-devel "1.3.2"]
+                                  [ring/ring-core "1.4.0"]
+                                  [ring/ring-devel "1.4.0"]
                                   [javax.servlet/servlet-api "2.5"]
                                   [org.slf4j/slf4j-api "1.7.12"]
                                   [org.slf4j/jul-to-slf4j "1.7.12"]
                                   [org.slf4j/jcl-over-slf4j "1.7.12"]
-                                  [org.apache.logging.log4j/log4j-api "2.2"]
-                                  [org.apache.logging.log4j/log4j-core "2.2"]
-                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.2"]
+                                  [org.apache.logging.log4j/log4j-api "2.3"]
+                                  [org.apache.logging.log4j/log4j-core "2.3"]
+                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.3"]
                                   [criterium "0.4.3"]]}}
 
   :test-selectors {:default (complement :performance)
