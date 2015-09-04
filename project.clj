@@ -16,14 +16,14 @@
                  [org.clojure/data.json "0.2.6"]
                  [circleci/clj-yaml "0.5.4"]
 
-                 [prismatic/schema "0.4.4"]
+                 [prismatic/schema "1.0.1"]
 
                  [clj-time "0.11.0"]
 
                  [ring-basic-authentication "1.0.5"]
                  [clj-http "2.0.0"]]
 
-  :plugins [[lein-cloverage "1.0.3"]]
+  :plugins [[lein-cloverage "1.0.6"]]
 
   :profiles {:dev {:dependencies [[ring/ring-mock "0.2.0"]
                                   [ring/ring-core "1.4.0"]

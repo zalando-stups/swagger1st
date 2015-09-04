@@ -28,7 +28,7 @@
                                          (assoc definition "host" (or
                                                                     (-> request :headers (get "host"))
                                                                     (-> request :server-name)
-                                                                    (-> definition "host")))
+                                                                    (get definition "host")))
                                          definition)))
                                    (r/header "Content-Type" "application/json"))
       (= ui-path path) (-> (r/response (swaggerui-template definition definition-path))

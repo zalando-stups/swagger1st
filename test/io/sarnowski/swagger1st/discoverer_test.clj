@@ -10,10 +10,10 @@
 
   (let [result (app (mock/request :get "/.well-known/schema-discovery"))
         discovery (json/read-str (:body result))]
-    (is (= discovery)
-        {:schema_url  "/swagger.json"
-         :schema_type "swagger-2.0"
-         :ui_url      "/ui/"}))
+    (is (= discovery
+           {"schema_url"  "/swagger.json"
+            "schema_type" "swagger-2.0"
+            "ui_url"      "/ui/"})))
 
   (let [result (app (mock/request :get "/swagger.json"))
         definition (json/read-str (:body result))]
