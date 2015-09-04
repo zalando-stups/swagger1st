@@ -59,14 +59,30 @@
            (map (fn [[k _]] k))
            (into #{})))))
 
-(deftest lookup-request
-  (let [requests {["get" []] :get
-                  ["post" []] :post
+(deftest honor-base-path-prefix
+  (is (= #{["get" ["api"]]
 
-                  ["get" ["foo" :bar]] :get-foo
-                  ["post" ["foo" :bar]] :post-foo
+           ["get" ["api" "foo" :bar]]}
+         (->>
+           (m/extract-requests
+             {"basePath" "/api"
+              "paths"    {
+                          "/"
+                          {"get" {}}
+
+                          "/foo/{bar}"
+                          {"get" {}}}})
+           (map (fn [[k _]] k))
+           (into #{})))))
+
+(deftest lookup-request
+  (let [requests {["get" []]              :get
+                  ["post" []]             :post
+
+                  ["get" ["foo" :bar]]    :get-foo
+                  ["post" ["foo" :bar]]   :post-foo
                   ["delete" ["foo" :bar]] :delete-foo}]
 
-  (is (= :get (second (m/lookup-request requests {:request-method :get :uri "/"}))))
-  (is (= :get-foo (second (m/lookup-request requests {:request-method :get :uri "/foo/baz"}))))
-  (is (= :delete-foo (second (m/lookup-request requests {:request-method :delete :uri "/foo/baz"}))))))
+    (is (= :get (second (m/lookup-request requests {:request-method :get :uri "/"}))))
+    (is (= :get-foo (second (m/lookup-request requests {:request-method :get :uri "/foo/baz"}))))
+    (is (= :delete-foo (second (m/lookup-request requests {:request-method :delete :uri "/foo/baz"}))))))

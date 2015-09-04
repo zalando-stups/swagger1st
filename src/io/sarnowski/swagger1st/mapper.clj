@@ -106,16 +106,25 @@
                      path-definition)]
     [[operation keyword-path] definition]))
 
+(defn join-base-path
+  "Joins the defined path with the global base path. Base paths are expected to start with a / and not end with a /."
+  [path base-path]
+  (if (and base-path (not= base-path "/"))
+    (str base-path path)
+    path))
+
 ; TODO flatten 'allOf' definitions
 (defn extract-requests
   "Extracts request-key->operation-definition from a swagger definition."
   [definition]
-  (let [inheriting-key? #{"parameters" "consumes" "produces" "schemes" "security"}]
+  (let [base-path (get definition "basePath")
+        inheriting-key? #{"parameters" "consumes" "produces" "schemes" "security"}]
     (->>
       ; create request-key / swagger-request tuples
       (for [[path path-definition] (get definition "paths")]
         (when-not (inheriting-key? path)
-          (let [path-definition (inherit-mimetypes path-definition definition)]
+          (let [path (join-base-path path base-path)
+                path-definition (inherit-mimetypes path-definition definition)]
             (for [[operation operation-definition] path-definition]
               (when-not (inheriting-key? operation)
                 (create-request-tuple operation operation-definition path path-definition))))))
@@ -168,7 +177,7 @@
     (if (nil? swagger-request)
       (api/error 404 (str (.toUpperCase (-> request :request-method name)) " " (-> request :uri) " not found."))
       (let [request (-> request
-                          (assoc-in [:swagger :request] swagger-request)
-                          (assoc-in [:swagger :key] key))]
-          (log/debug "request" key "->" swagger-request)
-          (next-handler request)))))
+                        (assoc-in [:swagger :request] swagger-request)
+                        (assoc-in [:swagger :key] key))]
+        (log/debug "request" key "->" swagger-request)
+        (next-handler request)))))

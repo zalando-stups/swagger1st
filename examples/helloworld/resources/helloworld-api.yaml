@@ -4,6 +4,8 @@ info:
   title: swagger1st helloworld example
   version: "1.0"
 
+basePath: /api
+
 paths:
   /greeting:
     get:
