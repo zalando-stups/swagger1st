@@ -294,7 +294,7 @@
 
 (defn setup
   "Prepares function calls for parsing parameters during request time."
-  [{:keys [requests] :as context} & {:keys [] :as parser-options}]
+  [{:keys [requests] :as context} parser-options]
   (let [parsers (into {}
                       (map (fn [[request-key request-definition]]
                              [request-key (create-parsers request-definition parser-options)])

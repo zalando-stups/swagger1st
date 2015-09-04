@@ -57,10 +57,10 @@
 
 (defn parser
   "A swagger middleware that uses a swagger definition for parsing parameters and crafting responses."
-  [context]
+  [context & {:keys [] :as parser-options}]
   (chain-handler
     context
-    :on-init parser/setup
+    :on-init #(parser/setup % parser-options)
     :on-request parser/parse))
 
 (defn protector
