@@ -16,41 +16,41 @@
                   (f/unparse date-time)
                   (json/write-str))))
 
-                                        ; add json capability to org.joda.time.DateTime
+; add json capability to org.joda.time.DateTime
 (extend DateTime json/JSONWriter
-        {:-write serialize-date-time})
+  {:-write serialize-date-time})
 
 (def json-content-type?
-                                        ; TODO could be more precise but also complex
-                                        ; examples:
-                                        ;  application/json
-                                        ;  application/vnd.order+json
+  ; TODO could be more precise but also complex
+  ; examples:
+  ;  application/json
+  ;  application/vnd.order+json
   #"application/.*json")
 
 (defn throw-value-error
   "Throws a validation error if value cannot be parsed or is invalid."
   [value definition path & reason]
   (throw (ex-info
-          (str "Value " (json/write-str value :escape-slash false)
-               " in " (string/join "->" path)
-               (if (get definition "required")
-                 " (required)"
-                 " (not required)")
-               " cannot be used as type '" (get definition "type") "'"
-               (if (get definition "format")
-                 (str " with format '" (get definition "format") "'")
-                 "")
-               " because " (string/join (map (fn [v] (if (keyword? v) (name v) v)) reason)) ".")
-          {:http-code  400
-           :value      value
-           :path       path
-           :definition definition})))
+           (str "Value " (json/write-str value :escape-slash false)
+                " in " (string/join "->" path)
+                (if (get definition "required")
+                  " (required)"
+                  " (not required)")
+                " cannot be used as type '" (get definition "type") "'"
+                (if (get definition "format")
+                  (str " with format '" (get definition "format") "'")
+                  "")
+                " because " (string/join (map (fn [v] (if (keyword? v) (name v) v)) reason)) ".")
+           {:http-code  400
+            :value      value
+            :path       path
+            :definition definition})))
 
 (defn extract-parameter-path
   "Extract a parameter from the request path."
   [request definition]
   (let [[_ template-path] (-> request :swagger :key)
-                                        ; TODO split paths before once and only access parsed paths here
+        ; TODO split paths before once and only access parsed paths here
         parameters (map (fn [t r] (when (keyword? t) [t r]))
                         template-path
                         (split-path (:uri request)))
@@ -78,14 +78,14 @@
   "Extract a parameter from the request body."
   [request parameter-definition]
   (let [request-definition (-> request :swagger :request)
-                                        ; TODO honor charset= definitions of content-type header
+        ; TODO honor charset= definitions of content-type header
         [content-type charset] (string/split (or
-                                              (get (:headers request) "content-type")
-                                              "application/octet-stream")
+                                               (get (:headers request) "content-type")
+                                               "application/octet-stream")
                                              #";")
         content-type (string/trim content-type)
         allowed-content-types (set (get request-definition "consumes"))
-                                        ; TODO make this configurable
+        ; TODO make this configurable
         supported-content-types {json-content-type? (fn [body] (json/read-json (slurp body)))}]
 
     (if (allowed-content-types content-type)                ; TODO could be checked on initialization of ring handler chain
@@ -95,8 +95,8 @@
           (catch Exception e
             (api/throw-error 400 (str "Body not parsable with given content type.")
                              {:content-type content-type
-                              :error (str e)})))
-                                        ; if we cannot deserialize it, just forward it to the executing function
+                              :error        (str e)})))
+        ; if we cannot deserialize it, just forward it to the executing function
         (:body request))
       (api/throw-error 406 "Content type not allowed."
                        {:content-type          content-type
@@ -117,8 +117,8 @@
                           "number"    #(Float/parseFloat %)
                           "boolean"   #(Boolean/parseBoolean %)
 
-                                        ; special formats
-                                        ; TODO support pluggable formats for e.g. 'email' or 'uuid'
+                          ; special formats
+                          ; TODO support pluggable formats for e.g. 'email' or 'uuid'
                           "int32"     #(Integer/parseInt %)
                           "int64"     #(Long/parseLong %)
                           "float"     #(Float/parseFloat %)
@@ -135,41 +135,43 @@
           (string-transformer value)
           (catch Exception e
             (err "it cannot be transformed: " (.getMessage e))))
-                                        ; TODO check on setup, not runtime
+        ; TODO check on setup, not runtime
         (err "its format is not supported")))
     value))
 
 (defmulti create-value-parser
-  "Creates a parser function that takes a value and coerces and validates it."
-  (fn [definition _]
-    (get definition "type")))
+          "Creates a parser function that takes a value and coerces and validates it."
+          (fn [definition _ _]
+            (get definition "type")))
 
-(defmethod create-value-parser "object" [definition path]
+(defmethod create-value-parser "object" [definition path parser-options]
   (let [required-keys (set (map keyword (get definition "required")))
         key-parsers (into {} (map (fn [[k v]]
-                                    [(keyword k) (create-value-parser v (conj path k))])
+                                    [(keyword k) (create-value-parser v (conj path k) parser-options)])
                                   (get definition "properties")))]
     (fn [value]
       (let [err (partial throw-value-error value definition path)]
         (if (map? value)
           (do
-                                        ; check all required keys are present
+            ; check all required keys are present
             (let [provided-keys (set (keys value))]
               (doseq [required-key required-keys]
                 (when-not (contains? provided-keys required-key)
                   (err "it misses the key '" (name required-key) "'"))))
-                                        ; traverse into all keys
+            ; traverse into all keys
             (into {}
                   (map (fn [[k v]]
                          (if-let [parser (key-parsers k)]
                            [k (parser v)]
-                           (err "the given attribute '" k "' is not defined")))
+                           (if (:allow-undefined-keys parser-options)
+                             [k v]
+                             (err "the given attribute '" k "' is not defined"))))
                        value)))
           (err "it is not an object"))))))
 
-(defmethod create-value-parser "array" [definition path]
+(defmethod create-value-parser "array" [definition path parser-options]
   (let [items-definition (get definition "items")
-        items-parser (create-value-parser items-definition path)]
+        items-parser (create-value-parser items-definition path parser-options)]
     (fn [value]
       (let [err (partial throw-value-error value definition path)
             check-count (fn [value]
@@ -189,14 +191,14 @@
         (check-unique value)
         (map items-parser value)))))
 
-(defmethod create-value-parser "string" [definition path]
+(defmethod create-value-parser "string" [definition path parser-options]
   (let [check-pattern (if (contains? definition "pattern")
                         (let [pattern (re-pattern (get definition "pattern"))]
                           (fn [value]
                             (let [err (partial throw-value-error value definition path)]
                               (when-not (re-matches pattern value)
                                 (err "it does not match the given pattern '" (get definition "pattern") "'")))))
-                                        ; noop
+                        ; noop
                         (fn [value] nil))
         check-size (fn [value]
                      (let [err (partial throw-value-error value definition path)]
@@ -219,7 +221,7 @@
               (check-size value))
             value))))))
 
-(defn create-value-parser-number [definition path]
+(defn create-value-parser-number [definition path parser-options]
   (fn [value]
     (let [err (partial throw-value-error value definition path)
           value (coerce-string value definition path)
@@ -249,13 +251,13 @@
           (check-range value)
           value)))))
 
-(defmethod create-value-parser "integer" [definition path]
-  (create-value-parser-number definition path))
+(defmethod create-value-parser "integer" [definition path parser-options]
+  (create-value-parser-number definition path parser-options))
 
-(defmethod create-value-parser "number" [definition path]
-  (create-value-parser-number definition path))
+(defmethod create-value-parser "number" [definition path parser-options]
+  (create-value-parser-number definition path parser-options))
 
-(defmethod create-value-parser "boolean" [definition path]
+(defmethod create-value-parser "boolean" [definition path parser-options]
   (fn [value]
     (let [err (partial throw-value-error value definition path)
           value (coerce-string value definition path)]
@@ -265,21 +267,21 @@
           value)
         value))))
 
-(defmethod create-value-parser :default [definition path]
-                                        ; ignore this value and just pass through
+(defmethod create-value-parser :default [definition path parser-options]
+  ; ignore this value and just pass through
   (fn [value]
     value))
 
 (defn create-parser
   "Creates a parsing function for the given parameter definition."
-  [parameter-definition]
+  [parameter-definition parser-options]
   (let [pin (get parameter-definition "in")
         pname (get parameter-definition "name")
 
         parameter-definition (if (= "body" pin) (get parameter-definition "schema") parameter-definition)
 
         extractor (extractors pin)
-        parse-value (create-value-parser parameter-definition [pin pname])]
+        parse-value (create-value-parser parameter-definition [pin pname] parser-options)]
     (fn [request]
       (let [pvalue (extractor request parameter-definition)
             pvalue (parse-value pvalue)]
@@ -287,15 +289,15 @@
 
 (defn create-parsers
   "Creates a list of all parameter parser functions for a request that return a triple of [in out value] when called."
-  [request-definition]
-  (map create-parser (get request-definition "parameters")))
+  [request-definition parser-options]
+  (map #(create-parser % parser-options) (get request-definition "parameters")))
 
 (defn setup
   "Prepares function calls for parsing parameters during request time."
-  [{:keys [requests] :as context}]
+  [{:keys [requests] :as context} & {:keys [] :as parser-options}]
   (let [parsers (into {}
                       (map (fn [[request-key request-definition]]
-                             [request-key (create-parsers request-definition)])
+                             [request-key (create-parsers request-definition parser-options)])
                            requests))]
     (assoc context :parsers parsers)))
 
@@ -307,7 +309,7 @@
                                                         body
                                                         (json/write-str body)))}]
     (if-let [serializer (supported-content-types (get-in response [:headers "Content-Type"]))]
-                                        ; TODO maybe check for allowed "produces" mimetypes and do object validation
+      ; TODO maybe check for allowed "produces" mimetypes and do object validation
       (update-in response [:body] serializer)
       response)))
 
@@ -316,11 +318,11 @@
   [{:keys [parsers]} next-handler request]
   (try
     (let [parameters (->> (get parsers (-> request :swagger :key))
-                                        ; execute all parsers of the request
+                          ; execute all parsers of the request
                           (map (fn [parser] (parser request)))
-                                        ; group by "in"
+                          ; group by "in"
                           (group-by first)
-                                        ; restructure to resemble the grouping: map[in][name] = value
+                          ; restructure to resemble the grouping: map[in][name] = value
                           (map (fn [[parameter-in parameters]]
                                  [(keyword parameter-in) (into {} (map (fn [[pin pname pvalue]]
                                                                          [(keyword pname) pvalue]) parameters))]))
@@ -331,10 +333,10 @@
 
     (catch Exception e
       (if (and (instance? ExceptionInfo e) (contains? (ex-data e) :http-code))
-                                        ; nice errors
+        ; nice errors
         (let [{:keys [http-code] :as data} (ex-data e)]
           (api/error http-code (.getMessage e) (:details data)))
-                                        ; unexpected errors
+        ; unexpected errors
         (do
           (log/error e "internal server error" (str e))
           (api/error 500 "Internal Server Error"))))))
