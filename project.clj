@@ -21,7 +21,8 @@
                  [clj-time "0.11.0"]
 
                  [ring-basic-authentication "1.0.5"]
-                 [clj-http "2.0.0"]]
+                 [clj-http "2.0.0"]
+                 [cheshire "5.5.0"]]
 
   :plugins [[lein-cloverage "1.0.6"]]
 
