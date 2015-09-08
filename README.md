@@ -23,6 +23,16 @@ lein new swagger1st myproject
 Go into the new project folder `myproject` and start a new webserver with `lein ring server-headless`. Go with your browser
 to [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
+You can also generate a project setup which includes Stuart Sierra's [component](https://github.com/stuartsierra/component)
+framework in order to see how you can handle dependency injection with swagger1st:
+
+```
+lein new swagger1st myproject +component
+```
+
+Go into the new project folder `myproject` and run its main function via `lein run -m myproject.core`. Go with your browser
+to [http://localhost:3000/ui/](http://localhost:3000/ui/).
+
 ### Manual Setup
 
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
@@ -51,25 +61,18 @@ The following setup creates a ring compliant handler.
 
 ## Complete Example Projects
 
-The [examples](examples/) directory contains some examples, that can help you bootstrap a complete setup:
+**Checkout the Leiningen templates as mentioned in the Kickstart section for working examples.**
 
-* [Hello, World!](examples/helloworld/)
-    * The simplest setup as a starting point for own applications. This already shows all parts necessary to combine in
-      order to have a working API.
-* [TODO](examples/todo/)
-    * A TODO list application, showing integration with the lifecycle framework
-      [component](https://github.com/stuartsierra/component). This integration allows all request handlers to access the
-      defined dependencies like databases.
-* [Friboo](https://github.com/zalando-stups/friboo)
-    * Friboo is [Zalando](http://tech.zalando.com/)'s opinionated Clojure microservice library which uses swagger1st at
-      its base for RESTful HTTP endpoints and also integrates with the
-      [component](https://github.com/stuartsierra/component) framework. See the following projects who are real world
-      applications of Zalando's cloud infrastructure based on Friboo with swagger1st:
-        * [Kio](https://github.com/zalando-stups/kio)
-        * [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3)
-        * [essentials](https://github.com/zalando-stups/essentials)
-        * [TWINTIP](https://github.com/zalando-stups/twintip-storage)
-        * [mint](https://github.com/zalando-stups/mint-storage)
+[Friboo](https://github.com/zalando-stups/friboo) is [Zalando](http://tech.zalando.com/)'s opinionated Clojure
+microservice library which uses swagger1st at its base for RESTful HTTP endpoints and also integrates with the
+[component](https://github.com/stuartsierra/component) framework. See the following projects who are real world
+applications of Zalando's cloud infrastructure based on Friboo with swagger1st:
+
+* [Kio](https://github.com/zalando-stups/kio)
+* [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3)
+* [essentials](https://github.com/zalando-stups/essentials)
+* [TWINTIP](https://github.com/zalando-stups/twintip-storage)
+* [mint](https://github.com/zalando-stups/mint-storage)
 
 ## Compatibility Overview
 

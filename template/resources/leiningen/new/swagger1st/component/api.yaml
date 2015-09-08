@@ -1,7 +1,7 @@
 swagger: "2.0"
 
 info:
-  title: swagger1st helloworld example
+  title: "{{name}} API"
   version: "1.0"
 
 basePath: /api
@@ -15,7 +15,7 @@ paths:
       tags:
         - Greeting
       # Hint: here we reference the actual Clojure function to call when this request comes in
-      operationId: helloworld/create-greeting
+      operationId: {{name}}.api/create-greeting
       produces:
         - application/json
       parameters:
@@ -37,5 +37,8 @@ paths:
               name:
                 type: string
                 example: "Tobi"
+              counter:
+                type: integer
+                example: "63"
         default:
           description: error
