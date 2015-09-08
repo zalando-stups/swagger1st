@@ -1,0 +1,41 @@
+swagger: "2.0"
+
+info:
+  title: "{{name}} API"
+  version: "1.0"
+
+basePath: /api
+
+paths:
+  /greeting:
+    get:
+      summary: generate greeting
+      description: |
+        Returns a greeting message.
+      tags:
+        - Greeting
+      # Hint: here we reference the actual Clojure function to call when this request comes in
+      operationId: {{name}}.api/create-greeting
+      produces:
+        - application/json
+      parameters:
+        - name: name
+          in: query
+          type: string
+          required: true
+          description: |
+            Name of the person to greet.
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Hello Tobi!"
+              name:
+                type: string
+                example: "Tobi"
+        default:
+          description: error
