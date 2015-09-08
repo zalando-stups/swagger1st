@@ -66,9 +66,10 @@ The [examples](examples/) directory contains some examples, that can help you bo
       [component](https://github.com/stuartsierra/component) framework. See the following projects who are real world
       applications of Zalando's cloud infrastructure based on Friboo with swagger1st:
         * [Kio](https://github.com/zalando-stups/kio)
+        * [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3)
         * [essentials](https://github.com/zalando-stups/essentials)
-        * [TWINTIP](https://github.com/zalando-stups/twintip)
-        * [mint](https://github.com/zalando-stups/mint)
+        * [TWINTIP](https://github.com/zalando-stups/twintip-storage)
+        * [mint](https://github.com/zalando-stups/mint-storage)
 
 ## Compatibility Overview
 
