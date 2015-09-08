@@ -238,3 +238,16 @@
             :body    (json-body
                        {:bar "baz"})}
            {"name" "testmap"}))))
+
+(deftest extract-body-parameter-without-keywords
+  (is (= {"foo/bar" "baz"
+          "bar"     "baz"}
+         (p/extract-parameter-body
+           {:uri     "/foo"
+            :headers {"content-type" "application/json"}
+            :swagger {:request {"consumes" ["application/json"]}}
+            :body    (json-body
+                       {"foo/bar" "baz"
+                        :bar      "baz"})}
+           {"name"                    "testmap"
+            "x-swagger1st-keywordize" false}))))
