@@ -1,6 +1,5 @@
 (ns helloworld
   (:require [io.sarnowski.swagger1st.core :as s1st]
-            [ring.middleware.params :refer [wrap-params]]
             [ring.util.response :as r]))
 
 ;; your business logic (see resources/helloworld-api.yaml)
@@ -22,7 +21,6 @@
 (def app
   (-> (s1st/context :yaml-cp "helloworld-api.yaml")
       (s1st/discoverer)
-      (s1st/ring wrap-params)
       (s1st/mapper)
       (s1st/parser)
       (s1st/executor)))

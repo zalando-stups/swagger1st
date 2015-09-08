@@ -1,6 +1,5 @@
 (ns io.sarnowski.swagger1st.integration
   (:require [clojure.test :refer :all]
-            [ring.middleware.params :refer [wrap-params]]
             [ring.mock.request :as mock]
             [io.sarnowski.swagger1st.core-test :refer :all]
             [io.sarnowski.swagger1st.util.security :as s1stsec]

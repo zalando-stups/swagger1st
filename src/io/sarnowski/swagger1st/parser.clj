@@ -3,8 +3,9 @@
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [io.sarnowski.swagger1st.mapper :refer [split-path]]
+            [io.sarnowski.swagger1st.util.api :as api]
             [clj-time.format :as f]
-            [io.sarnowski.swagger1st.util.api :as api])
+            [ring.middleware.params :refer [params-request]])
   (:import (org.joda.time DateTime)
            (java.io PrintWriter)
            (clojure.lang ExceptionInfo)))
@@ -316,27 +317,28 @@
 (defn parse
   "Executes all prepared functions for the request."
   [{:keys [parsers]} next-handler request]
-  (try
-    (let [parameters (->> (get parsers (-> request :swagger :key))
-                          ; execute all parsers of the request
-                          (map (fn [parser] (parser request)))
-                          ; group by "in"
-                          (group-by first)
-                          ; restructure to resemble the grouping: map[in][name] = value
-                          (map (fn [[parameter-in parameters]]
-                                 [(keyword parameter-in) (into {} (map (fn [[pin pname pvalue]]
-                                                                         [(keyword pname) pvalue]) parameters))]))
-                          (into {}))]
-      (log/debug "parameters" parameters)
-      (let [response (next-handler (assoc request :parameters parameters))]
-        (serialize-response request response)))
+  (let [request (params-request request)]
+    (try
+      (let [parameters (->> (get parsers (-> request :swagger :key))
+                            ; execute all parsers of the request
+                            (map (fn [parser] (parser request)))
+                            ; group by "in"
+                            (group-by first)
+                            ; restructure to resemble the grouping: map[in][name] = value
+                            (map (fn [[parameter-in parameters]]
+                                   [(keyword parameter-in) (into {} (map (fn [[pin pname pvalue]]
+                                                                           [(keyword pname) pvalue]) parameters))]))
+                            (into {}))]
+        (log/debug "parameters" parameters)
+        (let [response (next-handler (assoc request :parameters parameters))]
+          (serialize-response request response)))
 
-    (catch Exception e
-      (if (and (instance? ExceptionInfo e) (contains? (ex-data e) :http-code))
-        ; nice errors
-        (let [{:keys [http-code] :as data} (ex-data e)]
-          (api/error http-code (.getMessage e) (:details data)))
-        ; unexpected errors
-        (do
-          (log/error e "internal server error" (str e))
-          (api/error 500 "Internal Server Error"))))))
+      (catch Exception e
+        (if (and (instance? ExceptionInfo e) (contains? (ex-data e) :http-code))
+          ; nice errors
+          (let [{:keys [http-code] :as data} (ex-data e)]
+            (api/error http-code (.getMessage e) (:details data)))
+          ; unexpected errors
+          (do
+            (log/error e "internal server error" (str e))
+            (api/error 500 "Internal Server Error")))))))

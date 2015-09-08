@@ -3,7 +3,6 @@
             [com.stuartsierra.component :as component]
             [todo.db.atom :refer [new-atom-db]]
             [ring.adapter.jetty :as jetty]
-            [ring.middleware.params :refer [wrap-params]]
             [io.sarnowski.swagger1st.core :as s1st]
             [io.sarnowski.swagger1st.executor :as s1stexec]
             [io.sarnowski.swagger1st.util.api :as s1stapi])
@@ -34,7 +33,6 @@
               handler (-> (s1st/context :yaml-cp definition)
                           (s1st/ring s1stapi/surpress-favicon-requests)
                           (s1st/discoverer)
-                          (s1st/ring wrap-params)
                           (s1st/mapper)
                           (s1st/parser)
                           (s1st/executor :resolver db-mapper))]

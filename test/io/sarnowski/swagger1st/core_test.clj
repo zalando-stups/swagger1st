@@ -1,6 +1,5 @@
 (ns io.sarnowski.swagger1st.core-test
   (:require [clojure.test :refer :all]
-            [ring.middleware.params :refer [wrap-params]]
             [io.sarnowski.swagger1st.core :as s1st]
             [ring.util.response :refer :all]
             [clojure.pprint :refer [pprint]]
@@ -21,7 +20,6 @@
 (defn create-app [file & {:keys [security] :or {security {}}}]
   (-> (s1st/context :yaml-cp (str "io/sarnowski/swagger1st/" file))
       (s1st/discoverer)
-      (s1st/ring wrap-params)
       (s1st/mapper)
       (s1st/parser)
       (s1st/ring request-logging)

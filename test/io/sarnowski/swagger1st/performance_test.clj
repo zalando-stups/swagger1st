@@ -1,7 +1,6 @@
 (ns io.sarnowski.swagger1st.performance-test
   (:require [clojure.test :refer :all]
             [criterium.core :as c]
-            [ring.middleware.params :refer [wrap-params]]
             [io.sarnowski.swagger1st.core :as s1st]
             [io.sarnowski.swagger1st.util.security :as s1stsec]
             [ring.util.response :as r]
@@ -51,7 +50,6 @@
                        (first (swap! requests rest)))
         app (-> (s1st/context :direct definition)
                 (s1st/discoverer)
-                (s1st/ring wrap-params)
                 (s1st/mapper)
                 (s1st/parser)
                 (s1st/protector {"oauth2" (s1stsec/allow-all)})
