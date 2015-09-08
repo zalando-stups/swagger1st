@@ -6,4 +6,13 @@
             :url "http://opensource.org/licenses/ISC"
             :distribution :repo}
 
-  :eval-in-leiningen true)
+  :eval-in-leiningen true
+
+  :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version" "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag" "template-"]
+                  ["deploy"]
+                  ["change" "version" "leiningen.release/bump-version"]
+                  ["vcs" "commit"]
+                  ["vcs" "push"]])
