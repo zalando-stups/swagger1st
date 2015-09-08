@@ -41,7 +41,7 @@ The following setup creates a ring compliant handler.
             [io.sarnowski.swagger1st.util.security :as s1stsec]))
 
 (def app
-  (-> (s1st/context :yaml-cp definition)
+  (-> (s1st/context :yaml-cp "my-swagger-api.yaml")
       (s1st/discoverer)
       (s1st/mapper)
       (s1st/parser)
