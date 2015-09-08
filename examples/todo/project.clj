@@ -3,9 +3,9 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [ring "1.4.0"]
-                 [io.sarnowski/swagger1st "0.15.0-SNAPSHOT"]
+                 [io.sarnowski/swagger1st "0.15.0"]
                  [com.stuartsierra/component "0.2.3"]
-                 [org.slf4j/slf4j-simple "1.7.7"]]
+                 [org.slf4j/slf4j-simple "1.7.12"]]
 
   :main ^:skip-aot todo.core
 
