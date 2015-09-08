@@ -141,7 +141,7 @@ Field Name | Type | s1st | Description
 <a name="swaggerSwagger"></a>swagger | `string` | **OK** | **Required.** Specifies the Swagger Specification version being used. It can be used by the Swagger UI and other clients to interpret the API listing. The value MUST be `"2.0"`.
 <a name="swaggerInfo"></a>info | [Info Object](#infoObject) | **N/A** | **Required.** Provides metadata about the API. The metadata can be used by the clients if needed.
 <a name="swaggerHost"></a>host | `string` | **OK** | The host (name or ip) serving the API. This MUST be the host only and does not include the scheme nor sub-paths. It MAY include a port. If the `host` is not included, the host serving the documentation is to be used (including the port). The `host` does not support [path templating](#pathTemplating).
-<a name="swaggerBasePath"></a>basePath | `string` | **MISSING**[#20](https://github.com/sarnowski/swagger1st/issues/20) | The base path on which the API is served, which is relative to the [`host`](#swaggerHost). If it is not included, the API is served directly under the `host`. The value MUST start with a leading slash (`/`). The `basePath` does not support [path templating](#pathTemplating). 
+<a name="swaggerBasePath"></a>basePath | `string` | **OK** | The base path on which the API is served, which is relative to the [`host`](#swaggerHost). If it is not included, the API is served directly under the `host`. The value MUST start with a leading slash (`/`). The `basePath` does not support [path templating](#pathTemplating).
 <a name="swaggerSchemes"></a>schemes | [`string`] | **N/A** | The transfer protocol of the API. Values MUST be from the list: `"http"`, `"https"`, `"ws"`, `"wss"`. If the `schemes` is not included, the default scheme to be used is the one used to access the specification.
 <a name="swaggerConsumes"></a>consumes | [`string`] | **OK** | A list of MIME types the APIs can consume. This is global to all APIs but can be overridden on specific API calls. Value MUST be as described under [Mime Types](#mimeTypes).
 <a name="swaggerProduces"></a>produces | [`string`] | **N/A** | A list of MIME types the APIs can produce. This is global to all APIs but can be overridden on specific API calls. Value MUST be as described under [Mime Types](#mimeTypes).
@@ -269,8 +269,7 @@ url: http://www.apache.org/licenses/LICENSE-2.0.html
 #### <a name="pathsObject"></a>Paths Object
 
 Holds the relative paths to the individual endpoints. The path is appended to the [`basePath`](#swaggerBasePath) in
-order to construct the full URL **MISSING**[#20](https://github.com/sarnowski/swagger1st/issues/20). The Paths may be empty,
-due to [ACL constraints](#securityFiltering).
+order to construct the full URL. The Paths may be empty, due to [ACL constraints](#securityFiltering).
 
 ##### Patterned Fields
 

@@ -12,6 +12,19 @@ runtime, you can inspect and easily test your API with the built-in [Swagger UI]
 
 ## Kickstart
 
+### Leiningen Template
+
+If you are bootstrapping a complete new project or just want to try out swagger1st, you can use the Leiningen template:
+
+```
+lein new swagger1st myproject
+```
+
+Go into the new project folder `myproject` and start a new webserver with `lein ring server-headless`. Go with your browser
+to [http://localhost:3000/ui/](http://localhost:3000/ui/).
+
+### Manual Setup
+
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
     [io.sarnowski/swagger1st "<latest>"]
