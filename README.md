@@ -48,7 +48,8 @@ By default, this definition is connected to your business logic via the `operati
 ```
 
 That is everything you need to do to define and implement your API. Only fully validated requests get to your function,
-so you can rely on swagger1st to properly check all input parameters according to your definition.
+so you can rely on swagger1st to properly check all input parameters according to your definition. The function itself
+is a normal Clojure function without any dependencies to swagger1st - simple as that.
 
 ## Kickstart
 
