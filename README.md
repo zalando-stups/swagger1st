@@ -61,7 +61,7 @@ For the following steps, you need [Leiningen](http://leiningen.org/) installed.
 If you are bootstrapping a complete new project or just want to try out swagger1st, you can use the Leiningen template:
 
 ```
-lein new swagger1st myproject
+$ lein new swagger1st myproject
 ```
 
 Go into the new project folder `myproject` and start a new webserver with `lein ring server-headless`. Go with your
@@ -74,7 +74,7 @@ You can also generate a project setup which includes Stuart Sierra's
 with swagger1st:
 
 ```
-lein new swagger1st myproject +component
+$ lein new swagger1st myproject +component
 ```
 
 Go into the new project folder `myproject` and run its main function via `lein run -m myproject.core`. Go with your
