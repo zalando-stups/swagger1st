@@ -1,6 +1,7 @@
 (ns io.sarnowski.swagger1st.parser
   (:require [clojure.string :as string]
-            [clojure.data.json :as json]
+            [cheshire.core :as json]
+            [cheshire.generate :refer [add-encoder]]
             [clojure.tools.logging :as log]
             [io.sarnowski.swagger1st.mapper :refer [split-path]]
             [io.sarnowski.swagger1st.util.api :as api]
@@ -10,16 +11,14 @@
            (java.io PrintWriter)
            (clojure.lang ExceptionInfo)))
 
-(defn- serialize-date-time
-  "Serializes a org.joda.time.DateTime to JSON in a compliant way."
-  [^DateTime date-time #^PrintWriter out]
-  (.print out (-> (f/formatters :date-time)
-                  (f/unparse date-time)
-                  (json/write-str))))
-
 ; add json capability to org.joda.time.DateTime
-(extend DateTime json/JSONWriter
-  {:-write serialize-date-time})
+(add-encoder
+  org.joda.time.DateTime
+  (fn [dt jsonGenerator]
+    (.writeString jsonGenerator
+                  (-> dt
+                      (f/formatters :date-time)
+                      (f/unparse)))))
 
 (def json-content-type?
   ; TODO could be more precise but also complex
@@ -32,7 +31,7 @@
   "Throws a validation error if value cannot be parsed or is invalid."
   [value definition path & reason]
   (throw (ex-info
-           (str "Value " (json/write-str value :escape-slash false)
+           (str "Value " (json/encode value)
                 " in " (string/join "->" path)
                 (if (get definition "required")
                   " (required)"
@@ -89,7 +88,7 @@
         ; TODO make this configurable
         supported-content-types {json-content-type? (fn [body] (let [slurped-body (slurp body)
                                                                      keywordize? (get parameter-definition "x-swagger1st-keywordize" true)
-                                                                     json-body (json/read-json slurped-body keywordize?)]
+                                                                     json-body (json/parse-string slurped-body keywordize?)]
                                                                      json-body))}]
 
     (if (allowed-content-types content-type)                ; TODO could be checked on initialization of ring handler chain
@@ -311,7 +310,7 @@
   (let [supported-content-types {"application/json" (fn [body]
                                                       (if (string? body)
                                                         body
-                                                        (json/write-str body)))}]
+                                                        (json/encode body)))}]
     (if-let [serializer (supported-content-types (get-in response [:headers "Content-Type"]))]
       ; TODO maybe check for allowed "produces" mimetypes and do object validation
       (update-in response [:body] serializer)

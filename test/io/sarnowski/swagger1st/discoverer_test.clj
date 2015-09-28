@@ -2,21 +2,21 @@
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
             [io.sarnowski.swagger1st.core-test :refer :all]
-            [clojure.data.json :as json]))
+            [cheshire.core :as json]))
 
 (def app (create-app "discoverer_test.yaml"))
 
 (deftest discovery
 
   (let [result (app (mock/request :get "/.well-known/schema-discovery"))
-        discovery (json/read-str (:body result))]
+        discovery (json/decode (:body result))]
     (is (= discovery
            {"schema_url"  "/swagger.json"
             "schema_type" "swagger-2.0"
             "ui_url"      "/ui/"})))
 
   (let [result (app (mock/request :get "/swagger.json"))
-        definition (json/read-str (:body result))]
+        definition (json/decode (:body result))]
     (is (= "2.0" (get definition "swagger"))))
 
   (let [result (app (mock/request :get "/ui/"))

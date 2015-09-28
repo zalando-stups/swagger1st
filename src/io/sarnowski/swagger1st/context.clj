@@ -1,7 +1,7 @@
 (ns io.sarnowski.swagger1st.context
   (:require [clojure.java.io :as io]
             [clj-yaml.core :as yaml]
-            [clojure.data.json :as json]
+            [cheshire.core :as json]
             [schema.core :as schema]
             [io.sarnowski.swagger1st.schemas.swagger-2-0 :as swagger-2-0]))
 
@@ -12,7 +12,7 @@
   definition)
 
 (defmethod load-swagger-definition :json [_ definition]
-  (json/read-str definition))
+  (json/decode definition))
 
 (defmethod load-swagger-definition :json-file [_ definition]
   (load-swagger-definition :json (slurp definition)))

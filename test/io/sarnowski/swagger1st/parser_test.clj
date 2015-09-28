@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [io.sarnowski.swagger1st.parser :as p]
             [clj-time.core :as t]
-            [clojure.data.json :as json])
+            [cheshire.core :as json])
   (:import (java.io StringReader)
            (clojure.lang ExceptionInfo)))
 
@@ -227,7 +227,7 @@
 (defn json-body
   "Generates a reader that can be used to read serialized JSON."
   [data]
-  (StringReader. (json/write-str data)))
+  (StringReader. (json/encode data)))
 
 (deftest extract-body-parameter
   (is (= {:bar "baz"}
