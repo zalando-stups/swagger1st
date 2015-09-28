@@ -1,7 +1,6 @@
 (ns io.sarnowski.swagger1st.mapper
   (:require [ring.util.response :as r]
             [clojure.walk :as walk]
-            [clojure.data.json :as json]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
             [io.sarnowski.swagger1st.util.api :as api]))

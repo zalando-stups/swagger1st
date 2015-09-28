@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [ring.util.response :as r]
             [clojure.tools.logging :as log]
-            [clojure.data.json :as json]))
+            [cheshire.core :as json]))
 
 (defn- swaggerui-template
   "Loads the swagger ui template (index.html) and replaces certain keywords."
@@ -18,12 +18,12 @@
   [request definition {:keys [discovery-path definition-path ui-path overwrite-host?] :as config}]
   (let [path (:uri request)]
     (cond
-      (= discovery-path path) (-> (r/response (json/write-str {:schema_url  definition-path
-                                                               :schema_type "swagger-2.0"
-                                                               :ui_url      ui-path}))
+      (= discovery-path path) (-> (r/response (json/encode {:schema_url  definition-path
+                                                            :schema_type "swagger-2.0"
+                                                            :ui_url      ui-path}))
                                   (r/header "Content-Type" "application/json"))
       (= definition-path path) (-> (r/response
-                                     (json/write-str
+                                     (json/encode
                                        (if overwrite-host?
                                          (assoc definition "host" (or
                                                                     (-> request :headers (get "host"))

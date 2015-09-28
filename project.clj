@@ -13,7 +13,6 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.logging "0.3.1"]
 
-                 [org.clojure/data.json "0.2.6"]
                  [circleci/clj-yaml "0.5.4"]
 
                  [prismatic/schema "1.0.1"]

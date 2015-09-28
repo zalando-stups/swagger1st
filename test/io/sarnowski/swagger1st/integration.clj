@@ -5,7 +5,7 @@
             [io.sarnowski.swagger1st.util.security :as s1stsec]
             [ring.util.response :refer :all]
             [clojure.pprint :refer [pprint]]
-            [clojure.data.json :as json]))
+            [cheshire.core :as json]))
 
 ;; business logic for definition
 
@@ -52,13 +52,13 @@
 
          (is (= (app (-> (mock/request :post "/user/123")
                          (mock/header "Content-Type" "application/json; charset=UTF-8")
-                         (mock/body (json/write-str {:name "sarnowski"}))))
+                         (mock/body (json/encode {:name "sarnowski"}))))
                 {:status 200}))
 
          (is (= (app (mock/request :get "/user/123"))
                 {:status  200
                  :headers {"Content-Type" "application/json"}
-                 :body    (json/write-str {:name "sarnowski"})}))
+                 :body    (json/encode {:name "sarnowski"})}))
 
          (is (= (app (mock/request :delete "/user/123"))
                 {:status 200})))

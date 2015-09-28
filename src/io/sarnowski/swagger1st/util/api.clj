@@ -1,13 +1,14 @@
 (ns io.sarnowski.swagger1st.util.api
   (:require [ring.util.response :as r]
-            [clojure.data.json :as json]))
+            [cheshire.core :as json]))
 
 ; common helpers for APIs
 
 (defn error
   "Generate an error response."
   [http-status message & [details]]
-  (-> (r/response (json/write-str {:message message :details details} :escape-slash false))
+  (-> (r/response (json/encode {:message message
+                                :details details}))
       (r/content-type "application/json")
       (r/status http-status)))
 
