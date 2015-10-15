@@ -12,13 +12,11 @@
            (clojure.lang ExceptionInfo)))
 
 ; add json capability to org.joda.time.DateTime
-(add-encoder
-  org.joda.time.DateTime
-  (fn [dt jsonGenerator]
-    (.writeString jsonGenerator
-                  (-> dt
-                      (f/formatters :date-time)
-                      (f/unparse)))))
+(add-encoder org.joda.time.DateTime
+   (fn [d jsonGenerator]
+     (->> d
+          (f/unparse (:date-time f/formatters))
+          (.writeString jsonGenerator))))
 
 (def json-content-type?
   ; TODO could be more precise but also complex
