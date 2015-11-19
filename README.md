@@ -33,6 +33,9 @@ paths:
           in: query
           type: string
           pattern: "^[A-Z][a-z]+"
+      responses:
+          200:
+              description: say hello
 ```
 
 By default, this definition is connected to your business logic via the `operationId`, which might be defined like that:
