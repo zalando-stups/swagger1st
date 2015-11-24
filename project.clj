@@ -13,9 +13,9 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.logging "0.3.1"]
 
-                 [circleci/clj-yaml "0.5.4"]
+                 [circleci/clj-yaml "0.5.5"]
 
-                 [prismatic/schema "1.0.1"]
+                 [prismatic/schema "1.0.3"]
 
                  [clj-time "0.11.0"]
 
@@ -25,17 +25,18 @@
 
   :plugins [[lein-cloverage "1.0.6"]]
 
-  :profiles {:dev {:dependencies [[ring/ring-mock "0.2.0"]
+  :profiles {:dev {:dependencies [[ring/ring-mock "0.3.0"]
                                   [ring/ring-core "1.4.0"]
                                   [ring/ring-devel "1.4.0"]
                                   [javax.servlet/servlet-api "2.5"]
-                                  [org.slf4j/slf4j-api "1.7.12"]
-                                  [org.slf4j/jul-to-slf4j "1.7.12"]
-                                  [org.slf4j/jcl-over-slf4j "1.7.12"]
-                                  [org.apache.logging.log4j/log4j-api "2.3"]
-                                  [org.apache.logging.log4j/log4j-core "2.3"]
-                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.3"]
-                                  [criterium "0.4.3"]]}}
+                                  [org.slf4j/slf4j-api "1.7.13"]
+                                  [org.slf4j/jul-to-slf4j "1.7.13"]
+                                  [org.slf4j/jcl-over-slf4j "1.7.13"]
+                                  [org.apache.logging.log4j/log4j-api "2.4.1"]
+                                  [org.apache.logging.log4j/log4j-core "2.4.1"]
+                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.4.1"]
+                                  [criterium "0.4.3"]
+                                  [com.newrelic.agent.java/newrelic-api "3.22.1"]]}}
 
   :test-selectors {:default (complement :performance)
                    :performance :performance
