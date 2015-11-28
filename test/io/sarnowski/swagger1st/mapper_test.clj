@@ -86,3 +86,27 @@
     (is (= :get (second (m/lookup-request requests {:request-method :get :uri "/"}))))
     (is (= :get-foo (second (m/lookup-request requests {:request-method :get :uri "/foo/baz"}))))
     (is (= :delete-foo (second (m/lookup-request requests {:request-method :delete :uri "/foo/baz"}))))))
+
+(deftest ref-denormalization
+  (testing "implementation details"
+    (is (=                      {"a" nil}
+           (m/denormalize-refs* {"a" {"$ref" "#/b"}})))
+    (is (=                      {"a" {"$ref" "#/a"}}
+           (m/denormalize-refs* {"a" {"$ref" "#/a"}})))
+    (is (=                      {"a" "foo"          "b" "foo"}
+           (m/denormalize-refs* {"a" {"$ref" "#/b"} "b" "foo"})))
+    (is (=                                 {"a" {"$ref" "#/b"} "b" "foo"}
+           (m/denormalize-refs* (with-meta {"a" {"$ref" "#/b"} "b" "foo"}
+                                           {:io.sarnowski.swagger1st.mapper/from "#/b"}))))
+    (is (=                      {"a" "foo"          "b" "foo"          "c" "foo"}
+           (m/denormalize-refs* {"a" {"$ref" "#/c"} "b" {"$ref" "#/c"} "c" "foo"}))))
+  (testing "works"
+    (is (=                     {"a" "foo"          "b" "foo"}
+           (m/denormalize-refs {"a" {"$ref" "#/b"} "b" "foo"})))
+    (is (=                     {"a" "foo"          "b" "foo"          "c" "foo"}
+           (m/denormalize-refs {"a" {"$ref" "#/b"} "b" {"$ref" "#/c"} "c" "foo"}))))
+  (testing "can survive circular refs"
+    (is (=                     {"a" {"$ref" "#/a"}}
+           (m/denormalize-refs {"a" {"$ref" "#/a"}})))
+    (is (=                     {"a" {"$ref" "#/a"} "b" {"$ref" "#/b"}}
+           (m/denormalize-refs {"a" {"$ref" "#/b"} "b" {"$ref" "#/a"}})))))
