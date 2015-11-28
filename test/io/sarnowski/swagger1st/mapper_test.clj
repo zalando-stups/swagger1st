@@ -1,6 +1,8 @@
 (ns io.sarnowski.swagger1st.mapper-test
   (:require [clojure.test :refer :all]
-            [io.sarnowski.swagger1st.mapper :as m]))
+            [io.sarnowski.swagger1st.mapper :as m]
+            [io.sarnowski.swagger1st.core :as s1st]
+            [schema.core :as s]))
 
 ; TODO tests for definition inheritance
 
@@ -110,3 +112,14 @@
            (m/denormalize-refs {"a" {"$ref" "#/a"}})))
     (is (=                     {"a" {"$ref" "#/a"} "b" {"$ref" "#/b"}}
            (m/denormalize-refs {"a" {"$ref" "#/b"} "b" {"$ref" "#/a"}})))))
+
+(s/defschema NotRef
+  (s/pred #(not= "$ref" %)))
+
+(s/defschema NoRefs
+  (s/cond-pre {NotRef (s/recursive #'NoRefs)} [(s/recursive #'NoRefs)] s/Any))
+
+(deftest semi-integration-smoke-check
+  (testing "There should be no unresolved refs in the requests spec"
+    (let [ctx (m/setup (s1st/context :yaml-cp (str "io/sarnowski/swagger1st/" "integration.yaml")))]
+      (is (nil? (s/check NoRefs (:requests ctx)))))))
