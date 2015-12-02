@@ -3,7 +3,8 @@
             [clojure.walk :as walk]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
-            [io.sarnowski.swagger1st.util.api :as api]))
+            [io.sarnowski.swagger1st.util.api :as api])
+  (:import (clojure.lang IObj)))
 
 (defn get-definition
   "Resolves a $ref reference to its content."
@@ -11,18 +12,52 @@
   (let [path (rest (string/split r #"/"))]
     (get-in d path)))
 
-(defn denormalize-refs
-  "Searches for $ref objects and replaces those with their target."
+(defn conj-not-nil
+  [coll v]
+  (if (nil? v)
+    coll
+    (conj coll v)))
+
+(defn postwalk-with-path
+  "like postwalk, but f is called with two arguments: current element and accumulated path.
+  Accumulated path is constructed by conj'ing non-nil results of calling path-step-fn on every form."
+  [f path path-step-fn form]
+  (let [new-path (conj-not-nil path (path-step-fn form))]
+    (walk/walk #(postwalk-with-path f new-path path-step-fn %) identity (f form new-path))))
+
+(defn with-meta-if-applicable
+  "Sets meta if obj can hold it."
+  [obj m]
+  (if (instance? IObj obj)
+    (with-meta obj m)
+    obj))
+
+(defn denormalize-refs*
+  "Searches for $ref objects and replaces those with their target, also remembering the source in ::from metadata.
+  Does not resolve the same ref under one parent."
   [definition]
-  (let [check-ref (fn [element]
-                    (if-let [r (get element "$ref")]
-                      (get-definition r definition)
-                      element))]
-    (walk/postwalk (fn [element]
-                     (if (map? element)
-                       (check-ref element)
-                       element))
-                   definition)))
+  (let [check-ref (fn [element path]
+                    (let [r (get element "$ref")]
+                      (if (and r (not (contains? path r)))
+                        (with-meta-if-applicable (get-definition r definition) {::from r})
+                        element)))]
+    (postwalk-with-path (fn [element path]
+                          (if (map? element)
+                            (check-ref element path)
+                            element))
+                        #{}
+                        #(-> % meta ::from)
+                        definition)))
+
+(defn denormalize-refs
+  "Iteratively resolves refs until the result no longer changes.
+  Protected from circular refs by denormalize-refs* implementation."
+  [definition]
+  (loop [d definition]
+    (let [new-d (denormalize-refs* d)]
+      (if (= new-d d)
+        new-d
+        (recur new-d)))))
 
 (defn inherit-map
   "Merges a map from parent to definition, overwriting keys with definition."
