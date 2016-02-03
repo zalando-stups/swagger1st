@@ -15,7 +15,7 @@
 
                  [circleci/clj-yaml "0.5.5"]
 
-                 [prismatic/schema "1.0.3"]
+                 [prismatic/schema "1.0.4"]
 
                  [clj-time "0.11.0"]
 
