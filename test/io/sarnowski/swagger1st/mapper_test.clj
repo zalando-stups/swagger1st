@@ -122,4 +122,24 @@
 (deftest semi-integration-smoke-check
   (testing "There should be no unresolved refs in the requests spec"
     (let [ctx (m/setup (s1st/context :yaml-cp (str "io/sarnowski/swagger1st/" "integration.yaml")))]
+      (prn ctx)
       (is (nil? (s/check NoRefs (:requests ctx)))))))
+
+(deftest flatten-allOf
+  (is (= {"a" "b" "c" "d"}
+         (m/flatten-allOf {"allOf" [{"a" "b"} {"c" "d"}]})))
+  (is (= {"a" "d"}
+         (m/flatten-allOf {"allOf" [{"a" "b"} {"a" "d"}]})))
+  (is (= {"a" {"x" 1 "y" 2}}
+         (m/flatten-allOf {"allOf" [{"a" {"x" 1}} {"a" {"y" 2}}]})))
+  (is (= {"a" {"x" 1}}
+         (m/flatten-allOf {"allOf" [{"a" {"x" 1}} {"a" {}}]})))
+  (is (= {"a" {"x" 2}}
+         (m/flatten-allOf {"allOf" [{"a" {"x" 1}} {"a" {"x" 2}}]})))
+  (is (= {"a" "b" "c" "d" "e" "f"}
+         (m/flatten-allOf {"allOf" [{"a" "b"} {"c" "d"}] "e" "f"})))
+  (is (= {"a" {"b" "c" "d" "e"}}
+         (m/flatten-allOf {"a" {"allOf" [{"b" "c"} {"d" "e"}]}})))
+  (is (= {"a" {"b" "c" "d" {"e" "f"}}}
+         (m/flatten-allOf {"a" {"allOf" [{"b" "c"} {"d" {"allOf" [{"e" "f"}]}}]}}))))
+

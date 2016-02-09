@@ -1,5 +1,6 @@
 (ns io.sarnowski.swagger1st.mapper
   (:require [ring.util.response :as r]
+            [flatland.ordered.map :refer [ordered-map]]
             [clojure.walk :as walk]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
@@ -147,7 +148,6 @@
     (str base-path path)
     path))
 
-; TODO flatten 'allOf' definitions
 (defn extract-requests
   "Extracts request-key->operation-definition from a swagger definition."
   [definition]
@@ -167,6 +167,28 @@
       (remove nil?)
       (into {}))))
 
+(defn flatten-allOf
+  "Replace occurrence of allOf with the merged maps which are defined for allOf.
+   While the spec allows to create schema which contradict each other
+   (http://spacetelescope.github.io/understanding-json-schema/reference/combining.html#allof)
+   the implementation uses only the last definition of a given property"
+  [definition]
+  (letfn
+    [(con [f l] (cond (every? map? [f l]) (merge f l)
+                      (every? seq? [f l]) (concat f l)
+                      :else l))
+     (allOf-flat [d]
+       (reduce-kv (fn [a k v] (if (= "allOf" k)
+                                (apply (partial merge-with con) (cons a v))
+                                (assoc a k v)))
+                  (ordered-map)
+                  d))
+     (visit [n] (if (and (map? n) (contains? n "allOf"))
+                  (allOf-flat n)
+                  n))]
+    (walk/prewalk visit definition)))
+
+
 (defn create-requests
   "Creates a map of 'request-key' -> 'swagger-definition' entries. The request-key can be used to efficiently lookup
    requests. The swagger-definition contains denormalized information about the request specification (all refs and
@@ -174,6 +196,7 @@
   [definition]
   (-> definition
       denormalize-refs
+      flatten-allOf
       extract-requests))
 
 (defn path-machtes?
