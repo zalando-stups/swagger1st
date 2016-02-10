@@ -11,6 +11,9 @@
 (defn extension? [^String k]
   (.startsWith "x-" k))
 
+(defn ref? [x]
+  (get x "$ref"))
+
 (def primitives
   {"integer" s-long
    "number" s-float
@@ -140,8 +143,8 @@
   {s-string [s-string]})
 
 (def responses-object
-  {(s/optional-key "default")           (s/either response-object reference-object)
-   (s/either s-long s-string)               (s/either response-object reference-object)
+  {(s/optional-key "default")           (s/if ref? reference-object response-object)
+   (s/cond-pre s-long s-string)         (s/if ref? reference-object response-object)
    (s/optional-key (s/pred extension?)) s/Any})
 
 (def operation-object
@@ -153,7 +156,7 @@
    (s/optional-key "externalDocs")      external-documentation-object
    (s/optional-key "consumes")          [s-string]
    (s/optional-key "produces")          [s-string]
-   (s/optional-key "parameters")        [(s/either parameter-object reference-object)]
+   (s/optional-key "parameters")        [(s/if ref? reference-object parameter-object)]
    (s/optional-key "schemes")           [s-string]
    (s/optional-key "deprecated")        s-boolean
    (s/optional-key "security")          [security-requirement-object]
@@ -168,7 +171,7 @@
    (s/optional-key "options")           operation-object
    (s/optional-key "head")              operation-object
    (s/optional-key "patch")             operation-object
-   (s/optional-key "parameters")        [(s/either parameter-object reference-object)]
+   (s/optional-key "parameters")        [(s/if ref? reference-object parameter-object)]
    (s/optional-key (s/pred extension?)) s/Any})
 
 (def paths-object
