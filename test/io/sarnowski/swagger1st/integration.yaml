@@ -71,7 +71,7 @@ parameters:
     in: body
     description: The user's profile
     schema:
-      '$ref': '#/definitions/Profile'
+      '$ref': '#/definitions/ExtendedProfile'
 
 definitions:
   Profile:
@@ -79,6 +79,12 @@ definitions:
     properties:
       name:
         type: string
+  ExtendedProfile:
+    allOf:
+      - '$ref': '#/definitions/Profile'
+      - properties:
+          rule:
+            type: string
 
 securityDefinitions:
   userpw_def:
