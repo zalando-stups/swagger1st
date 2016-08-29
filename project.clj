@@ -1,4 +1,4 @@
-(defproject io.sarnowski/swagger1st "0.22.0-SNAPSHOT"
+(defproject org.zalando/swagger1st "0.22.0-beta1-SNAPSHOT"
   :description "A ring handler that does routing based on a swagger definition."
   :url "https://github.com/sarnowski/swagger1st"
 
@@ -49,6 +49,5 @@
                   [:email "tobias@sarnowski.io"]
                   [:timezone "+1"]]]
 
-  :signing {:gpg-key "tobias@sarnowski.io"}
   :deploy-repositories {"releases" {:url "https://oss.sonatype.org/service/local/staging/deploy/maven2/" :creds :gpg}
                         "snapshots" {:url "https://oss.sonatype.org/content/repositories/snapshots/" :creds :gpg}})
