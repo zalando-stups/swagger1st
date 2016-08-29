@@ -33,9 +33,23 @@
   (is (= (t/date-time 2015 4 28)
          (parse "2015-04-28" {"type"   "string"
                               "format" "date"})))
-  (is (= (t/date-time 2015 4 28 10 56 12 98)
-         (parse "2015-04-28T12:56:12.098+02:00" {"type"   "string"
-                                                 "format" "date-time"})))
+
+  ; date-times
+
+  (are [date-time-str expected]
+    (= expected (parse date-time-str {"type" "string", "format" "date-time"}))
+
+    "2015-04-28T12:56:12Z" (t/date-time 2015 4 28 12 56 12 0)
+    "2015-04-28T12:56:12.9Z" (t/date-time 2015 4 28 12 56 12 900)
+    "2015-04-28T12:56:12.98Z" (t/date-time 2015 4 28 12 56 12 980)
+    "2015-04-28T12:56:12.987Z" (t/date-time 2015 4 28 12 56 12 987)
+    "2015-04-28T12:56:12.9876Z" (t/date-time 2015 4 28 12 56 12 987)
+    "2015-04-28T12:56:12+02:00" (t/date-time 2015 4 28 10 56 12 0)
+    "2015-04-28T12:56:12.9+02:00" (t/date-time 2015 4 28 10 56 12 900)
+    "2015-04-28T12:56:12.98+02:00" (t/date-time 2015 4 28 10 56 12 980)
+    "2015-04-28T12:56:12.987+02:00" (t/date-time 2015 4 28 10 56 12 987)
+    "2015-04-28T12:56:12.9876+02:00" (t/date-time 2015 4 28 10 56 12 987)
+    )
 
   ; pattern matching
   (is (= "foo" (parse "foo" {"type"    "string"

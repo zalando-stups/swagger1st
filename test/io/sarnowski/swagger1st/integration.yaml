@@ -85,6 +85,9 @@ definitions:
       - properties:
           rule:
             type: string
+          created:
+            type: string
+            format: date-time
 
 securityDefinitions:
   userpw_def:
