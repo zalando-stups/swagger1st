@@ -110,7 +110,7 @@
    "formData" extract-parameter-form
    "body"     extract-parameter-body})
 
-(def date-time-formatter (f/formatters :date-time))
+(def date-time-formatter (f/formatters :date-time-parser))
 (def date-formatter (f/formatters :date))
 (def string-transformers {; basic types
                           "string"    identity
