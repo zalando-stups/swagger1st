@@ -20,7 +20,7 @@
                  [clj-time "0.12.0"]
 
                  [ring-basic-authentication "1.0.5"]
-                 [clj-http "3.2.0"]
+                 [clj-http "3.3.0"]
                  [cheshire "5.6.3"]]
 
   :plugins [[lein-cloverage "1.0.6"]]
@@ -32,11 +32,11 @@
                                   [org.slf4j/slf4j-api "1.7.21"]
                                   [org.slf4j/jul-to-slf4j "1.7.21"]
                                   [org.slf4j/jcl-over-slf4j "1.7.21"]
-                                  [org.apache.logging.log4j/log4j-api "2.6.2"]
-                                  [org.apache.logging.log4j/log4j-core "2.6.2"]
-                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.6.2"]
+                                  [org.apache.logging.log4j/log4j-api "2.7"]
+                                  [org.apache.logging.log4j/log4j-core "2.7"]
+                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.7"]
                                   [criterium "0.4.4"]
-                                  [com.newrelic.agent.java/newrelic-api "3.31.1"]]}}
+                                  [com.newrelic.agent.java/newrelic-api "3.32.0"]]}}
 
   :test-selectors {:default (complement :performance)
                    :performance :performance
