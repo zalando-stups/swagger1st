@@ -196,6 +196,14 @@
                  "properties" {"foo" {"type" "string"}}}
                 :allow-undefined-keys true))))
 
+(deftest file-values
+  (testing "parameters of type 'file' are just passed through"
+    (let [value {:filename     "screenshot.png",
+                 :content-type "image/png",
+                 :tempfile     :a-file-handle,
+                 :size         84647}]
+      (is (identical? value (parse value {"type" "file"}))))))
+
 (deftest extract-path-parameters
   (is (= "baz"
          (p/extract-parameter-path
@@ -218,11 +226,9 @@
            {"name" "bar"}))))
 
 (deftest extract-form-parameters
-  (is (= "baz"
-         (p/extract-parameter-form
-           {:uri         "/foo"
-            :form-params {"bar" "baz"}}
-           {"name" "bar"}))))
+  (are [request] (= "baz" (p/extract-parameter-form request {"name" "bar"}))
+    {:uri "/foo", :form-params {"bar" "baz"}}
+    {:uri "/foo", :multipart-params {"bar" "baz"}}))
 
 (defn json-body
   "Generates a reader that can be used to read serialized JSON."
