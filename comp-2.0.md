@@ -1,6 +1,6 @@
 # swagger1st compatibility documentation
 
-[swagger1st](https://github.com/sarnowski/swagger1st) implements the Swagger 2.0 specification for routing, parsing and
+[swagger1st](https://github.com/zalando/swagger1st) implements the Swagger 2.0 specification for routing, parsing and
 handling HTTP requests. This document is a copy of the Swagger 2.0 specification with additional comments describing the
 state of implementation. The following acronyms are used throughout the document to show the current state.
 
@@ -92,7 +92,7 @@ regex pattern for the field name. Patterned fields can have multiple occurrences
 
 The Swagger representation of the API is made of a single file. However, parts of the definitions can be split into
 separate files, at the discretion of the user. This is applicable for `$ref` fields in the specification as follows from
-the [JSON Schema](http://json-schema.org) definitions **MISSING**[#17](https://github.com/sarnowski/swagger1st/issues/17).
+the [JSON Schema](http://json-schema.org) definitions **MISSING**[#17](https://github.com/zalando/swagger1st/issues/17).
 
 By convention, the Swagger specification file is named `swagger.json`.
 
@@ -104,12 +104,12 @@ Primitive data types in the Swagger Specification are based on the types support
 
 An additional primitive data type `"file"` is used by the [Parameter Object](#parameterObject) and the
 [Response Object](#responseObject) to set the parameter type or the response as being a file
-**MISSING**[#18](https://github.com/sarnowski/swagger1st/issues/18).
+**MISSING**[#18](https://github.com/zalando/swagger1st/issues/18).
 
 <a name="dataTypeFormat"></a>Primitives have an optional modifier property `format`. Swagger uses several known formats
 to more finely define the data type being used. However, the `format` property is an open `string`-valued property, and
 can have any value to support documentation needs. Formats such as `"email"`, `"uuid"`, etc., can be used even though
-they are not defined by this specification **MISSING**[#19](https://github.com/sarnowski/swagger1st/issues/19). Types that are not accompanied by a `format` property follow their
+they are not defined by this specification **MISSING**[#19](https://github.com/zalando/swagger1st/issues/19). Types that are not accompanied by a `format` property follow their
 definition from the JSON Schema (except for `file` type which is defined above). The formats defined by the Swagger
 Specification are:
 
@@ -125,7 +125,7 @@ byte | `string` | `byte` | **OK** |
 boolean | `boolean` | | **OK** |
 date | `string` | `date` | **OK** | As defined by `full-date` - [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
 dateTime | `string` | `date-time` | **OK** | As defined by `date-time` - [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
-password | `string` | `password` | **MISSING**[#19](https://github.com/sarnowski/swagger1st/issues/19) | Used to hint UIs the input needs to be obscured.
+password | `string` | `password` | **MISSING**[#19](https://github.com/zalando/swagger1st/issues/19) | Used to hint UIs the input needs to be obscured.
 
 ### Schema
 
@@ -584,7 +584,7 @@ There are five possible parameter types.
 * Body **OK** - The payload that's appended to the HTTP request. Since there can only be one payload, there can only be *one* body parameter. The name of the body parameter has no effect on the parameter itself and is used for documentation purposes only. Since Form parameters are also in the payload, body and form parameters cannot exist together for the same operation.
 * Form **OK** - Used to describe the payload of an HTTP request when either `application/x-www-form-urlencoded` or `multipart/form-data` are used as the content type of the request (in Swagger's definition, the [`consumes`](#operationConsumes) property of an operation). This is the only parameter type that can be used to send files, thus supporting the `file` type. Since form parameters are sent in the payload, they cannot be declared together with a body parameter for the same operation. Form parameters have a different format based on the content-type used (for further details, consult http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4):
   * `application/x-www-form-urlencoded` **OK** - Similar to the format of Query parameters but as a payload. For example, `foo=1&bar=swagger` - both `foo` and `bar` are form parameters. This is normally used for simple parameters that are being transferred.
-  * `multipart/form-data` **MISSING**[#21](https://github.com/sarnowski/swagger1st/issues/21) - each parameter takes a section in the payload with an internal header. For example, for the header `Content-Disposition: form-data; name="submit-name"` the name of the parameter is `submit-name`. This type of form parameters is more commonly used for file transfers.
+  * `multipart/form-data` **MISSING**[#21](https://github.com/zalando/swagger1st/issues/21) - each parameter takes a section in the payload with an internal header. For example, for the header `Content-Disposition: form-data; name="submit-name"` the name of the parameter is `submit-name`. This type of form parameters is more commonly used for file transfers.
 
 ##### Fixed Fields
 Field Name | Type | s1st | Description
@@ -606,10 +606,10 @@ Field Name | Type | s1st | Description
 ---|:---:|:---:|---
 <a name="parameterType"></a>type | `string` | **OK** | **Required.** The type of the parameter. Since the parameter is not located at the request body, it is limited to simple types (that is, not an object). The value MUST be one of `"string"`, `"number"`, `"integer"`, `"boolean"`, `"array"` or `"file"`. If `type` is `"file"`, the [`consumes`](#operationConsumes) MUST be either `"multipart/form-data"` or `" application/x-www-form-urlencoded"` and the parameter MUST be [`in`](#parameterIn) `"formData"`.
 <a name="parameterFormat"></a>format | `string` | **OK** | The extending format for the previously mentioned [`type`](#parameterType). See [Data Type Formats](#dataTypeFormat) for further details.
-<a name="parameterAllowEmptyValue"/>allowEmptyValue | `boolean` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | Sets the ability to pass empty-valued parameters. This is valid only for either `query` or `formData` parameters and allows you to send a parameter with a name only or  an empty value. Default value is `false`.
+<a name="parameterAllowEmptyValue"/>allowEmptyValue | `boolean` | **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22) | Sets the ability to pass empty-valued parameters. This is valid only for either `query` or `formData` parameters and allows you to send a parameter with a name only or  an empty value. Default value is `false`.
 <a name="parameterItems"></a>items | [Items Object](#itemsObject) | **OK** | **Required if [`type`](#parameterType) is "array".** Describes the type of items in the array.
-<a name="parameterCollectionFormat"></a>collectionFormat | `string` | **MISSING**[#23](https://github.com/sarnowski/swagger1st/issues/23) | Determines the format of the array if type array is used. Possible values are: <ul><li>`csv` - comma separated values `foo,bar`. <li>`ssv` - space separated values `foo bar`. <li>`tsv` - tab separated values `foo\tbar`. <li>`pipes` - pipe separated values <code>foo&#124;bar</code>. <li>`multi` - corresponds to multiple parameter instances instead of multiple values for a single instance `foo=bar&foo=baz`. This is valid only for parameters [`in`](#parameterIn) "query" or "formData". </ul> Default value is `csv`.
-<a name="parameterDefault"></a>default | * | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | Sets a default value to the parameter. See http://json-schema.org/latest/json-schema-validation.html#anchor101. Unlike JSON Schema this value MUST conform to the defined [`type`](#parameterType) for this parameter.
+<a name="parameterCollectionFormat"></a>collectionFormat | `string` | **MISSING**[#23](https://github.com/zalando/swagger1st/issues/23) | Determines the format of the array if type array is used. Possible values are: <ul><li>`csv` - comma separated values `foo,bar`. <li>`ssv` - space separated values `foo bar`. <li>`tsv` - tab separated values `foo\tbar`. <li>`pipes` - pipe separated values <code>foo&#124;bar</code>. <li>`multi` - corresponds to multiple parameter instances instead of multiple values for a single instance `foo=bar&foo=baz`. This is valid only for parameters [`in`](#parameterIn) "query" or "formData". </ul> Default value is `csv`.
+<a name="parameterDefault"></a>default | * | **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22) | Sets a default value to the parameter. See http://json-schema.org/latest/json-schema-validation.html#anchor101. Unlike JSON Schema this value MUST conform to the defined [`type`](#parameterType) for this parameter.
 <a name="parameterMaximum"></a>maximum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
 <a name="parameterExclusiveMaximum"></a>exclusiveMaximum | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
 <a name="parameterMinimum"></a>minimum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
@@ -620,7 +620,7 @@ Field Name | Type | s1st | Description
 <a name="parameterMaxItems"></a>maxItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor42.
 <a name="parameterMinItems"></a>minItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor45.
 <a name="parameterUniqueItems"></a>uniqueItems | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor49.
-<a name="parameterEnum"></a>enum | [*] | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor76.
+<a name="parameterEnum"></a>enum | [*] | **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor76.
 <a name="parameterMultipleOf"></a>multipleOf | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor14.
 
 
@@ -788,8 +788,8 @@ Field Name | Type | s1st | Description
 <a name="itemsType"></a>type | `string` | **OK** | **Required.** The internal type of the array. The value MUST be one of `"string"`, `"number"`, `"integer"`, `"boolean"`, or `"array"`. Files and models are not allowed.
 <a name="itemsFormat"></a>format | `string` | **OK** | The extending format for the previously mentioned [`type`](#parameterType). See [Data Type Formats](#dataTypeFormat) for further details.
 <a name="itemsItems"></a>items | [Items Object](#itemsObject) | **OK** | **Required if [`type`](#itemsType) is "array".** Describes the type of items in the array.
-<a name="itemsCollectionFormat"></a>collectionFormat | `string` | **MISSING**[#23](https://github.com/sarnowski/swagger1st/issues/23) | Determines the format of the array if type array is used. Possible values are: <ul><li>`csv` - comma separated values `foo,bar`. <li>`ssv` - space separated values `foo bar`. <li>`tsv` - tab separated values `foo\tbar`. <li>`pipes` - pipe separated values <code>foo&#124;bar</code>. </ul> Default value is `csv`.
-<a name="itemsDefault"></a>default | * | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | Sets a default value to the data type. See http://json-schema.org/latest/json-schema-validation.html#anchor101. Unlike JSON Schema this value MUST conform to the defined [`type`](#itemsType) for the data type.
+<a name="itemsCollectionFormat"></a>collectionFormat | `string` | **MISSING**[#23](https://github.com/zalando/swagger1st/issues/23) | Determines the format of the array if type array is used. Possible values are: <ul><li>`csv` - comma separated values `foo,bar`. <li>`ssv` - space separated values `foo bar`. <li>`tsv` - tab separated values `foo\tbar`. <li>`pipes` - pipe separated values <code>foo&#124;bar</code>. </ul> Default value is `csv`.
+<a name="itemsDefault"></a>default | * | **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22) | Sets a default value to the data type. See http://json-schema.org/latest/json-schema-validation.html#anchor101. Unlike JSON Schema this value MUST conform to the defined [`type`](#itemsType) for the data type.
 <a name="itemsMaximum"></a>maximum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
 <a name="itemsMaximum"></a>exclusiveMaximum | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor17.
 <a name="itemsMinimum"></a>minimum | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor21.
@@ -800,7 +800,7 @@ Field Name | Type | s1st | Description
 <a name="itemsMaxItems"></a>maxItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor42.
 <a name="itemsMinItems"></a>minItems | `integer` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor45.
 <a name="itemsUniqueItems"></a>uniqueItems | `boolean` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor49.
-<a name="itemsEnum"></a>enum | [*] | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor76.
+<a name="itemsEnum"></a>enum | [*] | **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22) | See http://json-schema.org/latest/json-schema-validation.html#anchor76.
 <a name="itemsMultipleOf"></a>multipleOf | `number` | **OK** | See http://json-schema.org/latest/json-schema-validation.html#anchor14.
 
 ##### Items Object Examples
@@ -1155,7 +1155,7 @@ The Reference Object is a [JSON Reference](http://tools.ietf.org/html/draft-pbry
 [JSON Pointer](http://tools.ietf.org/html/rfc6901) as its value. For this specification, only
 [canonical dereferencing](http://json-schema.org/latest/json-schema-core.html#anchor27) is supported.
 
-*external references (files,URLs) not supported [#17](https://github.com/sarnowski/swagger1st/issues/17)*
+*external references (files,URLs) not supported [#17](https://github.com/zalando/swagger1st/issues/17)*
 
 ##### Fixed Fields
 Field Name | Type | s1st | Description
@@ -1185,7 +1185,7 @@ The following properties are taken directly from the JSON Schema definition and 
 - format **OK** (See [Data Type Formats](#dataTypeFormat) for further details)
 - title **N/A**
 - description **N/A** ([GFM syntax](https://help.github.com/articles/github-flavored-markdown) can be used for rich text representation)
-- default **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) (Unlike JSON Schema, the value MUST conform to the defined type for the Schema Object)
+- default **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22) (Unlike JSON Schema, the value MUST conform to the defined type for the Schema Object)
 - multipleOf **OK**
 - maximum **OK**
 - exclusiveMaximum **OK**
@@ -1197,28 +1197,28 @@ The following properties are taken directly from the JSON Schema definition and 
 - maxItems **OK**
 - minItems **OK**
 - uniqueItems **OK**
-- maxProperties **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
-- minProperties **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
+- maxProperties **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22)
+- minProperties **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22)
 - required **OK**
-- enum **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
+- enum **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22)
 - type **OK**
 
 The following properties are taken from the JSON Schema definition but their definitions were adjusted to the Swagger
 Specification. Their definition is the same as the one from JSON Schema, only where the original definition references
 the JSON Schema definition, the [Schema Object](#schemaObject) definition is used instead.
 - items **OK**
-- allOf **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
+- allOf **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22)
 - properties **OK**
-- additionalProperties **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22)
+- additionalProperties **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22)
 
 Other than the JSON Schema subset fields, the following fields may be used for further schema documentation.
 
 ##### Fixed Fields
 Field Name | Type | s1st | Description
 ---|:---:|:---:|---
-<a name="schemaDiscriminator"></a>discriminator | `string` | **MISSING**[#22](https://github.com/sarnowski/swagger1st/issues/22) | Adds support for polymorphism. The discriminator is the schema property name that is used to differentiate between other schema that inherit this schema. The property name used MUST be defined at this schema and it MUST be in the `required` property list. When used, the value MUST be the name of this schema or any schema that inherits it.
+<a name="schemaDiscriminator"></a>discriminator | `string` | **MISSING**[#22](https://github.com/zalando/swagger1st/issues/22) | Adds support for polymorphism. The discriminator is the schema property name that is used to differentiate between other schema that inherit this schema. The property name used MUST be defined at this schema and it MUST be in the `required` property list. When used, the value MUST be the name of this schema or any schema that inherits it.
 <a name="schemaReadOnly"></a>readOnly | `boolean` | **N/A** | Relevant only for Schema `"properties"` definitions. Declares the property as "read only". This means that it MAY be sent as part of a response but MUST NOT be sent as part of the request. Properties marked as `readOnly` being `true` SHOULD NOT be in the `required` list of the defined schema. Default value is `false`.
-<a name="schemaXml"></a>xml | [XML Object](#xmlObject) | **MISSING**[#24](https://github.com/sarnowski/swagger1st/issues/24) | This MAY be used only on properties schemas. It has no effect on root schemas. Adds Additional metadata to describe the XML representation format of this property.
+<a name="schemaXml"></a>xml | [XML Object](#xmlObject) | **MISSING**[#24](https://github.com/zalando/swagger1st/issues/24) | This MAY be used only on properties schemas. It has no effect on root schemas. Adds Additional metadata to describe the XML representation format of this property.
 <a name="schemaExternalDocs"></a>externalDocs | [External Documentation Object](#externalDocumentationObject) | **N/A** | Additional external documentation for this schema.
 <a name="schemaExample"></a>example | Any | **N/A** | A free-form property to include a an example of an instance for this schema.
 
@@ -1564,11 +1564,11 @@ used to add that information. See examples for expected behavior.
 ##### Fixed Fields
 Field Name | Type | s1st | Description
 ---|:---:|:---:|---
-<a name="xmlName"></a>name | `string` | **MISSING**[#24](https://github.com/sarnowski/swagger1st/issues/24) | Replaces the name of the element/attribute used for the described schema property. When defined within the Items Object (`items`), it will affect the name of the individual XML elements within the list. When defined alongside `type` being `array` (outside the `items`), it will affect the wrapping element and only if `wrapped` is `true`. If `wrapped` is `false`, it will be ignored.
-<a name="xmlNamespace"></a>namespace | `string` | **MISSING**[#24](https://github.com/sarnowski/swagger1st/issues/24) | The URL of the namespace definition. Value SHOULD be in the form of a URL.
-<a name="xmlPrefix"></a>prefix | `string` | **MISSING**[#24](https://github.com/sarnowski/swagger1st/issues/24) | The prefix to be used for the [name](#xmlName).
-<a name="xmlAttribute"></a>attribute | `boolean` | **MISSING**[#24](https://github.com/sarnowski/swagger1st/issues/24) | Declares whether the property definition translates to an attribute instead of an element. Default value is `false`.
-<a name="xmlWrapped"></a>wrapped | `boolean` | **MISSING**[#24](https://github.com/sarnowski/swagger1st/issues/24) | MAY be used only for an array definition. Signifies whether the array is wrapped (for example, `<books><book/><book/></books>`) or unwrapped (`<book/><book/>`). Default value is `false`. The definition takes effect only when defined alongside `type` being `array` (outside the `items`).
+<a name="xmlName"></a>name | `string` | **MISSING**[#24](https://github.com/zalando/swagger1st/issues/24) | Replaces the name of the element/attribute used for the described schema property. When defined within the Items Object (`items`), it will affect the name of the individual XML elements within the list. When defined alongside `type` being `array` (outside the `items`), it will affect the wrapping element and only if `wrapped` is `true`. If `wrapped` is `false`, it will be ignored.
+<a name="xmlNamespace"></a>namespace | `string` | **MISSING**[#24](https://github.com/zalando/swagger1st/issues/24) | The URL of the namespace definition. Value SHOULD be in the form of a URL.
+<a name="xmlPrefix"></a>prefix | `string` | **MISSING**[#24](https://github.com/zalando/swagger1st/issues/24) | The prefix to be used for the [name](#xmlName).
+<a name="xmlAttribute"></a>attribute | `boolean` | **MISSING**[#24](https://github.com/zalando/swagger1st/issues/24) | Declares whether the property definition translates to an attribute instead of an element. Default value is `false`.
+<a name="xmlWrapped"></a>wrapped | `boolean` | **MISSING**[#24](https://github.com/zalando/swagger1st/issues/24) | MAY be used only for an array definition. Signifies whether the array is wrapped (for example, `<books><book/><book/></books>`) or unwrapped (`<book/><book/>`). Default value is `false`. The definition takes effect only when defined alongside `type` being `array` (outside the `items`).
 
 ##### XML Object Examples
 

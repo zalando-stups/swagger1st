@@ -1,8 +1,8 @@
 # swagger1st (swagger first)
 
-![Maven Central](https://img.shields.io/maven-central/v/io.sarnowski/swagger1st.svg)
-[![Build Status](https://travis-ci.org/sarnowski/swagger1st.svg?branch=master)](https://travis-ci.org/sarnowski/swagger1st)
-[![Coverage Status](https://coveralls.io/repos/sarnowski/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/sarnowski/swagger1st?branch=master)
+![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
+[![Build Status](https://travis-ci.org/zalando/swagger1st.svg?branch=master)](https://travis-ci.org/zalando/swagger1st)
+[![Coverage Status](https://coveralls.io/repos/zalando/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/zalando/swagger1st?branch=master)
 
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
 based on your [Swagger](http://swagger.io/) definition. Instead of defining routes and validation rules in your code,
@@ -88,11 +88,11 @@ browser to [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
-    [io.sarnowski/swagger1st "<latest>"]
+    [org.zalando/swagger1st "<latest>"]
 
-You find the latest version in [Maven central](http://repo1.maven.org/maven2/io/sarnowski/swagger1st/):
+You find the latest version in [Maven central](http://repo1.maven.org/maven2/zalando/swagger1st/):
 
-![Maven Central](https://img.shields.io/maven-central/v/io.sarnowski/swagger1st.svg)
+![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
 
 The following setup creates a ring compliant handler.
 
@@ -168,7 +168,7 @@ specification:
 
 ## Development on swagger1st
 
-Source code can be found on [GitHub](https://github.com/sarnowski/swagger1st). Read
+Source code can be found on [GitHub](https://github.com/zalando/swagger1st). Read
 [this documentation](https://guides.github.com/introduction/flow/) if you are just starting with GitHub. In addition,
 you need [Leiningen](http://leiningen.org/) as the build tool, make sure it works first.
 
@@ -176,7 +176,7 @@ The following commands are a kickstarter for development:
 
 ```shell
 # get the source
-$ git clone https://github.com/sarnowski/swagger1st.git
+$ git clone https://github.com/zalando/swagger1st.git
 $ cd swagger1st
 
 # run the tests
@@ -197,6 +197,7 @@ For interactive development, you can start a REPL by typing `lein repl`.
 ## License
 
 Copyright (c) 2015, Tobias Sarnowski
+Copyright (c) 2016, Zalando SE
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted,
 provided that the above copyright notice and this permission notice appear in all copies.

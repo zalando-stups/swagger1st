@@ -1,12 +1,12 @@
-(defproject io.sarnowski/swagger1st "0.22.0-SNAPSHOT"
+(defproject org.zalando/swagger1st "0.22.0-SNAPSHOT"
   :description "A ring handler that does routing based on a swagger definition."
-  :url "https://github.com/sarnowski/swagger1st"
+  :url "https://github.com/zalando/swagger1st"
 
   :license {:name "ISC License"
             :url "http://opensource.org/licenses/ISC"
             :distribution :repo}
 
-  :scm {:url "git@github.com:sarnowski/swagger1st.git"}
+  :scm {:url "git@github.com:zalando/swagger1st.git"}
 
   :min-lein-version "2.0.0"
 
@@ -47,8 +47,11 @@
                   [:name "Tobias Sarnowski"]
                   [:url "http://www.sarnowski.io"]
                   [:email "tobias@sarnowski.io"]
+                  [:timezone "+1"]]
+                 [:developer
+                  [:name "Andre Hartmann"]
+                  [:email "andre.hartmann@zalando.de"]
                   [:timezone "+1"]]]
 
-  :signing {:gpg-key "tobias@sarnowski.io"}
   :deploy-repositories {"releases" {:url "https://oss.sonatype.org/service/local/staging/deploy/maven2/" :creds :gpg}
                         "snapshots" {:url "https://oss.sonatype.org/content/repositories/snapshots/" :creds :gpg}})
