@@ -3,7 +3,8 @@ language: clojure
 jdk:
   - oraclejdk8
 
-script: lein cloverage
+script: lein test :all
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - CLOVERAGE_VERSION=1.0.9 lein cloverage --codecov
+  - bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
