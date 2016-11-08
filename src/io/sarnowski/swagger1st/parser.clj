@@ -6,7 +6,8 @@
             [io.sarnowski.swagger1st.mapper :refer [split-path]]
             [io.sarnowski.swagger1st.util.api :as api]
             [clj-time.format :as f]
-            [ring.middleware.params :refer [params-request]])
+            [ring.middleware.params :refer [params-request]]
+            [ring.middleware.multipart-params :refer [multipart-params-request]])
   (:import (org.joda.time DateTime)
            (java.io PrintWriter)
            (clojure.lang ExceptionInfo)))
@@ -69,8 +70,11 @@
 
 (defn extract-parameter-form
   "Extract a parameter from the request body form."
-  [{form-params :form-params} definition]
-  (get form-params (get definition "name")))
+  [{:keys [form-params multipart-params]} definition]
+  (let [param-name (get definition "name")]
+    (or
+      (get form-params param-name)
+      (get multipart-params param-name))))
 
 (defn extract-parameter-body
   "Extract a parameter from the request body."
@@ -342,7 +346,7 @@
 (defn parse
   "Executes all prepared functions for the request."
   [{:keys [parsers]} next-handler request]
-  (let [request (params-request request)]
+  (let [request (-> request params-request multipart-params-request)]
     (try
       (let [parameters (->> (get parsers (-> request :swagger :key))
                             ; execute all parsers of the request
