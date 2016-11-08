@@ -52,13 +52,15 @@
 
          (is (= (app (-> (mock/request :post "/user/123")
                          (mock/header "Content-Type" "application/json; charset=UTF-8")
-                         (mock/body (json/encode {:name "sarnowski"}))))
+                         (mock/body (json/encode {:name "sarnowski"
+                                                  :created "2016-08-29T11:45:09+02:00"}))))
                 {:status 200}))
 
          (is (= (app (mock/request :get "/user/123"))
                 {:status  200
                  :headers {"Content-Type" "application/json"}
-                 :body    (json/encode {:name "sarnowski"})}))
+                 :body    (json/encode {:name "sarnowski"
+                                        :created "2016-08-29T09:45:09.000Z"})}))
 
          (is (= (app (mock/request :delete "/user/123"))
                 {:status 200})))
