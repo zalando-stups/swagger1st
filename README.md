@@ -2,7 +2,7 @@
 
 ![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
 [![Build Status](https://travis-ci.org/zalando/swagger1st.svg?branch=master)](https://travis-ci.org/zalando/swagger1st)
-[![Coverage Status](https://coveralls.io/repos/zalando/swagger1st/badge.svg?branch=master)](https://coveralls.io/r/zalando/swagger1st?branch=master)
+[![codecov](https://codecov.io/gh/zalando/swagger1st/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando/swagger1st)
 
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
 based on your [Swagger](http://swagger.io/) definition. Instead of defining routes and validation rules in your code,

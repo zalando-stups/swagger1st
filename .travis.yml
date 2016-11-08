@@ -3,7 +3,7 @@ language: clojure
 jdk:
   - oraclejdk8
 
-script: lein test :all
+script: lein cloverage
 
-after_script:
-  - bash -ex coveralls.sh
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
