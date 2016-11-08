@@ -116,60 +116,102 @@
 (deftest array-values
   (is (= ["foo" "bar"] (parse ["foo" "bar"]
                               {"type"  "array"
-                               "items" {"type" "string"}})))
+                               "items" {"type" "string"}
+                               "collectionFormat" "multi"})))
 
   (is (= [5 6] (parse [5 6]
                       {"type"  "array"
-                       "items" {"type" "integer"}})))
+                       "items" {"type" "integer"}
+                       "collectionFormat" "multi"})))
 
   (is (= [(t/date-time 2015 4 28 10 56 12 98)]
          (parse ["2015-04-28T12:56:12.098+02:00"]
                 {"type"  "array"
                  "items" {"type"   "string"
-                          "format" "date-time"}})))
+                          "format" "date-time"}
+                 "collectionFormat" "multi"})))
 
   ; sizes
   (is (= ["foo" "bar"] (parse ["foo" "bar"]
                               {"type"     "array"
                                "items"    {"type" "string"}
-                               "minItems" 2})))
+                               "minItems" 2
+                               "collectionFormat" "multi"})))
   (is (rejected (parse ["foo" "bar"]
                        {"type"     "array"
                         "items"    {"type" "string"}
-                        "minItems" 3})))
+                        "minItems" 3
+                        "collectionFormat" "multi"})))
 
   (is (= ["foo" "bar"] (parse ["foo" "bar"]
                               {"type"     "array"
                                "items"    {"type" "string"}
-                               "maxItems" 2})))
+                               "maxItems" 2
+                               "collectionFormat" "multi"})))
   (is (rejected (parse ["foo" "bar"]
                        {"type"     "array"
                         "items"    {"type" "string"}
-                        "maxItems" 1})))
+                        "maxItems" 1
+                        "collectionFormat" "multi"})))
 
   ; unique items
   (is (= ["foo" "bar"] (parse ["foo" "bar"]
                               {"type"        "array"
                                "items"       {"type" "string"}
-                               "uniqueItems" true})))
+                               "uniqueItems" true
+                               "collectionFormat" "multi"})))
   (is (= ["foo" "bar" "bar"] (parse ["foo" "bar" "bar"]
                                     {"type"        "array"
                                      "items"       {"type" "string"}
-                                     "uniqueItems" false})))
+                                     "uniqueItems" false
+                                     "collectionFormat" "multi"})))
   (is (rejected (parse ["foo" "bar" "bar"]
                        {"type"        "array"
                         "items"       {"type" "string"}
-                        "uniqueItems" true})))
+                        "uniqueItems" true
+                        "collectionFormat" "multi"})))
 
   (is (empty? (parse []
                      {"type"        "array"
                       "items"       {"type" "string"}
-                      "uniqueItems" true})))
+                      "uniqueItems" true
+                      "collectionFormat" "multi"})))
 
   (is (= ["foo"] (parse ["foo"]
                         {"type"        "array"
                          "items"       {"type" "string"}
-                         "uniqueItems" true}))))
+                         "uniqueItems" true
+                         "collectionFormat" "multi"})))
+
+  ; collection formats
+  (is (= ["foo"] (parse "foo"
+                        {"type"             "array"
+                         "items"            {"type" "string"}
+                         "collectionFormat" "multi"})))
+
+  (is (= ["foo" "bar"] (parse "foo,bar"
+                              {"type"             "array"
+                               "items"            {"type" "string"}
+                               "collectionFormat" "csv"})))
+
+  (is (= ["foo" "bar"] (parse "foo,bar"
+                              {"type"             "array"
+                               "items"            {"type" "string"}})))
+
+  (is (= ["foo" "bar"] (parse "foo bar"
+                              {"type"             "array"
+                               "items"            {"type" "string"}
+                               "collectionFormat" "ssv"})))
+
+  (is (= ["foo" "bar"] (parse "foo\tbar"
+                              {"type"             "array"
+                               "items"            {"type" "string"}
+                               "collectionFormat" "tsv"})))
+
+  (is (= ["foo" "bar"] (parse "foo|bar"
+                              {"type"             "array"
+                               "items"            {"type" "string"}
+                               "collectionFormat" "pipes"}))))
 
 (deftest object-values
   (is (= {:foo "bar"} (parse {:foo "bar"}

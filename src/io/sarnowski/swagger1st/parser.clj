@@ -140,6 +140,32 @@
         (err "its format is not supported")))
     value))
 
+(defmulti split-array
+  "Split a value according to the collection format given by the spec."
+  (fn [definition _]
+    (get definition "collectionFormat" "csv")))
+
+(defmethod split-array "csv" [definition value]
+  (string/split value #","))
+
+(defmethod split-array "ssv" [definition value]
+  (string/split value #" "))
+
+(defmethod split-array "tsv" [definition value]
+  (string/split value #"\t"))
+
+(defmethod split-array "pipes" [definition value]
+  (string/split value #"\|"))
+
+(defmethod split-array "multi" [definition value]
+  ;; The wrap-params middleware guarantees that multiple occurrences of a
+  ;; parameter will have the values collected in a vector. Note, however, that
+  ;; the wrapping will not happen in the special case where a parameter occurs
+  ;; only once, so we wrap the value ourselves in that case.
+  (if (vector? value)
+    value
+    [value]))
+
 (defmulti create-value-parser
           "Creates a parser function that takes a value and coerces and validates it."
           (fn [definition _ _]
@@ -174,7 +200,8 @@
   (let [items-definition (get definition "items")
         items-parser (create-value-parser items-definition path parser-options)]
     (fn [value]
-      (let [err (partial throw-value-error value definition path)
+      (let [vals (split-array definition value)
+            err (partial throw-value-error value definition path)
             check-count (fn [value]
                           (if-let [max-items (get definition "maxItems")]
                             (when-not (<= (count value) max-items)
@@ -186,11 +213,9 @@
                            (if (get definition "uniqueItems")
                              (when-not (or (empty? value) (apply distinct? value))
                                (err "it has duplicate items"))))]
-        (when-not (instance? Iterable value)
-          (err "it is not an array"))
-        (check-count value)
-        (check-unique value)
-        (map items-parser value)))))
+        (check-count vals)
+        (check-unique vals)
+        (map items-parser vals)))))
 
 (defmethod create-value-parser "string" [definition path parser-options]
   (let [check-pattern (if (contains? definition "pattern")
