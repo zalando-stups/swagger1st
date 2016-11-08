@@ -17,13 +17,13 @@
 
                  [prismatic/schema "1.1.3"]
 
-                 [clj-time "0.12.0"]
+                 [clj-time "0.12.2"]
 
                  [ring-basic-authentication "1.0.5"]
                  [clj-http "3.3.0"]
                  [cheshire "5.6.3"]]
 
-  :plugins [[lein-cloverage "1.0.6"]]
+  :plugins [[lein-cloverage "1.0.9"]]
 
   :profiles {:dev {:dependencies [[ring/ring-core "1.5.0"]
                                   [ring/ring-devel "1.5.0"]
@@ -36,7 +36,7 @@
                                   [org.apache.logging.log4j/log4j-core "2.7"]
                                   [org.apache.logging.log4j/log4j-slf4j-impl "2.7"]
                                   [criterium "0.4.4"]
-                                  [com.newrelic.agent.java/newrelic-api "3.32.0"]]}}
+                                  [com.newrelic.agent.java/newrelic-api "3.33.0"]]}}
 
   :test-selectors {:default (complement :performance)
                    :performance :performance
