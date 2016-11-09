@@ -184,34 +184,42 @@
                          "collectionFormat" "multi"})))
 
   ; collection formats
-  (is (= ["foo"] (parse "foo"
+  (are [collection-format]
+      (= [] (parse nil
+                   {"type"             "array"
+                    "items"            {"type" "string"}
+                    "collectionFormat" collection-format}))
+    "multi" "csv" "ssv" "tsv" "pipes")
+
+  (are [collection-format]
+      (= [""] (parse ""
+                     {"type"             "array"
+                      "items"            {"type" "string"}
+                      "collectionFormat" collection-format}))
+    "multi" "csv" "ssv" "tsv" "pipes")
+
+  (are [collection-format]
+      (= ["foo"] (parse "foo"
                         {"type"             "array"
                          "items"            {"type" "string"}
-                         "collectionFormat" "multi"})))
+                         "collectionFormat" collection-format}))
+    "multi" "csv" "ssv" "tsv" "pipes")
 
   (is (= ["foo" "bar"] (parse "foo,bar"
-                              {"type"             "array"
-                               "items"            {"type" "string"}
-                               "collectionFormat" "csv"})))
-
-  (is (= ["foo" "bar"] (parse "foo,bar"
+                              ;; "csv" should be the default format
                               {"type"             "array"
                                "items"            {"type" "string"}})))
 
-  (is (= ["foo" "bar"] (parse "foo bar"
+  (are [collection-format input]
+      (= ["foo" "bar"] (parse input
                               {"type"             "array"
                                "items"            {"type" "string"}
-                               "collectionFormat" "ssv"})))
-
-  (is (= ["foo" "bar"] (parse "foo\tbar"
-                              {"type"             "array"
-                               "items"            {"type" "string"}
-                               "collectionFormat" "tsv"})))
-
-  (is (= ["foo" "bar"] (parse "foo|bar"
-                              {"type"             "array"
-                               "items"            {"type" "string"}
-                               "collectionFormat" "pipes"}))))
+                               "collectionFormat" collection-format}))
+    "multi"  ["foo" "bar"]
+    "csv"    "foo,bar"
+    "ssv"    "foo bar"
+    "tsv"    "foo\tbar"
+    "pipes"  "foo|bar"))
 
 (deftest object-values
   (is (= {:foo "bar"} (parse {:foo "bar"}
