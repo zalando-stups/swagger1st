@@ -1,4 +1,4 @@
-(defproject org.zalando/swagger1st "0.23.0-SNAPSHOT"
+(defproject org.zalando/swagger1st "0.23.0"
   :description "A ring handler that does routing based on a swagger definition."
   :url "https://github.com/zalando/swagger1st"
 
