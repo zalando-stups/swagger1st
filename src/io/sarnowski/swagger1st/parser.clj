@@ -204,9 +204,10 @@
   (let [items-definition (get definition "items")
         items-parser (create-value-parser items-definition path parser-options)]
     (fn [value]
-      (let [vals (if (and value (not= "body" (first path)))
-                   (split-array definition value)
-                   [])
+      (let [vals (cond
+                   (= "body" (first path)) value
+                   (some? value) (split-array definition value)
+                   :else [])
             err (partial throw-value-error value definition path)
             check-count (fn [value]
                           (if-let [max-items (get definition "maxItems")]
