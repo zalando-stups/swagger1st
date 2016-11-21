@@ -7,11 +7,14 @@
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
 based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/) to specify your API according to the [Swagger/Open API 2.0 Specification](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
 
-**[Questions**:
+####Compatibility Overview
+swagger1st aims to implement all of the Swagger/OpenAPI spec's features, so that you only have to write your business logic. [This document](https://github.com/zalando/swagger1st/blob/master/comp-2.0.md) shows which aspects of the spec it currently supports.
+
+**[Questions:
 - Is swagger1st an API-First version of Ring?
 - Why would/should someone use this? In other words, what are the key, basic advantages of this approach: That it's tech-independent? That it's simpler than defining routes and validation rules? What's the "easy sell"?
 - Is there anything else that we know of that does something similar, or is this the first/most useful?
-- What are swagger1st's most useful/innovative aspects?**
+- What are swagger1st's most useful/innovative aspects?]**
 
 swagger1st will use it **[what, specifically?]** as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
 your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
@@ -84,7 +87,7 @@ $ lein new swagger1st myproject +component
 
 Then:
 - Go into the new project folder `myproject` and run its main function with `lein run -m myproject.core`
-— Use your browser to visit [http://localhost:3000/ui/](http://localhost:3000/ui/).
+- Use your browser to visit [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
 ### Manual Setup
 
@@ -113,40 +116,13 @@ The following setup creates a ring compliant handler.
       (s1st/executor)))
 ```
 
-## Complete Example Projects
+### Projects Using Swagger1st in Production
 
-Checkout the Leiningen templates as mentioned in the Kickstart section for working examples.
+- [Friboo](https://github.com/zalando/friboo), a utility library for writing microservices in Clojure, with support for Swagger and OAuth. It uses swagger1st at its base for RESTful HTTP endpoints and also integrates with the [component](https://github.com/stuartsierra/component) framework.
+- [swagger-mock](https://github.com/zalando/swagger-mock), which runs an HTTP server based on a Swagger/OpenAPI definition and returns mocked responses. With the complete data of your Swagger definition at hand, you can modify it before processing and also use its definition information during execution. This allows the swagger-mock to hook into your definition and parse the examples from it in order to return them on each request.
+- [STUPS.io](https://stups.io/) components [Kio](https://github.com/zalando-stups/kio), [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3), [Essentials](https://github.com/zalando-stups/essentials), [TWINTIP](https://github.com/zalando-stups/twintip-storage) and [mint](https://github.com/zalando-stups/mint-storage)
 
-### Friboo
-
-[Friboo](https://github.com/zalando-stups/friboo) is [Zalando](http://tech.zalando.com/)'s opinionated Clojure
-microservice library which uses swagger1st at its base for RESTful HTTP endpoints and also integrates with the
-[component](https://github.com/stuartsierra/component) framework. See the following projects who are real world
-applications of Zalando's cloud infrastructure based on Friboo with swagger1st:
-
-* [Kio](https://github.com/zalando-stups/kio)
-* [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3)
-* [essentials](https://github.com/zalando-stups/essentials)
-* [TWINTIP](https://github.com/zalando-stups/twintip-storage)
-* [mint](https://github.com/zalando-stups/mint-storage)
-
-### swagger-mock
-
-[swagger-mock](https://github.com/zalando/swagger-mock) is an example how to also use swagger1st. Since you have the
-complete data of your Swagger definition at hand, you can modify it before processing and also use its definition
-information during execution. This allows the swagger-mock to hook into your definition and parse the examples from it
-in order to return them on each request.
-
-## Compatibility Overview
-
-swagger1st aims to implement all features of the Swagger 2.0 specification. Everything that you can define with Swagger
-should be handled by swagger1st, so that you only have to write your business logic. Version 1.0 will implement all
-elements (that makes sense to handle). Until then, the following document shows the current supported aspects of the
-specification:
-
-* [Swagger 2.0 Compatibility Document](comp-2.0.md)
-
-## The Ring handler in detail
+### The Ring Handler in Detail
 
 * `s1st/context` (required)
     * Creates a new context from a given definition. This context will be used by the next steps to prepare the
