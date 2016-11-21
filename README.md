@@ -1,4 +1,4 @@
-# swagger1st: A Swagger-First Clojure Ring handler
+##swagger1st: A Swagger-First Clojure Ring handler
 
 ![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
 [![Build Status](https://travis-ci.org/zalando/swagger1st.svg?branch=master)](https://travis-ci.org/zalando/swagger1st)
@@ -6,6 +6,12 @@
 
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
 based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/) to specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
+
+**[Questions:
+— is swagger1st an API-First version of Ring?
+— Why would/should someone use this? In other words, what are the key, basic advantages of this approach: That it's tech-independent? That it's simpler than defining routes and validation rules? What's the "easy sell"?
+— Is there anything else that we know of that does something similar, or is this the first/most useful?
+— What are swagger1st's most useful features?**
 
 swagger1st will use it **[what, specifically?]** as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
 your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
