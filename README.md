@@ -7,11 +7,11 @@
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
 based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/) to specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
 
-**[Questions:
-— is swagger1st an API-First version of Ring?
-— Why would/should someone use this? In other words, what are the key, basic advantages of this approach: That it's tech-independent? That it's simpler than defining routes and validation rules? What's the "easy sell"?
-— Is there anything else that we know of that does something similar, or is this the first/most useful?
-— What are swagger1st's most useful features?**
+**[Questions**:
+**- Is swagger1st an API-First version of Ring?
+- Why would/should someone use this? In other words, what are the key, basic advantages of this approach: That it's tech-independent? That it's simpler than defining routes and validation rules? What's the "easy sell"?
+- Is there anything else that we know of that does something similar, or is this the first/most useful?
+- What are swagger1st's most useful/innovative aspects?**
 
 swagger1st will use it **[what, specifically?]** as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
 your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
@@ -57,24 +57,22 @@ This is all you need to do to define and implement your API. Only fully validate
 so you can rely on swagger1st to properly check all input parameters according to your definition. The function itself
 is a normal Clojure function without any dependencies to swagger1st - simple as that.
 
-## Kickstart
+### Quickstart
 
-### Leiningen Template
+### Simple Setup 
 
-For the following steps, you need [Leiningen](http://leiningen.org/) installed.
-
-#### Simple Setup
-
-If you are bootstrapping a complete new project or just want to try out swagger1st, you can use the Leiningen template:
+You'll need to install [Leiningen](http://leiningen.org/). If you're bootstrapping a completely new project, or just want to try out swagger1st, you can use the Leiningen template:
 
 ```
 $ lein new swagger1st myproject
 ```
+Follow these steps:
+- Go into the new project folder `myproject` and start a new web server with `lein ring server-headless`
+- Use your browser and go to [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
-Go into the new project folder `myproject` and start a new webserver with `lein ring server-headless`. Go with your
-browser to [http://localhost:3000/ui/](http://localhost:3000/ui/).
+**[Is that it? Are there more steps?]**
 
-#### Complex Setup
+### Complex Setup
 
 You can also generate a project setup which includes Stuart Sierra's
 [component](https://github.com/stuartsierra/component) framework in order to see how you can handle dependency injection
