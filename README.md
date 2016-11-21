@@ -1,20 +1,17 @@
-# swagger1st (swagger first)
+# swagger1st: A Swagger-First Clojure Ring handler
 
 ![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
 [![Build Status](https://travis-ci.org/zalando/swagger1st.svg?branch=master)](https://travis-ci.org/zalando/swagger1st)
 [![codecov](https://codecov.io/gh/zalando/swagger1st/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando/swagger1st)
 
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
-based on your [Swagger](http://swagger.io/) definition. Instead of defining routes and validation rules in your code,
-you specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec) using
-[their great tool set](http://editor.swagger.io/). This encourages an "API first" approach by letting you specify your
-API in a technology independent format. The resulting definition is the ultimate format for publishing, sharing and
-reviewing your API. swagger1st will use it as a configuration file for processing incoming requests. This approach makes
-sure, that your implementation and specification never gets out of sync. During runtime, you can inspect and easily test
-your API with the built-in [Swagger UI](http://petstore.swagger.io/). You are also free to extend the interpretation of
+based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/)to specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
+
+swagger1st will use it **[what, specifically?]** as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
+your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
 your definition according to your own needs.
 
-Imagine a simple API definition like that:
+Imagine a simple API definition like this:
 
 ```yaml
 swagger: '2.0'
@@ -38,7 +35,7 @@ paths:
               description: say hello
 ```
 
-By default, this definition is connected to your business logic via the `operationId`, which might be defined like that:
+By default, this definition is connected to your business logic via the `operationId`, which might be defined like so:
 
 ```clojure
 (ns example.api
@@ -50,7 +47,7 @@ By default, this definition is connected to your business logic via the `operati
         (r/content-type "plain/text"))))
 ```
 
-That is everything you need to do to define and implement your API. Only fully validated requests get to your function,
+This is all you need to do to define and implement your API. Only fully validated requests get to your function,
 so you can rely on swagger1st to properly check all input parameters according to your definition. The function itself
 is a normal Clojure function without any dependencies to swagger1st - simple as that.
 
