@@ -8,7 +8,7 @@ swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler tha
 based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/) to specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
 
 **[Questions**:
-**- Is swagger1st an API-First version of Ring?
+- Is swagger1st an API-First version of Ring?
 - Why would/should someone use this? In other words, what are the key, basic advantages of this approach: That it's tech-independent? That it's simpler than defining routes and validation rules? What's the "easy sell"?
 - Is there anything else that we know of that does something similar, or is this the first/most useful?
 - What are swagger1st's most useful/innovative aspects?**
@@ -59,39 +59,41 @@ is a normal Clojure function without any dependencies to swagger1st - simple as 
 
 ### Quickstart
 
-### Simple Setup 
+The following provides instructions for simple, complex and manual setups. For all three approaches you'll need to install [Leiningen](http://leiningen.org/).
 
-You'll need to install [Leiningen](http://leiningen.org/). If you're bootstrapping a completely new project, or just want to try out swagger1st, you can use the Leiningen template:
+#### Simple Setup 
+If you're bootstrapping a completely new project, or just want to try out swagger1st, you can use this Leiningen template:
 
 ```
 $ lein new swagger1st myproject
 ```
-Follow these steps:
+Then:
 - Go into the new project folder `myproject` and start a new web server with `lein ring server-headless`
-- Use your browser and go to [http://localhost:3000/ui/](http://localhost:3000/ui/).
+- Use your browser to visit [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
 **[Is that it? Are there more steps?]**
 
 ### Complex Setup
 
-You can also generate a project setup which includes Stuart Sierra's
-[component](https://github.com/stuartsierra/component) framework in order to see how you can handle dependency injection
-with swagger1st:
+To see how you can handle dependency injection with swagger1st, generate a project setup that includes Stuart Sierra's
+[component](https://github.com/stuartsierra/component) framework:
 
 ```
 $ lein new swagger1st myproject +component
 ```
 
-Go into the new project folder `myproject` and run its main function via `lein run -m myproject.core`. Go with your
-browser to [http://localhost:3000/ui/](http://localhost:3000/ui/).
+Then:
+- Go into the new project folder `myproject` and run its main function with `lein run -m myproject.core`
+— Use your browser to visit [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
 ### Manual Setup
 
+**[What is Manual Setup for? What are the advantages?] **
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
     [org.zalando/swagger1st "<latest>"]
 
-You find the latest version in [Maven central](http://repo1.maven.org/maven2/zalando/swagger1st/):
+Find the latest version in [Maven central](http://repo1.maven.org/maven2/zalando/swagger1st/):
 
 ![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
 
