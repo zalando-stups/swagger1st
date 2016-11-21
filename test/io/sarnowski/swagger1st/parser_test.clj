@@ -12,6 +12,12 @@
   (let [parser (p/create-value-parser definition ["test"] parser-options)]
     (parser value)))
 
+(defn parse-body
+  "Parses a JSON body according to its definition."
+  [value definition & {:keys [] :as parser-options}]
+  (let [parser (p/create-value-parser definition ["body"] parser-options)]
+    (parser value)))
+
 (defmacro rejected
   "Executes the expressions and returns true, if an ExceptionInfo with http-code 400 was thrown."
   [& exp]
@@ -215,6 +221,18 @@
                               {"type"             "array"
                                "items"            {"type" "string"}
                                "collectionFormat" collection-format}))
+    "multi"  ["foo" "bar"]
+    "csv"    "foo,bar"
+    "ssv"    "foo bar"
+    "tsv"    "foo\tbar"
+    "pipes"  "foo|bar")
+
+  ;; Ignore collectionFormat in body
+  (are [collection-format input]
+      (= (seq input) (parse-body input
+                                 {"type"             "array"
+                                  "items"            {"type" "string"}
+                                  "collectionFormat" collection-format}))
     "multi"  ["foo" "bar"]
     "csv"    "foo,bar"
     "ssv"    "foo bar"
