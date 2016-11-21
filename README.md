@@ -62,7 +62,7 @@ is a normal Clojure function without any dependencies to swagger1st - simple as 
 
 ### Quickstart
 
-The following provides instructions for simple, complex and manual setups. For all three approaches you'll need to install [Leiningen](http://leiningen.org/).
+The following provides instructions for simple, complex and manual setups. For all three approaches you'll need to install [Leiningen](http://leiningen.org/) as the build tool.
 
 #### Simple Setup 
 If you're bootstrapping a completely new project, or just want to try out swagger1st, you can use this Leiningen template:
@@ -89,18 +89,17 @@ Then:
 - Go into the new project folder `myproject` and run its main function with `lein run -m myproject.core`
 - Use your browser to visit [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
+**[Is that it? Are there more steps?]**
+
 ### Manual Setup
 
 **[What is Manual Setup for? What are the advantages?] **
+
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
     [org.zalando/swagger1st "<latest>"]
 
-Find the latest version in [Maven central](http://repo1.maven.org/maven2/zalando/swagger1st/):
-
-![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
-
-The following setup creates a ring compliant handler.
+This creates a Ring-compliant handler:
 
 ```clojure
 (ns example
@@ -115,6 +114,28 @@ The following setup creates a ring compliant handler.
       (s1st/protector {"oauth2" (s1stsec/allow-all)})
       (s1st/executor)))
 ```
+
+### Commands for Development
+
+```shell
+# get the source
+$ git clone https://github.com/zalando/swagger1st.git
+$ cd swagger1st
+
+# run the tests
+$ lein test
+
+# run all tests, including performance benchmarks
+$ lein test :all
+
+# build an own artifact for local development
+$ lein install
+
+# release a new version
+$ lein release :minor
+```
+
+For interactive development, you can start a REPL by typing `lein repl`.
 
 ### Projects Using Swagger1st in Production
 
@@ -145,35 +166,7 @@ The following setup creates a ring compliant handler.
       valid requests make it up until here. You can also specify an own function resolver function in order to hook into
       your own framework.
 
-## Development on swagger1st
-
-Source code can be found on [GitHub](https://github.com/zalando/swagger1st). Read
-[this documentation](https://guides.github.com/introduction/flow/) if you are just starting with GitHub. In addition,
-you need [Leiningen](http://leiningen.org/) as the build tool, make sure it works first.
-
-The following commands are a kickstarter for development:
-
-```shell
-# get the source
-$ git clone https://github.com/zalando/swagger1st.git
-$ cd swagger1st
-
-# run the tests
-$ lein test
-
-# run all tests, including performance benchmarks
-$ lein test :all
-
-# build an own artifact for local development
-$ lein install
-
-# release a new version
-$ lein release :minor
-```
-
-For interactive development, you can start a REPL by typing `lein repl`.
-
-## License
+### License
 
 Copyright (c) 2015, Tobias Sarnowski
 Copyright (c) 2016, Zalando SE
