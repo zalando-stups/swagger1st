@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/zalando/swagger1st/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando/swagger1st)
 
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
-based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/)to specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
+based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/) to specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
 
 swagger1st will use it **[what, specifically?]** as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
 your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
