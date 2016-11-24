@@ -11,12 +11,12 @@ based on your [Swagger](http://swagger.io/)/OpenAPI definition. Instead of defin
 swagger1st aims to implement all of the Swagger/OpenAPI spec's features, so that you only have to write your business logic. [This document](https://github.com/zalando/swagger1st/blob/master/comp-2.0.md) shows which aspects of the spec it currently supports.
 
 **[Questions:
-- Is swagger1st an API-First version of Ring?
+- Is swagger1st an API-First version of Ring? -> I guess that's explained in the last paragraph in the previous section; it's a ring handler that parses, validates and routes based on a Swagger definition.
 - Why would/should someone use this? In other words, what are the key, basic advantages of this approach: That it's tech-independent? That it's simpler than defining routes and validation rules? What's the "easy sell"?
-- Is there anything else that we know of that does something similar, or is this the first/most useful?
+- Is there anything else that we know of that does something similar, or is this the first/most useful? -> Complementary to the popular [ring-swagger](https://github.com/metosin/ring-swagger) library, which derives a Swagger definition from your Clojure code, swagger1st allows you to start with your API definition: You specify the API using Swagger in a platform-independent way, and swagger1st translates the specification into Clojure code.
 - What are swagger1st's most useful/innovative aspects?]**
 
-swagger1st will use it **[what, specifically?]** as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
+swagger1st will use the Swagger definition of your API as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
 your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
 your definition according to your own needs.
 
@@ -69,12 +69,11 @@ If you're bootstrapping a completely new project, or just want to try out swagge
 
 ```
 $ lein new swagger1st myproject
+$ cd myproject
+$ lein ring server-headless
 ```
-Then:
-- Go into the new project folder `myproject` and start a new web server with `lein ring server-headless`
-- Use your browser to visit [http://localhost:3000/ui/](http://localhost:3000/ui/).
 
-**[Is that it? Are there more steps?]**
+This will run a local web server on port 3000, so you can interact with the API at <http://localhost:3000/>. Also, you might want to have a look at <http://localhost:3000/ui/> for a graphical interface to explore and experiment with your API (using [Swagger UI](http://petstore.swagger.io/)).
 
 ### Complex Setup
 
@@ -83,17 +82,15 @@ To see how you can handle dependency injection with swagger1st, generate a proje
 
 ```
 $ lein new swagger1st myproject +component
+$ cd myproject
+$ lein run -m myproject.core
 ```
 
-Then:
-- Go into the new project folder `myproject` and run its main function with `lein run -m myproject.core`
-- Use your browser to visit [http://localhost:3000/ui/](http://localhost:3000/ui/).
-
-**[Is that it? Are there more steps?]**
+As with the simple setup above, this will launch a local web server on port 3000.
 
 ### Manual Setup
 
-**[What is Manual Setup for? What are the advantages?] **
+The following steps describe how to manually set up swagger1st in a Clojure project. This is especially useful if you want to integrate it into an existing project or cannot use the provided template for other reasons.
 
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
