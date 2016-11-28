@@ -13,7 +13,7 @@ swagger1st aims to implement all of the Swagger/OpenAPI spec's features, so that
 **[Questions:
 - Is swagger1st an API-First version of Ring? -> I guess that's explained in the last paragraph in the previous section; it's a ring handler that parses, validates and routes based on a Swagger definition.
 - Why would/should someone use this? In other words, what are the key, basic advantages of this approach: That it's tech-independent? That it's simpler than defining routes and validation rules? What's the "easy sell"?
-- Is there anything else that we know of that does something similar, or is this the first/most useful? -> Complementary to the popular [ring-swagger](https://github.com/metosin/ring-swagger) library, which derives a Swagger definition from your Clojure code, swagger1st allows you to start with your API definition: You specify the API using Swagger in a platform-independent way, and swagger1st translates the specification into Clojure code.
+- Is there anything else that we know of that does something similar, or is this the first/most useful? -> Unlike [ring-swagger](https://github.com/metosin/ring-swagger), which derives a Swagger definition from your Clojure code, swagger1st allows you to start with your API definition: You specify the API using Swagger in a platform-independent way, and swagger1st translates the specification into Clojure code.
 - What are swagger1st's most useful/innovative aspects?]**
 
 swagger1st will use the Swagger definition of your API as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
