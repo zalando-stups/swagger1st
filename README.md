@@ -1,20 +1,22 @@
-# swagger1st (swagger first)
+## swagger1st: A Swagger-First Clojure Ring handler
 
 ![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
 [![Build Status](https://travis-ci.org/zalando/swagger1st.svg?branch=master)](https://travis-ci.org/zalando/swagger1st)
 [![codecov](https://codecov.io/gh/zalando/swagger1st/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando/swagger1st)
 
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
-based on your [Swagger](http://swagger.io/) definition. Instead of defining routes and validation rules in your code,
-you specify your API in the [Swagger 2.0 Specification format](https://github.com/swagger-api/swagger-spec) using
-[their great tool set](http://editor.swagger.io/). This encourages an "API first" approach by letting you specify your
-API in a technology independent format. The resulting definition is the ultimate format for publishing, sharing and
-reviewing your API. swagger1st will use it as a configuration file for processing incoming requests. This approach makes
-sure, that your implementation and specification never gets out of sync. During runtime, you can inspect and easily test
-your API with the built-in [Swagger UI](http://petstore.swagger.io/). You are also free to extend the interpretation of
+based on your [Swagger](http://swagger.io/)/OpenAPI definition. It takes the opposite approach of [ring-swagger](https://github.com/metosin/ring-swagger)—which enables you to generate your Swagger spec from your Clojure code—by allowing you to use your Swagger spec to generate Clojure code.
+
+Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/) to specify your API according to the [Swagger/Open API 2.0 Specification](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
+
+#### Compatibility Overview
+swagger1st aims to implement all of the Swagger/OpenAPI spec's features, so that you only have to write your business logic. [This document](https://github.com/zalando/swagger1st/blob/master/comp-2.0.md) shows which aspects of the spec it currently supports.
+
+swagger1st will use the Swagger definition of your API as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
+your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
 your definition according to your own needs.
 
-Imagine a simple API definition like that:
+Imagine a simple API definition like this:
 
 ```yaml
 swagger: '2.0'
@@ -38,7 +40,7 @@ paths:
               description: say hello
 ```
 
-By default, this definition is connected to your business logic via the `operationId`, which might be defined like that:
+By default, this definition is connected to your business logic via the `operationId`, which might be defined like so:
 
 ```clojure
 (ns example.api
@@ -50,51 +52,47 @@ By default, this definition is connected to your business logic via the `operati
         (r/content-type "plain/text"))))
 ```
 
-That is everything you need to do to define and implement your API. Only fully validated requests get to your function,
+This is all you need to do to define and implement your API. Only fully validated requests get to your function,
 so you can rely on swagger1st to properly check all input parameters according to your definition. The function itself
 is a normal Clojure function without any dependencies to swagger1st - simple as that.
 
-## Kickstart
+### Quickstart
 
-### Leiningen Template
+The following provides instructions for simple, complex and manual setups. For all three approaches you'll need to install [Leiningen](http://leiningen.org/) as the build tool.
 
-For the following steps, you need [Leiningen](http://leiningen.org/) installed.
-
-#### Simple Setup
-
-If you are bootstrapping a complete new project or just want to try out swagger1st, you can use the Leiningen template:
+#### Simple Setup 
+If you're bootstrapping a completely new project, or just want to try out swagger1st, you can use this Leiningen template:
 
 ```
 $ lein new swagger1st myproject
+$ cd myproject
+$ lein ring server-headless
 ```
 
-Go into the new project folder `myproject` and start a new webserver with `lein ring server-headless`. Go with your
-browser to [http://localhost:3000/ui/](http://localhost:3000/ui/).
+This will run a local web server on port 3000, so you can interact with the API at <http://localhost:3000/>. Also, you might want to have a look at <http://localhost:3000/ui/> for a graphical interface to explore and experiment with your API (using [Swagger UI](http://petstore.swagger.io/)).
 
-#### Complex Setup
+### Complex Setup
 
-You can also generate a project setup which includes Stuart Sierra's
-[component](https://github.com/stuartsierra/component) framework in order to see how you can handle dependency injection
-with swagger1st:
+To see how you can handle dependency injection with swagger1st, generate a project setup that includes Stuart Sierra's
+[component](https://github.com/stuartsierra/component) framework:
 
 ```
 $ lein new swagger1st myproject +component
+$ cd myproject
+$ lein run -m myproject.core
 ```
 
-Go into the new project folder `myproject` and run its main function via `lein run -m myproject.core`. Go with your
-browser to [http://localhost:3000/ui/](http://localhost:3000/ui/).
+As with the simple setup above, this will launch a local web server on port 3000.
 
 ### Manual Setup
+
+The following steps describe how to manually set up swagger1st in a Clojure project. This is especially useful if you want to integrate it into an existing project or cannot use the provided template for other reasons.
 
 Use the following dependency in your [Leiningen](http://leiningen.org/) project:
 
     [org.zalando/swagger1st "<latest>"]
 
-You find the latest version in [Maven central](http://repo1.maven.org/maven2/zalando/swagger1st/):
-
-![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
-
-The following setup creates a ring compliant handler.
+This creates a Ring-compliant handler:
 
 ```clojure
 (ns example
@@ -110,40 +108,35 @@ The following setup creates a ring compliant handler.
       (s1st/executor)))
 ```
 
-## Complete Example Projects
+### Commands for Development
 
-Checkout the Leiningen templates as mentioned in the Kickstart section for working examples.
+```shell
+# get the source
+$ git clone https://github.com/zalando/swagger1st.git
+$ cd swagger1st
 
-### Friboo
+# run the tests
+$ lein test
 
-[Friboo](https://github.com/zalando-stups/friboo) is [Zalando](http://tech.zalando.com/)'s opinionated Clojure
-microservice library which uses swagger1st at its base for RESTful HTTP endpoints and also integrates with the
-[component](https://github.com/stuartsierra/component) framework. See the following projects who are real world
-applications of Zalando's cloud infrastructure based on Friboo with swagger1st:
+# run all tests, including performance benchmarks
+$ lein test :all
 
-* [Kio](https://github.com/zalando-stups/kio)
-* [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3)
-* [essentials](https://github.com/zalando-stups/essentials)
-* [TWINTIP](https://github.com/zalando-stups/twintip-storage)
-* [mint](https://github.com/zalando-stups/mint-storage)
+# build an own artifact for local development
+$ lein install
 
-### swagger-mock
+# release a new version
+$ lein release :minor
+```
 
-[swagger-mock](https://github.com/zalando/swagger-mock) is an example how to also use swagger1st. Since you have the
-complete data of your Swagger definition at hand, you can modify it before processing and also use its definition
-information during execution. This allows the swagger-mock to hook into your definition and parse the examples from it
-in order to return them on each request.
+For interactive development, you can start a REPL by typing `lein repl`.
 
-## Compatibility Overview
+### Projects Using Swagger1st in Production
 
-swagger1st aims to implement all features of the Swagger 2.0 specification. Everything that you can define with Swagger
-should be handled by swagger1st, so that you only have to write your business logic. Version 1.0 will implement all
-elements (that makes sense to handle). Until then, the following document shows the current supported aspects of the
-specification:
+- [Friboo](https://github.com/zalando/friboo), a utility library for writing microservices in Clojure, with support for Swagger and OAuth. It uses swagger1st at its base for RESTful HTTP endpoints and also integrates with the [component](https://github.com/stuartsierra/component) framework.
+- [swagger-mock](https://github.com/zalando/swagger-mock), which runs an HTTP server based on a Swagger/OpenAPI definition and returns mocked responses. With the complete data of your Swagger definition at hand, you can modify it before processing and also use its definition information during execution. This allows the swagger-mock to hook into your definition and parse the examples from it in order to return them on each request.
+- [STUPS.io](https://stups.io/) components [Kio](https://github.com/zalando-stups/kio), [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3), [Essentials](https://github.com/zalando-stups/essentials), [TWINTIP](https://github.com/zalando-stups/twintip-storage) and [mint](https://github.com/zalando-stups/mint-storage)
 
-* [Swagger 2.0 Compatibility Document](comp-2.0.md)
-
-## The Ring handler in detail
+### The Ring Handler in Detail
 
 * `s1st/context` (required)
     * Creates a new context from a given definition. This context will be used by the next steps to prepare the
@@ -166,35 +159,7 @@ specification:
       valid requests make it up until here. You can also specify an own function resolver function in order to hook into
       your own framework.
 
-## Development on swagger1st
-
-Source code can be found on [GitHub](https://github.com/zalando/swagger1st). Read
-[this documentation](https://guides.github.com/introduction/flow/) if you are just starting with GitHub. In addition,
-you need [Leiningen](http://leiningen.org/) as the build tool, make sure it works first.
-
-The following commands are a kickstarter for development:
-
-```shell
-# get the source
-$ git clone https://github.com/zalando/swagger1st.git
-$ cd swagger1st
-
-# run the tests
-$ lein test
-
-# run all tests, including performance benchmarks
-$ lein test :all
-
-# build an own artifact for local development
-$ lein install
-
-# release a new version
-$ lein release :minor
-```
-
-For interactive development, you can start a REPL by typing `lein repl`.
-
-## License
+### License
 
 Copyright (c) 2015, Tobias Sarnowski
 Copyright (c) 2016, Zalando SE
