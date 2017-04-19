@@ -38,7 +38,7 @@
   [context & {:keys [discovery-path definition-path ui-path overwrite-host?]
               :or   {discovery-path  "/.well-known/schema-discovery"
                      definition-path "/swagger.json"
-                     ui-path         "/ui/"
+                     ui-path         "/ui"
                      overwrite-host? true}}]
   (chain-handler
     context
