@@ -36,3 +36,34 @@
 (deftest kio-definition
   (s/validate schema-2-0/root-object
               (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/schemas/kio.yaml")))
+
+(deftest info-object-extensions
+  (s/validate schema-2-0/info-object {"title"         "minimal schema"
+                                      "version"       "1.0"
+                                      "x-internal-id" 123}))
+
+(deftest schema-object-extensions
+  (s/validate schema-2-0/schema-object {"type" "            string"
+                                        "x-extensible-enum" ["foo" "bar"]}))
+
+(deftest parameter-object-extensions
+  (s/validate schema-2-0/parameter-object {"name"          "id"
+                                           "in"            "path"
+                                           "x-internal-id" 123}))
+
+(deftest operation-object-extensions
+  (s/validate schema-2-0/operation-object {"operationId"   "operation.id"
+                                           "responses"     {"default" {"description" "default response"}}
+                                           "x-internal-id" 123}))
+
+(deftest path-object-extensions
+  (s/validate schema-2-0/path-object {"$ref"          "#/definitions/path"
+                                      "x-internal-id" 123}))
+
+(deftest security-scheme-object-extensions
+  (s/validate schema-2-0/security-scheme-object {"type"          "basic"
+                                                 "x-internal-id" 123}))
+
+(deftest tag-object-extensions
+  (s/validate schema-2-0/tag-object {"name"          "default"
+                                     "x-internal-id" 123}))
