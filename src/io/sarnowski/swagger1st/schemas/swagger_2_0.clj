@@ -14,12 +14,6 @@
 (defn ref? [x]
   (get x "$ref"))
 
-(def primitives
-  {"integer" s-long
-   "number" s-float
-   "string" s-string
-   "boolean" s-boolean})
-
 ;;; complex types
 
 (def contact-object
