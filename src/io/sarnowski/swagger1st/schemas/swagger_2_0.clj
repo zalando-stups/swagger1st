@@ -1,5 +1,6 @@
 (ns io.sarnowski.swagger1st.schemas.swagger-2-0
-  (:require [schema.core :as s]))
+  (:require [clojure.string :as string]
+            [schema.core :as s]))
 
 ;;; Basic types
 
@@ -8,17 +9,12 @@
 (def s-string s/Str)
 (def s-boolean s/Bool)
 
-(defn extension? [^String k]
-  (.startsWith "x-" k))
+(defn extension? [k]
+  (and (string? k)
+       (string/starts-with? k "x-")))
 
 (defn ref? [x]
   (get x "$ref"))
-
-(def primitives
-  {"integer" s-long
-   "number" s-float
-   "string" s-string
-   "boolean" s-boolean})
 
 ;;; complex types
 
@@ -32,13 +28,13 @@
    (s/optional-key "url")  s-string})
 
 (def info-object
-  {(s/required-key "title")             s-string
-   (s/required-key "version")           s-string
-   (s/optional-key "description")       s-string
-   (s/optional-key "termsOfService")    s-string
-   (s/optional-key "contact")           contact-object
-   (s/optional-key "license")           license-object
-   (s/optional-key (s/pred extension?)) s/Any})
+  {(s/required-key "title")          s-string
+   (s/required-key "version")        s-string
+   (s/optional-key "description")    s-string
+   (s/optional-key "termsOfService") s-string
+   (s/optional-key "contact")        contact-object
+   (s/optional-key "license")        license-object
+   (s/pred extension?)               s/Any})
 
 (def external-documentation-object
   {(s/required-key "url")         s-string
@@ -104,7 +100,7 @@
    (s/optional-key "externalDocs")     external-documentation-object
    (s/optional-key "example")          s/Any
    (s/optional-key "$ref")             s-string
-   (s/optional-key "x-swagger1st-keywordize") s/Any})
+   (s/pred extension?)                  s/Any})
 
 (def header-object
   (merge
@@ -126,12 +122,12 @@
 (def parameter-object
   (merge
     items-object
-    {(s/required-key "name")              s-string
-     (s/required-key "in")                s-string
-     (s/optional-key "description")       s-string
-     (s/optional-key "required")          s-boolean
-     (s/optional-key "schema")            schema-object
-     (s/optional-key (s/pred extension?)) s/Any}))
+    {(s/required-key "name")        s-string
+     (s/required-key "in")          s-string
+     (s/optional-key "description") s-string
+     (s/optional-key "required")    s-boolean
+     (s/optional-key "schema")      schema-object
+     (s/pred extension?)            s/Any}))
 
 (def parameters-definitions-object
   {s-string parameter-object})
@@ -142,41 +138,41 @@
 (def security-requirement-object
   {s-string [s-string]})
 
+;; TODO: allows extensions
 (def responses-object
   {(s/optional-key "default")           (s/if ref? reference-object response-object)
-   (s/cond-pre s-long s-string)         (s/if ref? reference-object response-object)
-   (s/optional-key (s/pred extension?)) s/Any})
+   (s/cond-pre s-long s-string)         (s/if ref? reference-object response-object)})
 
 (def operation-object
-  {(s/required-key "operationId")       s-string
-   (s/required-key "responses")         responses-object
-   (s/optional-key "tags")              [s-string]
-   (s/optional-key "summary")           s-string
-   (s/optional-key "description")       s-string
-   (s/optional-key "externalDocs")      external-documentation-object
-   (s/optional-key "consumes")          [s-string]
-   (s/optional-key "produces")          [s-string]
-   (s/optional-key "parameters")        [(s/if ref? reference-object parameter-object)]
-   (s/optional-key "schemes")           [s-string]
-   (s/optional-key "deprecated")        s-boolean
-   (s/optional-key "security")          [security-requirement-object]
-   (s/optional-key (s/pred extension?)) s/Any})
+  {(s/required-key "operationId")  s-string
+   (s/required-key "responses")    responses-object
+   (s/optional-key "tags")         [s-string]
+   (s/optional-key "summary")      s-string
+   (s/optional-key "description")  s-string
+   (s/optional-key "externalDocs") external-documentation-object
+   (s/optional-key "consumes")     [s-string]
+   (s/optional-key "produces")     [s-string]
+   (s/optional-key "parameters")   [(s/if ref? reference-object parameter-object)]
+   (s/optional-key "schemes")      [s-string]
+   (s/optional-key "deprecated")   s-boolean
+   (s/optional-key "security")     [security-requirement-object]
+   (s/pred extension?)             s/Any})
 
 (def path-object
-  {(s/optional-key "$ref")              s-string
-   (s/optional-key "get")               operation-object
-   (s/optional-key "put")               operation-object
-   (s/optional-key "post")              operation-object
-   (s/optional-key "delete")            operation-object
-   (s/optional-key "options")           operation-object
-   (s/optional-key "head")              operation-object
-   (s/optional-key "patch")             operation-object
-   (s/optional-key "parameters")        [(s/if ref? reference-object parameter-object)]
-   (s/optional-key (s/pred extension?)) s/Any})
+  {(s/optional-key "$ref")       s-string
+   (s/optional-key "get")        operation-object
+   (s/optional-key "put")        operation-object
+   (s/optional-key "post")       operation-object
+   (s/optional-key "delete")     operation-object
+   (s/optional-key "options")    operation-object
+   (s/optional-key "head")       operation-object
+   (s/optional-key "patch")      operation-object
+   (s/optional-key "parameters") [(s/if ref? reference-object parameter-object)]
+   (s/pred extension?)           s/Any})
 
+;; TODO: allows extensions
 (def paths-object
-  {s-string                               path-object
-   (s/optional-key (s/pred extension?)) s/Any})
+  {s-string path-object})
 
 (def definitions-object
   {s-string schema-object})
@@ -196,24 +192,24 @@
   {s-string s-string})
 
 (def security-scheme-object
-  {(s/required-key "type")              security-scheme-types
-   (s/optional-key "description")       s-string
-   (s/optional-key "name")              s-string
-   (s/optional-key "in")                s-string
-   (s/optional-key "flow")              security-scheme-oauth2-flows
-   (s/optional-key "authorizationUrl")  s-string
-   (s/optional-key "tokenUrl")          s-string
-   (s/optional-key "scopes")            scopes-object
-   (s/optional-key (s/pred extension?)) s/Any})
+  {(s/required-key "type")             security-scheme-types
+   (s/optional-key "description")      s-string
+   (s/optional-key "name")             s-string
+   (s/optional-key "in")               s-string
+   (s/optional-key "flow")             security-scheme-oauth2-flows
+   (s/optional-key "authorizationUrl") s-string
+   (s/optional-key "tokenUrl")         s-string
+   (s/optional-key "scopes")           scopes-object
+   (s/pred extension?)                 s/Any})
 
 (def security-definitions-object
   {s-string security-scheme-object})
 
 (def tag-object
-  {(s/required-key "name")              s-string
-   (s/optional-key "description")       s-string
-   (s/optional-key "externalDocs")      external-documentation-object
-   (s/optional-key (s/pred extension?)) s/Any})
+  {(s/required-key "name")         s-string
+   (s/optional-key "description")  s-string
+   (s/optional-key "externalDocs") external-documentation-object
+   (s/pred extension?)             s/Any})
 
 (def root-object
   {(s/required-key "swagger")             (s/eq "2.0")
