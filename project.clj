@@ -11,32 +11,32 @@
   :min-lein-version "2.0.0"
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/tools.logging "0.3.1"]
+                 [org.clojure/tools.logging "0.4.0"]
 
                  [circleci/clj-yaml "0.5.5"]
 
-                 [prismatic/schema "1.1.3"]
+                 [prismatic/schema "1.1.6"]
 
-                 [clj-time "0.12.2"]
+                 [clj-time "0.13.0"]
 
                  [ring-basic-authentication "1.0.5"]
-                 [clj-http "3.3.0"]
-                 [cheshire "5.6.3"]]
+                 [clj-http "3.6.1"]
+                 [cheshire "5.7.1"]]
 
   :plugins [[lein-cloverage "1.0.9"]]
 
-  :profiles {:dev {:dependencies [[ring/ring-core "1.5.0"]
-                                  [ring/ring-devel "1.5.0"]
-                                  [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
+  :profiles {:dev {:dependencies [[ring/ring-core "1.6.1"]
+                                  [ring/ring-devel "1.6.1"]
+                                  [ring/ring-mock "0.3.1"]
                                   [javax.servlet/servlet-api "2.5"]
-                                  [org.slf4j/slf4j-api "1.7.21"]
-                                  [org.slf4j/jul-to-slf4j "1.7.21"]
-                                  [org.slf4j/jcl-over-slf4j "1.7.21"]
-                                  [org.apache.logging.log4j/log4j-api "2.7"]
-                                  [org.apache.logging.log4j/log4j-core "2.7"]
-                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.7"]
+                                  [org.slf4j/slf4j-api "1.7.25"]
+                                  [org.slf4j/jul-to-slf4j "1.7.25"]
+                                  [org.slf4j/jcl-over-slf4j "1.7.25"]
+                                  [org.apache.logging.log4j/log4j-api "2.8.2"]
+                                  [org.apache.logging.log4j/log4j-core "2.8.2"]
+                                  [org.apache.logging.log4j/log4j-slf4j-impl "2.8.2"]
                                   [criterium "0.4.4"]
-                                  [com.newrelic.agent.java/newrelic-api "3.33.0"]]}}
+                                  [com.newrelic.agent.java/newrelic-api "3.40.0"]]}}
 
   :test-selectors {:default (complement :performance)
                    :performance :performance
