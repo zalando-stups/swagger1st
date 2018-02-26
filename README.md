@@ -47,7 +47,7 @@ By default, this definition is connected to your business logic via the `operati
   (:require [ring.util.response :as r]))
 
 (defn generate-greeting [request]
-  (let [firstname (-> request :parameters :query :name)]
+  (let [firstname (-> request :parameters :query :firstname)]
     (-> (r/response (str "Hello " firstname "!"))
         (r/content-type "plain/text"))))
 ```
