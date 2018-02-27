@@ -1,5 +1,7 @@
 (ns io.sarnowski.swagger1st.validation-test
   (:require [clojure.test :refer :all]
+            [clojure.tools.logging :as log]
+            [whitepages.expect-call :refer [expect-call]]
             [io.sarnowski.swagger1st.validation :refer [validate]]
             [io.sarnowski.swagger1st.context :refer [load-swagger-definition]]))
 
@@ -16,6 +18,7 @@
 
 (deftest unused-parameter-definition
   (let [definition (load-swagger-definition :yaml-cp "io/sarnowski/swagger1st/schemas/unused-parameter-definition.yaml")]
-    (is (=
-      (with-out-str (validate definition)
-      "[swagger1st] [WARN] Params defined but not used: #{unusedParam}\n")))))
+    (expect-call [(log/log* [_ level _ message]
+       (is (= level :warn))
+       (is (= "Params defined but not used: #{unusedParam}" message)))]
+      (validate definition))))

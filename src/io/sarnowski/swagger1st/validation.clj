@@ -22,10 +22,9 @@
   (let [used-params (collect-used-params definition)
         defined-params (collect-defined-params definition)
         used-but-undefined-params (clojure.set/difference used-params defined-params)
-        defined-but-unused-params (clojure.set/difference defined-params used-params)
-        ]
-    (if-not (empty? used-but-undefined-params)
+        defined-but-unused-params (clojure.set/difference defined-params used-params)]
+    (when-not (empty? used-but-undefined-params)
       (throw (ex-info "Some parameters are used but not defined" {:names used-but-undefined-params})))
-    (if-not (empty? defined-but-unused-params)
+    (when-not (empty? defined-but-unused-params)
       ;; Not a critical error, a warning is enough
-      (println "[swagger1st] [WARN] Params defined but not used: " defined-but-unused-params))))
+      (log/warn "Params defined but not used:" defined-but-unused-params))))
