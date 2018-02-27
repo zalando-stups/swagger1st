@@ -1,8 +1,8 @@
 ## swagger1st: A Swagger-First Clojure Ring handler
 
 ![Maven Central](https://img.shields.io/maven-central/v/org.zalando/swagger1st.svg)
-[![Build Status](https://travis-ci.org/zalando/swagger1st.svg?branch=master)](https://travis-ci.org/zalando/swagger1st)
-[![codecov](https://codecov.io/gh/zalando/swagger1st/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando/swagger1st)
+[![Build Status](https://travis-ci.org/zalando-stups/swagger1st.svg?branch=master)](https://travis-ci.org/zalando-stups/swagger1st)
+[![codecov](https://codecov.io/gh/zalando-stups/swagger1st/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando-stups/swagger1st)
 
 swagger1st is a Clojure [Ring](https://github.com/ring-clojure/ring) handler that parses, validates and routes requests
 based on your [Swagger](http://swagger.io/)/OpenAPI definition. It takes the opposite approach of [ring-swagger](https://github.com/metosin/ring-swagger)—which enables you to generate your Swagger spec from your Clojure code—by allowing you to use your Swagger spec to generate Clojure code.
@@ -10,7 +10,7 @@ based on your [Swagger](http://swagger.io/)/OpenAPI definition. It takes the opp
 Instead of defining routes and validation rules in your code, you can use swagger1st along with [Swagger/OpenAPI's great tool set](http://editor.swagger.io/) to specify your API according to the [Swagger/Open API 2.0 Specification](https://github.com/swagger-api/swagger-spec). This enables you to specify your API in an API-First, technology-independent format. The resulting definition is the ultimate format for publishing, sharing and reviewing your API.
 
 #### Compatibility Overview
-swagger1st aims to implement all of the Swagger/OpenAPI spec's features, so that you only have to write your business logic. [This document](https://github.com/zalando/swagger1st/blob/master/comp-2.0.md) shows which aspects of the spec it currently supports.
+swagger1st aims to implement all of the Swagger/OpenAPI spec's features, so that you only have to write your business logic. [This document](https://github.com/zalando-stups/swagger1st/blob/master/comp-2.0.md) shows which aspects of the spec it currently supports.
 
 swagger1st will use the Swagger definition of your API as a configuration file for processing incoming requests—ensuring that your implementation and specification always remain in sync. During runtime, you can inspect and easily test
 your API with the built-in [Swagger UI](http://petstore.swagger.io/). You can also extend the interpretation of
@@ -60,7 +60,7 @@ is a normal Clojure function without any dependencies to swagger1st - simple as 
 
 The following provides instructions for simple, complex and manual setups. For all three approaches you'll need to install [Leiningen](http://leiningen.org/) as the build tool.
 
-#### Simple Setup 
+#### Simple Setup
 If you're bootstrapping a completely new project, or just want to try out swagger1st, you can use this Leiningen template:
 
 ```
@@ -112,7 +112,7 @@ This creates a Ring-compliant handler:
 
 ```shell
 # get the source
-$ git clone https://github.com/zalando/swagger1st.git
+$ git clone https://github.com/zalando-stups/swagger1st.git
 $ cd swagger1st
 
 # run the tests
@@ -133,7 +133,6 @@ For interactive development, you can start a REPL by typing `lein repl`.
 ### Projects Using Swagger1st in Production
 
 - [Friboo](https://github.com/zalando/friboo), a utility library for writing microservices in Clojure, with support for Swagger and OAuth. It uses swagger1st at its base for RESTful HTTP endpoints and also integrates with the [component](https://github.com/stuartsierra/component) framework.
-- [swagger-mock](https://github.com/zalando/swagger-mock), which runs an HTTP server based on a Swagger/OpenAPI definition and returns mocked responses. With the complete data of your Swagger definition at hand, you can modify it before processing and also use its definition information during execution. This allows the swagger-mock to hook into your definition and parse the examples from it in order to return them on each request.
 - [STUPS.io](https://stups.io/) components [Kio](https://github.com/zalando-stups/kio), [PierOne](https://github.com/zalando-stups/pierone) (a complete Docker registry based on S3), [Essentials](https://github.com/zalando-stups/essentials), [TWINTIP](https://github.com/zalando-stups/twintip-storage) and [mint](https://github.com/zalando-stups/mint-storage)
 
 ### The Ring Handler in Detail
