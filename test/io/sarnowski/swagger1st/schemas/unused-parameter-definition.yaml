@@ -1,0 +1,20 @@
+swagger: '2.0'
+info:
+  title: Uber API
+  version: "1.0.0"
+
+paths:
+  /products:
+    get:
+      operationId: none
+      responses:
+        200:
+          description: all fine
+
+parameters:
+  unusedParam:
+    name: unusedParameterName
+    in: query
+    description: generic unused parameter
+    required: true
+    type: string

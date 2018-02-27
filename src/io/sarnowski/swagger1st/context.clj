@@ -3,6 +3,7 @@
             [clj-yaml.core :as yaml]
             [cheshire.core :as json]
             [schema.core :as schema]
+            [io.sarnowski.swagger1st.validation :as validation]
             [io.sarnowski.swagger1st.schemas.swagger-2-0 :as swagger-2-0]))
 
 (defmulti load-swagger-definition "Loads a swagger definition from given source."
@@ -33,7 +34,6 @@
   "Loads a swagger definition and produces a context containing the validated and loaded definition."
   [swagger-definition-type swagger-definition validate?]
   (let [definition (load-swagger-definition swagger-definition-type swagger-definition)]
-    (when validate?
-      (schema/validate swagger-2-0/root-object definition))
+    (when validate? (validation/validate definition))
     {:definition     definition
      :chain-handlers (list)}))
