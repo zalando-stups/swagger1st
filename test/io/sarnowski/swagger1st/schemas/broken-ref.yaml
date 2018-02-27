@@ -1,0 +1,23 @@
+swagger: '2.0'
+info:
+  title: Uber API
+  version: "1.0.0"
+
+paths:
+  /products:
+    get:
+      operationId: none
+      parameters:
+        - $ref: '#/parameters/goodParam'
+        - $ref: '#/parameters/badParam'
+      responses:
+        200:
+          description: all fine
+
+parameters:
+  goodParam:
+    name: goodParamName
+    in: query
+    description: generic good parameter
+    required: true
+    type: string

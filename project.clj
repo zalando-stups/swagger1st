@@ -35,6 +35,7 @@
                                   [org.apache.logging.log4j/log4j-api "2.8.2"]
                                   [org.apache.logging.log4j/log4j-core "2.8.2"]
                                   [org.apache.logging.log4j/log4j-slf4j-impl "2.8.2"]
+                                  [whitepages/expect-call "0.1.0"]
                                   [criterium "0.4.4"]
                                   [com.newrelic.agent.java/newrelic-api "3.40.0"]]}}
 
