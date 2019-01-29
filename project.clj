@@ -25,8 +25,8 @@
 
   :plugins [[lein-cloverage "1.0.9"]]
 
-  :profiles {:dev {:dependencies [[ring/ring-core "1.6.1"]
-                                  [ring/ring-devel "1.6.1"]
+  :profiles {:dev {:dependencies [[ring/ring-core "1.6.3"]
+                                  [ring/ring-devel "1.6.3"]
                                   [ring/ring-mock "0.3.1"]
                                   [javax.servlet/servlet-api "2.5"]
                                   [org.slf4j/slf4j-api "1.7.25"]
