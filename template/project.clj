@@ -1,4 +1,4 @@
-(defproject swagger1st/lein-template "0.25.0"
+(defproject swagger1st/lein-template "0.26.0"
   :description "Leiningen template for creating a swagger1st app."
   :url "https://github.com/zalando/swagger1st"
 
