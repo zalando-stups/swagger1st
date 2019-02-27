@@ -13,7 +13,7 @@
       vals
       (mapcat vals)
       (mapcat #(get % "parameters"))
-      (mapcat vals)
+      (keep #(get % "$ref"))
       (map #(clojure.string/replace % "#/parameters/" ""))
       set)))
 

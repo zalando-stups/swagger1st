@@ -10,6 +10,10 @@ paths:
       parameters:
         - $ref: '#/parameters/goodParam'
         - $ref: '#/parameters/badParam'
+        - name: limit
+          in: query
+          description: max records to return
+          type: integer
       responses:
         200:
           description: all fine
