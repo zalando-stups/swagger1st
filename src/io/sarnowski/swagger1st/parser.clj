@@ -205,7 +205,7 @@
         items-parser (create-value-parser items-definition path parser-options)]
     (fn [value]
       (let [vals (cond
-                   (= "body" (first path)) value
+									 (and (= "body" (first path)) (= 1 (count path))) value
                    (some? value) (split-array definition value)
                    :else [])
             err (partial throw-value-error value definition path)

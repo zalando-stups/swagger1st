@@ -239,6 +239,32 @@
     "tsv"    "foo\tbar"
     "pipes"  "foo|bar"))
 
+(deftest nested-array-values
+  (is (= {:words ["foobar"]} (parse-body {:words "foobar"}
+                                         {"type"       "object"
+                                          "required"   ["words"]
+                                          "properties" {"words" {"type"  "array"
+                                                                 "items" {"type" "string"}}}})))
+
+  (is (= {:words ["foobar"]} (parse-body {:words ["foobar"]}
+                                         {"type"       "object"
+                                          "required"   ["words"]
+                                          "properties" {"words" {"type"             "array"
+                                                                 "items"            {"type" "string"}
+                                                                 "collectionFormat" "multi"}}})))
+  (is (= {:words ["foo" "bar"]} (parse-body {:words "foo,bar"}
+                                            {"type"       "object"
+                                             "required"   ["words"]
+                                             "properties" {"words" {"type"  "array"
+                                                                    "items" {"type" "string"}}}})))
+  (is (= {:words [1234]} (parse-body {:words 1234}
+                            {"type"       "object"
+                             "required"   ["words"]
+                             "properties" {"words" {"type"             "array"
+                                                    "items"            {"type" "integer"}
+                                                    "collectionFormat" "multi"}}}))))
+
+
 (deftest object-values
   (is (= {:foo "bar"} (parse {:foo "bar"}
                              {"type"       "object"
